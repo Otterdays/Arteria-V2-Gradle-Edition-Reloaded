@@ -87,7 +87,7 @@ fun PlayPlaceholderScreen(
                             color = ArteriaPalette.AccentHover,
                         )
                         Text(
-                            text = "Gameplay is not wired up yet. This screen only proves navigation from the Docking Station.",
+                            text = "Session is active. Continue from the Docking Station to manage profiles.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = ArteriaPalette.TextMuted,
                         )

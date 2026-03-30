@@ -1,29 +1,49 @@
 package com.arteria.game.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.room.Room
+import com.arteria.game.data.profile.ProfileDatabase
+import com.arteria.game.data.profile.RoomProfileRepository
 import com.arteria.game.navigation.NavRoutes
 import com.arteria.game.ui.account.AccountCreationScreen
 import com.arteria.game.ui.account.AccountSelectionScreen
-import com.arteria.game.ui.account.AccountSlot
+import com.arteria.game.ui.account.AccountViewModel
 import com.arteria.game.ui.account.PlayPlaceholderScreen
-import java.util.UUID
+import kotlinx.coroutines.launch
 
 @Composable
 fun ArteriaApp(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    val accounts = remember {
-        mutableStateListOf(
-            AccountSlot(id = "demo-1", displayName = "Demo adventurer"),
-        )
+    // [TRACE: DOCS/SCRATCHPAD.md — startup account/session persistence]
+    val appContext = LocalContext.current.applicationContext
+    val database = remember(appContext) {
+        Room.databaseBuilder(
+            appContext,
+            ProfileDatabase::class.java,
+            "arteria_profiles.db",
+        ).build()
     }
+    val repository = remember(database) { RoomProfileRepository(database) }
+    val accountViewModel: AccountViewModel = viewModel(
+        factory = AccountViewModel.factory(repository),
+    )
+    val uiState by accountViewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
@@ -32,32 +52,50 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
     ) {
         composable(NavRoutes.AccountSelect) {
             AccountSelectionScreen(
-                accounts = accounts,
+                accounts = uiState.accounts,
+                selectedId = uiState.selectedId,
+                errorMessage = uiState.errorMessage,
+                onSelectAccount = accountViewModel::selectAccount,
                 onCreateNewClick = { navController.navigate(NavRoutes.AccountCreate) },
-                onContinueWithAccount = { slot ->
-                    navController.navigate(NavRoutes.playPath(slot.displayName))
+                onContinueWithAccount = {
+                    scope.launch {
+                        val selectedId = accountViewModel.continueWithSelectedProfile()
+                        if (selectedId != null) {
+                            navController.navigate(NavRoutes.playPath(selectedId))
+                        }
+                    }
                 },
             )
         }
         composable(NavRoutes.AccountCreate) {
             AccountCreationScreen(
                 onBack = { navController.popBackStack() },
+                errorMessage = uiState.errorMessage,
+                onClearError = accountViewModel::clearError,
                 onCreateAccount = { name ->
-                    accounts.add(AccountSlot(id = UUID.randomUUID().toString(), displayName = name))
-                    navController.popBackStack()
+                    scope.launch {
+                        val created = accountViewModel.createProfile(name)
+                        if (created) {
+                            navController.popBackStack()
+                        }
+                    }
                 },
             )
         }
         composable(
             route = NavRoutes.PlayPlaceholder,
             arguments = listOf(
-                navArgument("accountName") { type = NavType.StringType },
+                navArgument("profileId") { type = NavType.StringType },
             ),
         ) { entry ->
-            val raw = entry.arguments?.getString("accountName").orEmpty()
-            val name = android.net.Uri.decode(raw)
+            val raw = entry.arguments?.getString("profileId").orEmpty()
+            val profileId = android.net.Uri.decode(raw)
+            var accountName by remember(profileId) { mutableStateOf("Preparing session...") }
+            LaunchedEffect(profileId) {
+                accountName = accountViewModel.resolveDisplayName(profileId)
+            }
             PlayPlaceholderScreen(
-                accountDisplayName = name,
+                accountDisplayName = accountName,
                 onBackToAccounts = {
                     navController.popBackStack(NavRoutes.AccountSelect, inclusive = false)
                 },

@@ -41,6 +41,8 @@ import com.arteria.game.ui.theme.ArteriaPalette
 fun AccountCreationScreen(
     onBack: () -> Unit,
     onCreateAccount: (displayName: String) -> Unit,
+    errorMessage: String?,
+    onClearError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var displayName by rememberSaveable { mutableStateOf("") }
@@ -80,7 +82,7 @@ fun AccountCreationScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
-                    text = "Name your profile. Standard is the only game mode for now.",
+                    text = "Name your profile to begin your session.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = ArteriaPalette.TextSecondary,
                 )
@@ -97,7 +99,10 @@ fun AccountCreationScreen(
                     ) {
                         OutlinedTextField(
                             value = displayName,
-                            onValueChange = { displayName = it },
+                            onValueChange = {
+                                displayName = it
+                                onClearError()
+                            },
                             label = { Text("Account name") },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -113,6 +118,13 @@ fun AccountCreationScreen(
                                 unfocusedContainerColor = ArteriaPalette.BgInput.copy(alpha = 0.6f),
                             ),
                         )
+                        if (!errorMessage.isNullOrBlank()) {
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = ArteriaPalette.AccentHover,
+                            )
+                        }
                         Text(
                             text = "Game mode",
                             style = MaterialTheme.typography.titleSmall,
@@ -135,7 +147,7 @@ fun AccountCreationScreen(
                             ),
                         )
                         Text(
-                            text = "Hardcore, seasonal, and other modes will plug in here later.",
+                            text = "Additional game modes appear here when available.",
                             style = MaterialTheme.typography.bodySmall,
                             color = ArteriaPalette.TextMuted,
                         )
@@ -143,8 +155,7 @@ fun AccountCreationScreen(
                 }
                 Button(
                     onClick = {
-                        val name = displayName.trim().ifBlank { "Adventurer" }
-                        onCreateAccount(name)
+                        onCreateAccount(displayName)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(

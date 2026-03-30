@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Implemented persistent startup account/profile flow using Room + AccountViewModel, switched play nav to `profileId`, added tests, and updated SBOM. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SCRATCHPAD — agent handoff template. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Last Actions renumbered; Next Action points at `Arteria-Gradle-Edition-v1.2/`; out-of-scope minSdk note amended. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Cinzel bundled + docs (SBOM, REFERENCES, ARCHITECTURE); SCRATCHPAD status. |
@@ -33,6 +34,8 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 ## Last Actions (most recent first)
 
+**2026-03-30:** **Basic username/session persistence shipped (Room):** Added `data/profile` Room stack (`ProfileEntity`, `ProfileDao`, `ProfileDatabase`, `ProfileRepository`, `RoomProfileRepository`), new `AccountViewModel` state/actions (load/select/create/continue), wired persistence in `ui/ArteriaApp.kt`, switched route payload to `profileId` in `navigation/NavRoutes.kt`, and upgraded account UI to surface validation/DB errors. Added tests: `app/src/test/.../AccountViewModelTest.kt` and `app/src/androidTest/.../RoomProfileRepositoryTest.kt`. Build verification currently blocked on machine JDK setup (`JAVA_COMPILER` capability missing from configured JRE path).
+
 1. **2026-03-30:** **Docs / roadmap alignment (V2):** Added `DOCS/SUMMARY.md` (AI hub, design-doc paths, multi-agent workflow). `ROADMAP.md` — identity block + **Phases 7–10** (UX/QoL, visual alignment, feature verticals, performance & Play). Normalized **Gradle root** naming to **`Arteria-Gradle-Edition-V2/`** across `ARCHITECTURE.md`, `REFERENCES.md`, `SBOM`, `MIGRATION_SPEC`, `ROADMAP`, `SCRATCHPAD`. Root `README.md` + `DOCU/SUMMARY.md` link to V2 doc hub.
 2. **2026-03-22:** **Animated main-menu sky:** `DockingBackground` — dual `InfiniteTransition` loops (26s cosmic / 5.2s twinkle), **78** stars with per-star phase/speed, **3** soft radial **nebula** blobs (accent blue / purple / luminar) drifting slowly, **lerp**-shifted vertical gradient “breath.” KDoc lists roadmap: reduced motion, parallax, shader fog, battery hooks. Used on account select / create / session screens.
 3. **2026-03-22:** **Cinzel font:** Bundled variable `res/font/cinzel.ttf` (Google Fonts OFL, parity with Expo `Cinzel_400Regular` / `Cinzel_700Bold`). `ArteriaTheme.kt` uses Cinzel for display / titles / pretag; body remains sans-serif. Docs: `SBOM.md` **Bundled font assets**, `REFERENCES.md` typography section, `ARCHITECTURE.md` §4 rows. `:app:compileDebugKotlin` OK.
@@ -61,6 +64,8 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 ---
 
 ## Next Action (for the next agent)
+
+**[AMENDED 2026-03-30]:** Unblock local Gradle verification by pointing toolchain to a full JDK 21 (not JRE), then run `:app:testDebugUnitTest` and Android test task/device run to validate the new Room profile flow end-to-end.
 
 1. Read [SUMMARY.md](SUMMARY.md), then [ROADMAP.md](ROADMAP.md) Phase 1 (`[IN PROGRESS]` checklist — Compose + package + `:core` module are in place) and **Phases 7–10** if picking UX/QoL/UI work.
 2. Read [MIGRATION_SPEC.md](MIGRATION_SPEC.md) for TS → Kotlin mapping and source file pointers.

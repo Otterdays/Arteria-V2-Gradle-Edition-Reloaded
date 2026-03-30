@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Added Room + lifecycle Compose + KSP + coroutines-test + room-testing entries for persistent startup profile/session system. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SBOM tables, toolchain inventory, whitepaper supersession notice. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Android SDK targets amendment: API 36.1 compile via `CompileSdkSpec`, links to AGP 9.1 + Android 16 migration. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Build Toolchain row: Gradle Daemon JVM 21 / ADOPTIUM + `gradle-daemon-jvm.properties`. |
@@ -20,7 +21,7 @@
 # SBOM (Software Bill of Materials) — Arteria Gradle Edition V2
 
 > **`[AMENDED 2026-03-30]:`** Same document as historically titled "v1.2" — repo path **`Arteria-Gradle-Edition-V2/`**.
-> **Last updated:** 2026-03-22
+> **Last updated:** 2026-03-30
 > **Status:** Single source of truth for toolchain, SDK targets, and all declared dependencies.
 
 ---
@@ -84,6 +85,8 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 |--------|-------|-------------|----------|--------------|---------|-------|
 | `:app` | `implementation` | `androidx.core:core-ktx` | 1.13.1 | 1.18.0 | 2026-03-22 | Core Kotlin extensions |
 | `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | 2.8.4 | 2.10.0 | 2026-03-22 | Lifecycle coroutines |
+| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | 2.8.4 | 2.10.0 | 2026-03-30 | Lifecycle-aware state collection in Compose |
+| `:app` | `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | 2.8.4 | 2.10.0 | 2026-03-30 | Compose `viewModel()` integration |
 | `:app` | `implementation` | `androidx.activity:activity-compose` | 1.9.1 | 1.13.0 | 2026-03-22 | Compose entry Activity |
 | `:app` | `implementation` | `androidx.compose:compose-bom` | `platform` 2024.06.00 | `platform` 2026.03.00 | 2026-03-22 | BOM pins Compose library versions |
 | `:app` | `implementation` | `androidx.compose.ui:ui` | (via BOM) | (via newer BOM) | — | UI core |
@@ -91,6 +94,8 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 | `:app` | `implementation` | `androidx.compose.ui:ui-tooling-preview` | (via BOM) | (via newer BOM) | — | `@Preview` |
 | `:app` | `implementation` | `androidx.compose.material3:material3` | (via BOM) | (via newer BOM) | — | Material 3 |
 | `:app` | `implementation` | `androidx.navigation:navigation-compose` | 2.8.0 | 2.9.7 | 2026-03-22 | Compose navigation |
+| `:app` | `implementation` | `androidx.room:room-runtime` | 2.6.1 | 2.8.0 | 2026-03-30 | Room runtime for profile persistence |
+| `:app` | `implementation` | `androidx.room:room-ktx` | 2.6.1 | 2.8.0 | 2026-03-30 | Coroutines + transaction helpers for Room |
 
 ### `:app` — `debugImplementation`
 
@@ -107,12 +112,14 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 | `:app` | `androidTestImplementation` | `androidx.compose.ui:ui-test-junit4` | (via BOM) | (via newer BOM) | — | Compose UI tests |
 | `:app` | `androidTestImplementation` | `androidx.test.ext:junit` | 1.2.1 | 1.3.0 | 2026-03-22 | AndroidX JUnit extensions |
 | `:app` | `androidTestImplementation` | `androidx.test.espresso:espresso-core` | 3.6.1 | 3.7.0 | 2026-03-22 | UI test harness |
+| `:app` | `androidTestImplementation` | `androidx.room:room-testing` | 2.6.1 | 2.8.0 | 2026-03-30 | In-memory Room test helpers |
 
 ### `:app` — `testImplementation`
 
 | Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
 |--------|-------|-------------|----------|--------------|---------|-------|
 | `:app` | `testImplementation` | `junit:junit` | 4.13.2 | 4.13.2 | 2026-03-22 | JVM unit tests (current for JUnit 4 line) |
+| `:app` | `testImplementation` | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.8.1 | 1.10.2 | 2026-03-30 | Main dispatcher override + coroutine testing |
 
 ### `:core`
 
@@ -128,6 +135,7 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 | root `build.gradle.kts` | `com.android.application` | 9.1.0 | — | — | Match [AGP / Gradle matrix](https://developer.android.com/build/releases/gradle-plugin#updating-gradle) |
 | root `build.gradle.kts` | `com.android.library` | 9.1.0 | — | — | Same as AGP |
 | root `build.gradle.kts` | `org.jetbrains.kotlin.plugin.compose` | 2.0.0 | — | — | **Must stay compatible with Kotlin version shipped with AGP** ([Compose compiler setup](https://developer.android.com/develop/ui/compose/compiler)) |
+| root `build.gradle.kts` | `com.google.devtools.ksp` | 2.0.0-1.0.24 | — | — | KSP codegen for Room compiler with built-in Kotlin |
 | `settings.gradle.kts` | `org.gradle.toolchains.foojay-resolver-convention` | 1.0.0 | — | — | JDK toolchain discovery |
 
 ### Template — add new dependencies here

@@ -18,10 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,11 +40,12 @@ data class AccountSlot(
 fun AccountSelectionScreen(
     accounts: List<AccountSlot>,
     onCreateNewClick: () -> Unit,
-    onContinueWithAccount: (AccountSlot) -> Unit,
+    selectedId: String?,
+    errorMessage: String?,
+    onSelectAccount: (String) -> Unit,
+    onContinueWithAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedId by remember(accounts) { mutableStateOf<String?>(accounts.firstOrNull()?.id) }
-
     Box(modifier = modifier.fillMaxSize()) {
         DockingBackground(Modifier.fillMaxSize())
         Column(
@@ -60,10 +57,19 @@ fun AccountSelectionScreen(
         ) {
             DockingTitleBlock(
                 title = "The Docking Station",
-                subtitle = "Select an account to continue, or forge a new profile. " +
-                    "(UI preview — nothing is saved to disk yet.)",
+                subtitle = "Select an account to continue, or forge a new profile.",
             )
             Spacer(Modifier.height(8.dp))
+            if (!errorMessage.isNullOrBlank()) {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ArteriaPalette.AccentHover,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                )
+            }
 
             if (accounts.isEmpty()) {
                 Text(
@@ -90,7 +96,7 @@ fun AccountSelectionScreen(
                             metaLine = "Game mode · Standard",
                             selected = selected,
                             gradient = dockingGradientForIndex(index),
-                            onClick = { selectedId = account.id },
+                            onClick = { onSelectAccount(account.id) },
                         )
                     }
                     item {
@@ -105,9 +111,7 @@ fun AccountSelectionScreen(
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = {
-                    val id = selectedId ?: return@Button
-                    val slot = accounts.find { it.id == id } ?: return@Button
-                    onContinueWithAccount(slot)
+                    onContinueWithAccount()
                 },
                 enabled = selectedId != null && accounts.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth(),
