@@ -60,6 +60,7 @@
 | `implementation` | `androidx.compose.ui:ui` | `via BOM` |
 | `implementation` | `androidx.compose.ui:ui-graphics` | `via BOM` |
 | `implementation` | `androidx.compose.ui:ui-tooling-preview` | `via BOM` |
+| `implementation` | `androidx.compose.material:material-icons-core` | `via BOM` |
 | `implementation` | `androidx.compose.material3:material3` | `via BOM` |
 | `implementation` | `androidx.navigation:navigation-compose` | `2.9.7` |
 | `implementation` | `androidx.room:room-runtime` | `2.8.0` |

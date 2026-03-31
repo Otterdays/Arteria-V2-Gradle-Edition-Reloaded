@@ -17,13 +17,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
+import androidx.room.withTransaction
+import com.arteria.game.data.game.GameDatabase
+import com.arteria.game.data.game.GameRepository
 import com.arteria.game.data.profile.ProfileDatabase
 import com.arteria.game.data.profile.RoomProfileRepository
 import com.arteria.game.navigation.NavRoutes
 import com.arteria.game.ui.account.AccountCreationScreen
 import com.arteria.game.ui.account.AccountSelectionScreen
 import com.arteria.game.ui.account.AccountViewModel
-import com.arteria.game.ui.account.PlayPlaceholderScreen
+import com.arteria.game.ui.game.GameScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,6 +41,19 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
         ).build()
     }
     val repository = remember(database) { RoomProfileRepository(database) }
+    val gameDatabase = remember(appContext) {
+        Room.databaseBuilder(
+            appContext,
+            GameDatabase::class.java,
+            "arteria_game.db",
+        ).build()
+    }
+    val gameRepository = remember(gameDatabase) {
+        GameRepository(
+            dao = gameDatabase.gameDao(),
+            runInTransaction = { block -> gameDatabase.withTransaction { block() } },
+        )
+    }
     val accountViewModel: AccountViewModel = viewModel(
         factory = AccountViewModel.factory(repository),
     )
@@ -61,7 +77,7 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
                     scope.launch {
                         val selectedId = accountViewModel.continueWithSelectedProfile()
                         if (selectedId != null) {
-                            navController.navigate(NavRoutes.playPath(selectedId))
+                            navController.navigate(NavRoutes.gamePath(selectedId))
                         }
                     }
                 },
@@ -83,7 +99,7 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
             )
         }
         composable(
-            route = NavRoutes.PlayPlaceholder,
+            route = NavRoutes.Game,
             arguments = listOf(
                 navArgument("profileId") { type = NavType.StringType },
             ),
@@ -94,7 +110,9 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
             LaunchedEffect(profileId) {
                 accountName = accountViewModel.resolveDisplayName(profileId)
             }
-            PlayPlaceholderScreen(
+            GameScreen(
+                profileId = profileId,
+                gameRepository = gameRepository,
                 accountDisplayName = accountName,
                 onBackToAccounts = {
                     navController.popBackStack(NavRoutes.AccountSelect, inclusive = false)

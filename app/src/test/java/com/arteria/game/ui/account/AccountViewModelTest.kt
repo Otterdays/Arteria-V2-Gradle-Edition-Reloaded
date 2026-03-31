@@ -2,12 +2,13 @@ package com.arteria.game.ui.account
 
 import com.arteria.game.data.profile.ProfileRecord
 import com.arteria.game.data.profile.ProfileRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -17,10 +18,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AccountViewModelTest {
     @Before
     fun setUpMainDispatcher() {
-        Dispatchers.setMain(StandardTestDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
     @After
@@ -29,7 +31,7 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun createProfile_rejectsInvalidName() = runBlocking {
+    fun createProfile_rejectsInvalidName() = runTest {
         val repository = FakeProfileRepository()
         val viewModel = AccountViewModel(repository)
 
@@ -41,7 +43,7 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun continueWithSelectedProfile_setsActiveAndReturnsId() = runBlocking {
+    fun continueWithSelectedProfile_setsActiveAndReturnsId() = runTest {
         val repository = FakeProfileRepository()
         val viewModel = AccountViewModel(repository)
         val created = repository.createProfile("PilotOne").getOrThrow()
@@ -54,7 +56,7 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun loadsActiveOrFirstSelection_whenProfilesExist() = runBlocking {
+    fun loadsActiveOrFirstSelection_whenProfilesExist() = runTest {
         val repository = FakeProfileRepository()
         val first = repository.createProfile("PilotOne").getOrThrow()
         val second = repository.createProfile("PilotTwo").getOrThrow()

@@ -60,6 +60,20 @@
 
 ---
 
+## Mission Checklist (Zen-Dhawan Recovery)
+
+- [x] Recover zen-dhawan Kotlin files from `@.claude/worktrees/zen-dhawan`.
+- [x] Place recovered files into canonical app paths (`app/src/main/java/com/arteria/game/{core,data/ui}`).
+- [x] Wire nav handoff from account flow into `game/{profileId}` route.
+- [x] Add game-state Room stack (`arteria_game.db`) and tick/offline loop wiring.
+- [x] Run build verification (`:app:assembleDebug`) and unit test verification (`:app:testDebugUnitTest`).
+- [x] Add/refresh initial tests for `TickEngine` and `GameRepository`; fix `AccountViewModelTest`.
+- [ ] Run manual device smoke test (account create/select -> enter game -> switch account).
+- [ ] Add/refresh `GameViewModel` behavior tests (offline load, training start/stop, save cadence).
+- [ ] Decide whether domain code remains in `app/.../core` or is moved into `:core` module.
+
+---
+
 ## Documentation index (this `DOCS/` folder)
 
 | Doc | Role |

@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Zen-Dhawan recovery completion pass: wired game route/screens/data engine, fixed review findings (offline processing threading, transaction save, enum safety), and added unit tests for TickEngine + GameRepository with green `:app:testDebugUnitTest`. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | SCRATCHPAD/SUMMARY/SBOM status refresh: JDK 21 build path, Room profiles, transfer APK naming; superseded stale “build blocked” handoff lines. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Renamed transfer APK output to `Arteria-V2-Gradle-Edition-Reloaded-*` in `build-apk-for-transfer.ps1`. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Upgraded all declared app/core dependency coordinates to SBOM latest-known versions for user-led full modernization test pass. |
@@ -42,6 +43,26 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 ---
 
 ## Last Actions (most recent first)
+
+**2026-03-31:** **GameViewModel test stability:** Added optional constructor param `enableTickLoop` (default `true`; `ViewModelProvider.Factory` unchanged). `GameViewModelTest` passes `enableTickLoop = false` so the tick loop’s `delay`/`while` does not run under `runTest`; removed reflection-based `dispose()`. **Note:** On Windows, Gradle may fail with `FileSystemException` on `app/build/.../classes.jar` if another process (IDE, daemon) holds the file — close or retry before `:app:testDebugUnitTest` / `:app:clean`.
+
+**2026-03-31:** **Zen-Dhawan recovery verification green:** `:app:assembleDebug` and `:app:testDebugUnitTest` both pass after integration. Added tests:
+- `app/src/test/java/com/arteria/game/core/engine/TickEngineTest.kt`
+- `app/src/test/java/com/arteria/game/data/game/GameRepositoryTest.kt`
+- Updated `AccountViewModelTest` to stable coroutine test dispatcher usage.
+Also fixed reviewer findings:
+- Moved offline tick processing off main thread in `GameViewModel` (`Dispatchers.Default` for offline simulation).
+- Made `GameRepository.saveGameState` atomic via injected transaction runner wired to Room `withTransaction` in `ArteriaApp`.
+- Hardened skill enum decode during load (`runCatching { SkillId.valueOf(...) }`).
+
+**2026-03-30:** **Zen-Dhawan recovery mission (in progress):** Located recovered gameplay stack in `@.claude/worktrees/zen-dhawan` and started canonical merge into app tree:
+- Added `app/src/main/java/com/arteria/game/core/{model,skill,data,engine}/*` (`GameModels`, `SkillId`, `XPTable`, `MiningData`, `TickEngine`).
+- Added `app/src/main/java/com/arteria/game/data/game/*` (`GameEntities`, `GameDao`, `GameDatabase`, `GameRepository`) with `arteria_game.db`.
+- Added `app/src/main/java/com/arteria/game/ui/game/*` (`GameScreen`, `GameViewModel`, `SkillsScreen`, `SkillDetailScreen`, `BankScreen`, `CombatScreen`, `SettingsScreen`, `OfflineReportDialog`).
+- Updated `ArteriaApp` + `NavRoutes` to route account continue -> `game/{profileId}` with encoded profile id.
+- Updated `app/build.gradle.kts` and `SBOM.md` for `androidx.compose.material:material-icons-extended`.
+- **`[AMENDED 2026-03-31]:`** Compose icons dependency is **`material-icons-core`** (BOM), not `material-icons-extended` — align SBOM line when editing that file.
+- **Open verification task:** complete successful `:app:assembleDebug` and test pass after full merge.
 
 **2026-03-30:** **Architecture doc fully rebuilt:** Rewrote `DOCS/ARCHITECTURE.md` into a clean, code-accurate architecture spec with explicit sections for current runtime architecture, responsibilities, behavior flows, boundaries, constraints, and planned next architecture. Removed mixed historical/planned ambiguity from primary sections.
 
@@ -87,6 +108,18 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 ---
 
 ## Next Action (for the next agent)
+
+**`[AMENDED 2026-03-31]:`** Manual app smoke test + polish checklist:
+1. Install APK on emulator/device and verify flow: account create/select -> enter game -> train Mining -> see bank item growth -> switch account.
+2. Add `GameViewModel` tests for offline report display behavior and periodic save behavior.
+3. Decide if `app/src/main/java/com/arteria/game/core/*` should migrate into `:core` module now or after gameplay vertical stabilizes.
+4. Remove or archive now-orphaned `PlayPlaceholderScreen.kt` once manual smoke confirms no fallback needed.
+
+**`[AMENDED 2026-03-30]:`** Continue Zen-Dhawan recovery checklist:
+1. Finish wiring by replacing old placeholder references (`PlayPlaceholder`) if any remain.
+2. Run `:app:assembleDebug`, `:app:testDebugUnitTest`, and targeted device smoke test for account -> game route.
+3. Add tests for `TickEngine` tick/offline behavior and `GameRepository` load/save correctness.
+4. If stable, update docs (`ARCHITECTURE`, `SUMMARY`, `SBOM`) with final “Phase 1 complete” status.
 
 **`[AMENDED 2026-03-30]:`** Continue product work: [ROADMAP.md](ROADMAP.md) Phase 1 navigation placeholders (Skills, Bank, Combat, Settings) and/or gameplay wiring beyond session placeholder. Run `:app:testDebugUnitTest` and instrumented tests when touching persistence or navigation.
 **[AMENDED 2026-03-30]:** README published; next focus: **Phase 1 completion** (navigation scaffold with placeholder routes: Skills, Bank, Combat, Settings) or **Phase 2 engine port** (TickSystem, XPTable logic from monorepo). **Setup verification:** Confirm local JDK 21 is full JDK (not JRE), then run `:app:assembleDebug` + `:app:testDebugUnitTest` + device install to validate Room persistence end-to-end.

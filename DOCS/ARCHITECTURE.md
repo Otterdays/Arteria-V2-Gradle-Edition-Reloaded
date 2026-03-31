@@ -26,10 +26,10 @@
 | App package | `com.arteria.game` |
 | Core package | `com.arteria.game.core` |
 | UI stack | Jetpack Compose + Navigation Compose |
-| Persistence | Room (`arteria_profiles.db`) |
+| Persistence | Room (`arteria_profiles.db`, `arteria_game.db`) |
 | Modules | `:app` (active), `:core` (present, minimal) |
 | Toolchain | Gradle 9.6 nightly, AGP 9.1, JDK 21 |
-| Current gameplay state | Account/profile flow live, gameplay screens placeholder |
+| Current gameplay state | Account/profile flow live + in-app game hub (Skills/Bank/Combat/Settings) |
 
 ---
 
@@ -42,13 +42,18 @@ Android OS
       -> NavHost (Navigation Compose)
         -> account_select
         -> account_create
-        -> play/{profileId} (placeholder)
+        -> game/{profileId}
       -> AccountViewModel (StateFlow UI state)
         -> ProfileRepository (interface)
           -> RoomProfileRepository (implementation)
             -> ProfileDatabase (Room)
               -> ProfileDao
                 -> SQLite file: arteria_profiles.db
+      -> GameViewModel (StateFlow tick state)
+        -> GameRepository
+          -> GameDatabase (Room)
+            -> GameDao
+              -> SQLite file: arteria_game.db
 ```
 
 ### Responsibilities
@@ -57,12 +62,14 @@ Android OS
 |------|------------|----------------|
 | Entry/UI host | `app/src/main/java/com/arteria/game/MainActivity.kt` | Application entry; Compose host setup |
 | Navigation/UI composition | `app/src/main/java/com/arteria/game/ui/ArteriaApp.kt` | Builds `NavHost`, wires VM to screens, route transitions |
-| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*` | Account select/create/placeholder screens and interactions |
+| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow + in-game hub screens and overlays |
 | State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations |
 | Navigation contracts | `app/src/main/java/com/arteria/game/navigation/NavRoutes.kt` | Route constants and encoded route-builder API |
 | Persistence boundary | `app/src/main/java/com/arteria/game/data/profile/ProfileRepository.kt` | App-facing persistence contract |
 | Persistence implementation | `app/src/main/java/com/arteria/game/data/profile/RoomProfileRepository.kt` | Room-backed implementation of profile operations |
 | Database schema/access | `app/src/main/java/com/arteria/game/data/profile/ProfileEntity.kt`, `ProfileDao.kt`, `ProfileDatabase.kt` | Entity model, queries, and Room database definition |
+| Game data persistence | `app/src/main/java/com/arteria/game/data/game/*` | Room-backed game state persistence per profile |
+| Gameplay domain/tick | `app/src/main/java/com/arteria/game/core/*` | Skill model, XP table, action data, and tick/offline simulation engine |
 | Reusable module | `core/build.gradle.kts` | Reserved for extracted engine/domain code; currently minimal |
 
 ---
@@ -88,8 +95,8 @@ Android OS
 
 1. User selects an account and taps continue.
 2. `AccountViewModel` marks selected profile as active and updates last-played timestamp.
-3. App navigates to `play/{profileId}` using URL-safe encoded id.
-4. Placeholder screen resolves display name from state/repository.
+3. App navigates to `game/{profileId}` using URL-safe encoded id.
+4. `GameViewModel` loads game state from `arteria_game.db`, processes offline progress, and starts the active tick loop.
 
 ---
 
@@ -125,7 +132,8 @@ Android OS
 
 ### Phase 1 completion (near-term)
 
-- Expand navigation graph beyond placeholder: Skills, Bank, Combat, Settings.
+- Harden the new game hub path (`game/{profileId}`) with tests around route/decode and profile switching.
+- Expand beyond current hub stubs by adding first playable combat/skill interactions.
 - Keep current boundary pattern: composables -> ViewModel -> repository contracts.
 
 ### Phase 2+ domain extraction
@@ -150,9 +158,12 @@ app/src/main/java/com/arteria/game/
   navigation/NavRoutes.kt
   ui/ArteriaApp.kt
   ui/account/*
+  ui/game/*
   ui/components/*
   ui/theme/*
   data/profile/*
+  data/game/*
+  core/*
 
 core/
   build.gradle.kts  (module exists; domain expansion target)
