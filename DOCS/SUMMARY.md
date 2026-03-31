@@ -13,11 +13,15 @@
 
 # SUMMARY — Arteria Gradle Edition V2
 
-**What this is:** Native Android track (Kotlin, Jetpack Compose, Gradle 9.x line). The shipping React Native app remains under monorepo root `apps/mobile/`; this folder is the **parallel native product**.
+**What this is:** Native Android track (Kotlin, Jetpack Compose, Gradle 9.x line). This folder is the active V2 implementation and product track.
 
 **Gradle project root:** `Arteria-Gradle-Edition-V2/` (contains `settings.gradle.kts`, `:app`, `:core`). Open this directory in Android Studio.
 
 **`[AMENDED 2026-03-30]:`** The same project may live in a folder named **`Arteria-V2-Gradle-Edition-Reloaded`** — treat it as the same Gradle root if those files are present.
+
+**`[AMENDED 2026-03-30]:`** Any Expo / React Native mentions in this repo are **legacy V1 context only**. Current implementation stack is native Android: **Kotlin + Jetpack Compose + Room + Gradle 9.x + AGP 9.1**.
+
+**`[AMENDED 2026-03-30]:`** Do not add Expo/React Native dependencies or workflow steps to this project.
 
 ---
 

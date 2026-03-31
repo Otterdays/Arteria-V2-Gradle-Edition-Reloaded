@@ -1,6 +1,6 @@
-# Arteria Gradle Edition V2
+# Arteria V2 Gradle Edition Reloaded
 
-> **Native Android Idle RPG** — Kotlin + Jetpack Compose on cutting-edge tooling. Parallel native product to the main Expo/React Native app.
+> **Native Android Idle RPG** — Kotlin + Jetpack Compose on cutting-edge Gradle/AGP tooling.
 
 ```
    ___    ____  ________  ____  ___
@@ -16,7 +16,7 @@
 
 ## What is Arteria?
 
-**Arteria** is a feature-rich **idle RPG** for Android. Players manage skills, craft items, engage in combat, and progress through a game world — all while the game ticks forward even when closed. The main game runs on **Expo** (React Native); this folder is a **parallel native Android** implementation targeting the latest Gradle and Compose tooling.
+**Arteria** is a feature-rich **idle RPG** for Android. Players manage skills, craft items, engage in combat, and progress through a game world — all while the game ticks forward even when closed. This repository is the **native Android track** and the source of truth for current implementation work.
 
 ### Key Features
 
@@ -41,8 +41,8 @@
 ### Build and Run
 
 ```bash
-# Open this folder in Android Studio
-#   File > Open > .../Arteria-V2-Gradle-Edition-Reloaded/.claude/worktrees/naughty-banzai
+# Open this repository root in Android Studio
+#   File > Open > .../Arteria-V2-Gradle-Edition-Reloaded
 
 # Or, build from command line
 ./gradlew :app:assembleDebug      # Build APK
@@ -95,9 +95,9 @@ The app is a **Jetpack Compose shell** with persistent profile management:
 | **Gradle** | 9.6.0-nightly | Build system |
 | **AGP** | 9.1.0 | Android Gradle Plugin |
 | **Kotlin** | (bundled in AGP 9.1) | Language (JVM bytecode targets Java 21) |
-| **Jetpack Compose** | 2024.06.00 (BOM) | Declarative UI |
-| **Navigation Compose** | 2.8.0 | Screen routing |
-| **Room** | 2.6.1 | Local persistence |
+| **Jetpack Compose** | 2026.03.00 (BOM) | Declarative UI |
+| **Navigation Compose** | 2.9.7 | Screen routing |
+| **Room** | 2.8.0 | Local persistence |
 | **JDK** | 21 (ADOPTIUM) | Daemon + bytecode target |
 
 ### Future Architecture (Phases 2–6+)
@@ -188,7 +188,7 @@ The project maintains **extensive internal documentation** designed for AI-assis
 | **[DOCS/SCRATCHPAD.md](DOCS/SCRATCHPAD.md)** | Live status, blockers, next actions | Current & next developer |
 | **[DOCS/ROADMAP.md](DOCS/ROADMAP.md)** | Full phased plan (Phases 0–10) | Project leads & planners |
 | **[DOCS/ARCHITECTURE.md](DOCS/ARCHITECTURE.md)** | System design, render pipeline, module inventory | Architects & engineers |
-| **[DOCS/MIGRATION_SPEC.md](DOCS/MIGRATION_SPEC.md)** | How to port React Native / TypeScript to Kotlin | Backend/engine developers |
+| **[DOCS/MIGRATION_SPEC.md](DOCS/MIGRATION_SPEC.md)** | How to port legacy TypeScript engine logic to Kotlin | Backend/engine developers |
 | **[DOCS/SBOM.md](DOCS/SBOM.md)** | Dependency inventory, versions, upgrade policy | DevOps & maintainers |
 | **[DOCS/REFERENCES.md](DOCS/REFERENCES.md)** | External official documentation | All |
 
@@ -213,10 +213,10 @@ The project maintains **extensive internal documentation** designed for AI-assis
    - `DOCU/IMPROVEMENTS.md` for UX/QoL priorities
    - `DOCU/THEMING.md` or `zhip-ai-styling.md` for visual language
 
-2. **Mirror React Native screens:**
-   - Reference `apps/mobile/app/` layout/component patterns (not code copy, UX intent)
-   - Align colors + typography with `apps/mobile/constants/theme.ts`
-   - Use Compose equivalents (Buttons, TextFields, LazyColumn, etc.)
+2. **Use V2 design parity references:**
+   - Reference `DOCS/ARTERIA-V1-DOCS/DOCU/` only as historical UX context
+   - Keep implementation native-first with Compose equivalents (Buttons, TextFields, LazyColumn, etc.)
+   - Prefer V2 docs (`ROADMAP`, `ARCHITECTURE`, `MIGRATION_SPEC`) over legacy app conventions
 
 3. **Update this README and DOCS as you work**
 
@@ -363,13 +363,13 @@ Arteria is developed by [Your Name/Organization]. See `LICENSE.md` (if present) 
 - **Room:** Apache 2.0 — [androidx.room](https://developer.android.com/training/data-storage/room)
 - See [DOCS/SBOM.md](DOCS/SBOM.md) for full dependency list
 
-### Main Arteria Project
+### Legacy References
 
-This is **V2**, a native Android fork. The primary game runs on **React Native / Expo**:
+Legacy V1 materials may mention React Native / Expo. In this repository, those references are historical only:
 
-- **Main repo:** [https://github.com/your-org/Arteria](https://github.com/your-org/Arteria) (update this link)
-- **Game design docs:** See `DOCU/` in the main repo root
-- **React Native app:** `apps/mobile/` in main repo
+- Current implementation stack is **Kotlin + Jetpack Compose + Room + Gradle 9.x + AGP 9.1**
+- Use `DOCS/ARTERIA-V1-DOCS/` for historical design context only
+- Do not add Expo/React Native modules to this project
 
 ---
 
@@ -399,6 +399,6 @@ For issues, questions, or feature requests:
 ---
 
 **Last Updated:** 2026-03-30
-**Version:** 1.0 (Gradle Edition V2, Phases 0–1 complete)
-**Status:** Compose shell + Room persistence — ready for Phase 2 (Engine port)
+**Version:** 1.1 (V2 Gradle Edition Reloaded)
+**Status:** Native Compose shell + Room persistence — continuing Phase 1/2 delivery
 

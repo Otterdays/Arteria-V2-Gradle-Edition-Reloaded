@@ -27,6 +27,8 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 **`[AMENDED 2026-03-30]:`** This repo may be checked out as **`Arteria-V2-Gradle-Edition-Reloaded`** on disk — same Gradle project (`settings.gradle.kts`, `:app`, `:core`).
 
+**`[AMENDED 2026-03-30]:`** Expo / React Native references in this file and other docs are historical V1 notes unless explicitly marked as active V2 work.
+
 ---
 
 ## Current Status
@@ -40,6 +42,10 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 ---
 
 ## Last Actions (most recent first)
+
+**2026-03-30:** **Architecture doc fully rebuilt:** Rewrote `DOCS/ARCHITECTURE.md` into a clean, code-accurate architecture spec with explicit sections for current runtime architecture, responsibilities, behavior flows, boundaries, constraints, and planned next architecture. Removed mixed historical/planned ambiguity from primary sections.
+
+**2026-03-30:** **SBOM rebuild + docs audit:** Replaced `DOCS/SBOM.md` with a clean, current bill of materials generated from live Gradle declarations (`settings.gradle.kts`, root/app/core `build.gradle.kts`, wrapper/toolchain files). Audit notes: `DOCS/ARCHITECTURE.md` still contains historical/planned sections mixed with current-state data and should get a focused cleanup pass when content-doc edits are in scope.
 
 **2026-03-30:** **Handoff / docs sync:** Status above reflects **working** `build-apk-for-transfer` + `:app:assembleDebug` when the machine uses JDK 21 (not a JRE-only path). Prior notes in this file about `JAVA_COMPILER` / JRE Adoptium failures are **historical** — fix is JDK + correct `JAVA_HOME` / optional `org.gradle.java.home`. Ready to continue Phase 1 / gameplay placeholders per [ROADMAP.md](ROADMAP.md).
 

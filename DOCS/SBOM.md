@@ -4,182 +4,114 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Build Toolchain note: optional `org.gradle.java.home` in `gradle.properties` (JDK 21) for consistent Gradle JVM; status line refresh. |
-| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Synced SBOM `Declared` version columns to match upgraded Gradle dependency coordinates. |
-| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Bulk dependency modernization pass in Gradle files (`:app` + `:core`) to SBOM latest-known versions. |
-| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Added Room + lifecycle Compose + KSP + coroutines-test + room-testing entries for persistent startup profile/session system. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SBOM tables, toolchain inventory, whitepaper supersession notice. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | Android SDK targets amendment: API 36.1 compile via `CompileSdkSpec`, links to AGP 9.1 + Android 16 migration. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | Build Toolchain row: Gradle Daemon JVM 21 / ADOPTIUM + `gradle-daemon-jvm.properties`. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | SBOM audit: canonical dependency tables (declared vs latest-known columns); deprecated stale runtime/test/native rows annotated. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | SBOM cleanup: removed deprecated/stale tables; single source of truth for new agents. |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | Title corrected to **Software** Bill of Materials (industry-standard SBOM expansion). |
-| 2026-03-22 | Cursor Agent (Composer) | Cursor | **Bundled fonts** section: Cinzel variable TTF in `res/font/`; SBOM + license pointer. |
-| 2026-03-30 | Cursor Agent | Composer | Title note: product **Gradle Edition V2**; folder `Arteria-Gradle-Edition-V2/`. |
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Full SBOM rebuild from live Gradle files for clean, current bill of materials. |
 
 *Future contributors: append a row here when you materially change this doc.*
 
 ---
 
-# SBOM (Software Bill of Materials) — Arteria Gradle Edition V2
+# SBOM (Software Bill of Materials) — Arteria V2 Gradle Edition Reloaded
 
-> **`[AMENDED 2026-03-30]:`** Same document as historically titled "v1.2" — repo path **`Arteria-Gradle-Edition-V2/`**.
-> **Last updated:** 2026-03-30 (dependency modernization + JDK pin note)
-> **Status:** Single source of truth for toolchain, SDK targets, and all declared dependencies.
+> Last updated: 2026-03-30
+> Source of truth: `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, `core/build.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties`, `gradle/gradle-daemon-jvm.properties`
+> Scope: Declared build/runtime/test dependencies and bundled non-Maven assets.
 
 ---
 
 ## Build Toolchain
 
-| Component | Version | Source / Notes |
-|-----------|---------|----------------|
-| Gradle | 9.6.0-nightly (`20260322000231+0000`) | Pinned snapshot — [distributions-snapshots](https://services.gradle.org/distributions-snapshots/) |
-| Android Gradle Plugin | 9.1.0 | Root `build.gradle.kts` `plugins { }` |
-| JDK (daemon + bytecode) | **21** / vendor **ADOPTIUM** | `gradle/gradle-daemon-jvm.properties` (Foojay auto-provision); `compileOptions` `JavaVersion.VERSION_21` in `:app` and `:core`. **`[AMENDED 2026-03-30]:`** Optional explicit Gradle JVM: `org.gradle.java.home` in root `gradle.properties` (full JDK path, not JRE-only) — avoids `JAVA_COMPILER` errors when the OS default Java is a JRE. |
-| Kotlin | (AGP-bundled) | Kotlin compiler version managed by AGP 9.1.0 built-in Kotlin |
-| CMake / NDK | **Not active** | No `externalNativeBuild` in current `:app` / `:core`. Will be added when C++/OpenGL GPU island lands (see `ARCHITECTURE.md` Phase 5+). |
+| Component | Declared version | Source |
+|-----------|------------------|--------|
+| Gradle wrapper | `9.6.0-nightly-20260322000231+0000` | `gradle/wrapper/gradle-wrapper.properties` |
+| Android Gradle Plugin | `9.1.0` | root `build.gradle.kts` |
+| Compose plugin | `org.jetbrains.kotlin.plugin.compose:2.0.0` | root `build.gradle.kts` |
+| KSP plugin | `com.google.devtools.ksp:2.0.0-1.0.24` | root `build.gradle.kts` |
+| Foojay toolchain resolver | `org.gradle.toolchains.foojay-resolver-convention:1.0.0` | `settings.gradle.kts` |
+| Daemon JVM toolchain | `JDK 21` / vendor `ADOPTIUM` | `gradle/gradle-daemon-jvm.properties` |
+| Java bytecode target | `JavaVersion.VERSION_21` | `app/build.gradle.kts`, `core/build.gradle.kts` |
 
 ---
 
-## Android SDK Targets
+## Android Targets
 
-| Property | Value | Notes |
-|----------|-------|-------|
-| compileSdk | **36.1** | `compileSdk { version = release(36) { minorApiLevel = 1 } }` — Android 16 / Baklava |
-| targetSdk | **36** | `targetSdk { version = release(36) }` — opts into [Android 16 behaviors](https://developer.android.com/about/versions/16/migration) |
-| minSdk | **26** | Android 8.0 — broadened for real-world reach |
-| SDK Build Tools | 36.0.0 | Required by [AGP 9.1](https://developer.android.com/build/releases/agp-9-1-0-release-notes); max supported API is **36.1** |
-
----
-
-## Bundled font assets (not on Maven)
-
-Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update this table when adding or replacing font files.
-
-| Asset | File | License | Upstream / notes |
-|-------|------|---------|------------------|
-| Cinzel (variable, wght axis) | `cinzel.ttf` | **SIL Open Font License 1.1** | [google/fonts `ofl/cinzel`](https://github.com/google/fonts/tree/main/ofl/cinzel) — same family as Expo `@expo-google-fonts/cinzel` / `FontCinzel` in `apps/mobile/constants/theme.ts`. Full license text: [`OFL.txt` in that folder](https://github.com/google/fonts/blob/main/ofl/cinzel/OFL.txt). |
-
-**Compose usage:** `FontFamily(Font(R.font.cinzel, …))` in `ui/theme/ArteriaTheme.kt` for display titles, app bar titles, and gold pretag (`labelSmall`). Body copy uses `FontFamily.SansSerif`.
+| Property | Value | Source |
+|----------|-------|--------|
+| `applicationId` | `com.arteria.game` | `app/build.gradle.kts` |
+| `namespace` (`:app`) | `com.arteria.game` | `app/build.gradle.kts` |
+| `namespace` (`:core`) | `com.arteria.game.core` | `core/build.gradle.kts` |
+| `compileSdk` | `36.1` | `app/build.gradle.kts`, `core/build.gradle.kts` |
+| `targetSdk` | `36` | `app/build.gradle.kts` |
+| `minSdk` | `26` | `app/build.gradle.kts`, `core/build.gradle.kts` |
 
 ---
 
-## Dependency Inventory
+## Declared Dependencies
 
-**Gradle files audited:** `app/build.gradle.kts`, `core/build.gradle.kts`, root `build.gradle.kts`, `settings.gradle.kts`.
+### `:app` module
 
-**How to use this section**
+| Scope | Coordinates | Declared |
+|-------|-------------|----------|
+| `implementation` | `androidx.core:core-ktx` | `1.18.0` |
+| `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | `2.10.0` |
+| `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | `2.10.0` |
+| `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | `2.10.0` |
+| `implementation` | `androidx.activity:activity-compose` | `1.13.0` |
+| `implementation` | `androidx.compose:compose-bom` | `platform(2026.03.00)` |
+| `implementation` | `androidx.compose.ui:ui` | `via BOM` |
+| `implementation` | `androidx.compose.ui:ui-graphics` | `via BOM` |
+| `implementation` | `androidx.compose.ui:ui-tooling-preview` | `via BOM` |
+| `implementation` | `androidx.compose.material3:material3` | `via BOM` |
+| `implementation` | `androidx.navigation:navigation-compose` | `2.9.7` |
+| `implementation` | `androidx.room:room-runtime` | `2.8.0` |
+| `implementation` | `androidx.room:room-ktx` | `2.8.0` |
+| `ksp` | `androidx.room:room-compiler` | `2.8.0` |
+| `testImplementation` | `junit:junit` | `4.13.2` |
+| `testImplementation` | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | `1.10.2` |
+| `androidTestImplementation` | `androidx.test.ext:junit` | `1.3.0` |
+| `androidTestImplementation` | `androidx.test.espresso:espresso-core` | `3.7.0` |
+| `androidTestImplementation` | `androidx.room:room-testing` | `2.8.0` |
+| `androidTestImplementation` | `androidx.compose:compose-bom` | `platform(2026.03.00)` |
+| `androidTestImplementation` | `androidx.compose.ui:ui-test-junit4` | `via BOM` |
+| `debugImplementation` | `androidx.compose.ui:ui-tooling` | `via BOM` |
+| `debugImplementation` | `androidx.compose.ui:ui-test-manifest` | `via BOM` |
 
-| Column | Meaning |
-|--------|---------|
-| **Module** | `:app`, `:core`, or `(root)` for plugins |
-| **Scope** | Gradle configuration (`implementation`, `testImplementation`, etc.) |
-| **Coordinates** | `group:artifact` |
-| **Declared** | Version in Gradle, or `(via BOM)` for Compose BOM-managed libs |
-| **Latest known (stable)** | Newer release identified for planning — **confirm on [Google Maven](https://maven.google.com/web/index.html) or [Maven Central](https://search.maven.org/) before bumping** |
-| **Checked** | Date the "Latest known" value was researched |
-| **Notes** | Role / upgrade cautions |
+### `:core` module
 
-**Maintainers:** On each dependency pass, refresh **Latest known** + **Checked**, run `./gradlew :app:assembleDebug`, and run your test task. For Compose, bump **`compose-bom`** first, then sync other AndroidX versions to [BOM mapping](https://developer.android.com/develop/ui/compose/bom/bom-mapping).
-
-### `:app` — `implementation`
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `implementation` | `androidx.core:core-ktx` | 1.18.0 | 1.18.0 | 2026-03-30 | Core Kotlin extensions |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | 2.10.0 | 2.10.0 | 2026-03-30 | Lifecycle coroutines |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | 2.10.0 | 2.10.0 | 2026-03-30 | Lifecycle-aware state collection in Compose |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | 2.10.0 | 2.10.0 | 2026-03-30 | Compose `viewModel()` integration |
-| `:app` | `implementation` | `androidx.activity:activity-compose` | 1.13.0 | 1.13.0 | 2026-03-30 | Compose entry Activity |
-| `:app` | `implementation` | `androidx.compose:compose-bom` | `platform` 2026.03.00 | `platform` 2026.03.00 | 2026-03-30 | BOM pins Compose library versions |
-| `:app` | `implementation` | `androidx.compose.ui:ui` | (via BOM) | (via newer BOM) | — | UI core |
-| `:app` | `implementation` | `androidx.compose.ui:ui-graphics` | (via BOM) | (via newer BOM) | — | Graphics primitives |
-| `:app` | `implementation` | `androidx.compose.ui:ui-tooling-preview` | (via BOM) | (via newer BOM) | — | `@Preview` |
-| `:app` | `implementation` | `androidx.compose.material3:material3` | (via BOM) | (via newer BOM) | — | Material 3 |
-| `:app` | `implementation` | `androidx.navigation:navigation-compose` | 2.9.7 | 2.9.7 | 2026-03-30 | Compose navigation |
-| `:app` | `implementation` | `androidx.room:room-runtime` | 2.8.0 | 2.8.0 | 2026-03-30 | Room runtime for profile persistence |
-| `:app` | `implementation` | `androidx.room:room-ktx` | 2.8.0 | 2.8.0 | 2026-03-30 | Coroutines + transaction helpers for Room |
-
-### `:app` — `debugImplementation`
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `debugImplementation` | `androidx.compose.ui:ui-tooling` | (via BOM) | (via newer BOM) | — | Studio layout inspector |
-| `:app` | `debugImplementation` | `androidx.compose.ui:ui-test-manifest` | (via BOM) | (via newer BOM) | — | Test manifest |
-
-### `:app` — `androidTestImplementation`
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `androidTestImplementation` | `androidx.compose:compose-bom` | `platform` 2026.03.00 | `platform` 2026.03.00 | 2026-03-30 | Keep in sync with `implementation` BOM |
-| `:app` | `androidTestImplementation` | `androidx.compose.ui:ui-test-junit4` | (via BOM) | (via newer BOM) | — | Compose UI tests |
-| `:app` | `androidTestImplementation` | `androidx.test.ext:junit` | 1.3.0 | 1.3.0 | 2026-03-30 | AndroidX JUnit extensions |
-| `:app` | `androidTestImplementation` | `androidx.test.espresso:espresso-core` | 3.7.0 | 3.7.0 | 2026-03-30 | UI test harness |
-| `:app` | `androidTestImplementation` | `androidx.room:room-testing` | 2.8.0 | 2.8.0 | 2026-03-30 | In-memory Room test helpers |
-
-### `:app` — `testImplementation`
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `testImplementation` | `junit:junit` | 4.13.2 | 4.13.2 | 2026-03-22 | JVM unit tests (current for JUnit 4 line) |
-| `:app` | `testImplementation` | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.10.2 | 1.10.2 | 2026-03-30 | Main dispatcher override + coroutine testing |
-
-### `:core`
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:core` | `implementation` | `androidx.core:core-ktx` | 1.18.0 | 1.18.0 | 2026-03-30 | Keep aligned with `:app` |
-| `:core` | `testImplementation` | `junit:junit` | 4.13.2 | 4.13.2 | 2026-03-22 | JVM unit tests |
-
-### Gradle Plugins
-
-| Source | Plugin ID | Declared | Latest known | Checked | Notes |
-|--------|-----------|----------|--------------|---------|-------|
-| root `build.gradle.kts` | `com.android.application` | 9.1.0 | — | — | Match [AGP / Gradle matrix](https://developer.android.com/build/releases/gradle-plugin#updating-gradle) |
-| root `build.gradle.kts` | `com.android.library` | 9.1.0 | — | — | Same as AGP |
-| root `build.gradle.kts` | `org.jetbrains.kotlin.plugin.compose` | 2.0.0 | — | — | **Must stay compatible with Kotlin version shipped with AGP** ([Compose compiler setup](https://developer.android.com/develop/ui/compose/compiler)) |
-| root `build.gradle.kts` | `com.google.devtools.ksp` | 2.0.0-1.0.24 | — | — | KSP codegen for Room compiler with built-in Kotlin |
-| `settings.gradle.kts` | `org.gradle.toolchains.foojay-resolver-convention` | 1.0.0 | — | — | JDK toolchain discovery |
-
-### Template — add new dependencies here
-
-| Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
-|--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` / `:core` | `implementation` / … | `group:artifact` | | | | |
+| Scope | Coordinates | Declared |
+|-------|-------------|----------|
+| `implementation` | `androidx.core:core-ktx` | `1.18.0` |
+| `testImplementation` | `junit:junit` | `4.13.2` |
 
 ---
 
-## What Is NOT Here
+## Bundled Non-Maven Assets
 
-| Technology | Why |
-|------------|-----|
-| React Native | `@react-native/gradle-plugin` requires Gradle 8.x APIs removed in Gradle 9.0. Incompatible. |
-| Hermes / JSC | No JS engine — native-only project. |
-| Expo | Depends on React Native. Not applicable. |
-| Metro bundler | No JS bundling needed. |
-| Node.js / npm | No JS dependencies. Build is Gradle-only. |
-| Native C++ / OpenGL | **Planned** (Phase 5+). Not wired in current `:app` / `:core`. When added, create rows in Dependency Inventory and a new Native Libraries section. |
+| Asset | Location | License |
+|-------|----------|---------|
+| Cinzel variable font | `app/src/main/res/font/cinzel.ttf` | SIL Open Font License 1.1 |
 
 ---
 
-## Vulnerability Status
+## Exclusions (Not in This SBOM)
 
-| Date | Tool | Result |
-|------|------|--------|
-| 2026-03-30 | Manual review (post-bump) | Re-verify after dependency modernization pass; prior 2026-03-22 assessment still expected for Google/AndroidX — confirm on next release bump. |
-| 2026-03-22 | Manual review | 0 known vulnerabilities. All deps are first-party Google/AndroidX. Re-check after any version bump. |
-
----
-
-## Update Policy
-
-- **Gradle nightly:** Pin exact snapshot URL. Only update intentionally — nightlies can break between days.
-- **AGP:** Track stable releases. 9.1.0 is current.
-- **AndroidX / Compose:** Bump **`compose-bom`** first; refresh Dependency Inventory columns after verifying on Google Maven. Optional: [Gradle Versions Plugin](https://github.com/ben-manes/gradle-versions-plugin) for `dependencyUpdates`.
-- **NDK / CMake:** When native code is added, pin versions per AGP release notes and add rows to Dependency Inventory.
+| Technology | Status |
+|------------|--------|
+| React Native / Expo / Metro / Hermes | Not part of this native Gradle project |
+| Node.js package ecosystem (`package.json`) | None declared in this project root |
+| C++/NDK runtime libraries | Not active in current Gradle modules |
 
 ---
 
-## Whitepaper Supersession Notice
+## Security Snapshot
 
-The `whitepaper.md` in this DOCS folder describes a React Native CLI migration (Expo to RN 0.83, Hermes, Skia, Zustand). That approach is **superseded** — RN's Gradle plugin is incompatible with Gradle 9.x. Arteria Gradle Edition V2 is native Kotlin + Compose. The whitepaper is retained for historical reference only; do not execute its instructions.
+| Date | Method | Result |
+|------|--------|--------|
+| 2026-03-30 | Coordinate-level review of declared deps | No known high-risk third-party dependencies introduced; stack is AndroidX/Google/Kotlin ecosystem plus JUnit |
+
+---
+
+## Update Procedure
+
+1. Read live declarations from `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, and `core/build.gradle.kts`.
+2. Update this SBOM in the same change as dependency edits.
+3. Run verification: `./gradlew :app:assembleDebug` and relevant test tasks.
