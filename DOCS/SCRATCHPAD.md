@@ -7,6 +7,7 @@
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | SCRATCHPAD/SUMMARY/SBOM status refresh: JDK 21 build path, Room profiles, transfer APK naming; superseded stale “build blocked” handoff lines. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Renamed transfer APK output to `Arteria-V2-Gradle-Edition-Reloaded-*` in `build-apk-for-transfer.ps1`. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Upgraded all declared app/core dependency coordinates to SBOM latest-known versions for user-led full modernization test pass. |
+| 2026-03-30 | Claude Haiku 4.5 | Anthropic Claude | Professional README.md with banner, quick-start, architecture, project structure, docs roadmap, contributing guidelines, troubleshooting, and links to main Arteria project. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Implemented persistent startup account/profile flow using Room + AccountViewModel, switched play nav to `profileId`, added tests, and updated SBOM. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SCRATCHPAD — agent handoff template. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Last Actions renumbered; Next Action points at `Arteria-Gradle-Edition-v1.2/`; out-of-scope minSdk note amended. |
@@ -47,8 +48,11 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 **2026-03-30:** **Bulk dependency modernization:** Updated `app/build.gradle.kts` and `core/build.gradle.kts` to SBOM latest-known versions (core-ktx, lifecycle*, activity-compose, compose BOM, navigation-compose, room*, coroutines-test, AndroidX test libs). Build attempt still blocked by local Java toolchain resolution selecting `Eclipse Adoptium jre-21...` (`JAVA_COMPILER` missing) despite `org.gradle.java.home` entry.
 
 **2026-03-30:** **Basic username/session persistence shipped (Room):** Added `data/profile` Room stack (`ProfileEntity`, `ProfileDao`, `ProfileDatabase`, `ProfileRepository`, `RoomProfileRepository`), new `AccountViewModel` state/actions (load/select/create/continue), wired persistence in `ui/ArteriaApp.kt`, switched route payload to `profileId` in `navigation/NavRoutes.kt`, and upgraded account UI to surface validation/DB errors. Added tests: `app/src/test/.../AccountViewModelTest.kt` and `app/src/androidTest/.../RoomProfileRepositoryTest.kt`. Build verification currently blocked on machine JDK setup (`JAVA_COMPILER` capability missing from configured JRE path).
+**2026-03-30:** **Professional README.md shipped:** Created comprehensive `README.md` (404 lines) with ASCII art header, engaging introduction, quick-start section, architecture overview (current Compose shell + future GPU island), detailed project structure tree, documentation roadmap with reading order, development workflow (UI/frontend, engine/backend, Gradle), contributing guidelines, build verification checklist, troubleshooting guide, license/credits, and links to main Arteria project. Integrated with existing DOCS/ hub and SUMMARY.md. Serves as primary entry point for new developers and AI agents.
 
-1. **2026-03-30:** **Docs / roadmap alignment (V2):** Added `DOCS/SUMMARY.md` (AI hub, design-doc paths, multi-agent workflow). `ROADMAP.md` — identity block + **Phases 7–10** (UX/QoL, visual alignment, feature verticals, performance & Play). Normalized **Gradle root** naming to **`Arteria-Gradle-Edition-V2/`** across `ARCHITECTURE.md`, `REFERENCES.md`, `SBOM`, `MIGRATION_SPEC`, `ROADMAP`, `SCRATCHPAD`. Root `README.md` + `DOCU/SUMMARY.md` link to V2 doc hub.
+1. **2026-03-30:** **Basic username/session persistence shipped (Room):** Added `data/profile` Room stack (`ProfileEntity`, `ProfileDao`, `ProfileDatabase`, `ProfileRepository`, `RoomProfileRepository`), new `AccountViewModel` state/actions (load/select/create/continue), wired persistence in `ui/ArteriaApp.kt`, switched route payload to `profileId` in `navigation/NavRoutes.kt`, and upgraded account UI to surface validation/DB errors. Added tests: `app/src/test/.../AccountViewModelTest.kt` and `app/src/androidTest/.../RoomProfileRepositoryTest.kt`. Build verification currently blocked on machine JDK setup (`JAVA_COMPILER` capability missing from configured JRE path).
+
+2. **2026-03-30:** **Docs / roadmap alignment (V2):** Added `DOCS/SUMMARY.md` (AI hub, design-doc paths, multi-agent workflow). `ROADMAP.md` — identity block + **Phases 7–10** (UX/QoL, visual alignment, feature verticals, performance & Play). Normalized **Gradle root** naming to **`Arteria-Gradle-Edition-V2/`** across `ARCHITECTURE.md`, `REFERENCES.md`, `SBOM`, `MIGRATION_SPEC`, `ROADMAP`, `SCRATCHPAD`. Root `README.md` + `DOCU/SUMMARY.md` link to V2 doc hub.
 2. **2026-03-22:** **Animated main-menu sky:** `DockingBackground` — dual `InfiniteTransition` loops (26s cosmic / 5.2s twinkle), **78** stars with per-star phase/speed, **3** soft radial **nebula** blobs (accent blue / purple / luminar) drifting slowly, **lerp**-shifted vertical gradient “breath.” KDoc lists roadmap: reduced motion, parallax, shader fog, battery hooks. Used on account select / create / session screens.
 3. **2026-03-22:** **Cinzel font:** Bundled variable `res/font/cinzel.ttf` (Google Fonts OFL, parity with Expo `Cinzel_400Regular` / `Cinzel_700Bold`). `ArteriaTheme.kt` uses Cinzel for display / titles / pretag; body remains sans-serif. Docs: `SBOM.md` **Bundled font assets**, `REFERENCES.md` typography section, `ARCHITECTURE.md` §4 rows. `:app:compileDebugKotlin` OK.
 4. **2026-03-22:** **Docking Station UI:** Palette + starfield + gradient account cards inspired by `apps/mobile/app/character-select.tsx` and `constants/theme.ts`.
@@ -79,8 +83,9 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 ## Next Action (for the next agent)
 
 **`[AMENDED 2026-03-30]:`** Continue product work: [ROADMAP.md](ROADMAP.md) Phase 1 navigation placeholders (Skills, Bank, Combat, Settings) and/or gameplay wiring beyond session placeholder. Run `:app:testDebugUnitTest` and instrumented tests when touching persistence or navigation.
+**[AMENDED 2026-03-30]:** README published; next focus: **Phase 1 completion** (navigation scaffold with placeholder routes: Skills, Bank, Combat, Settings) or **Phase 2 engine port** (TickSystem, XPTable logic from monorepo). **Setup verification:** Confirm local JDK 21 is full JDK (not JRE), then run `:app:assembleDebug` + `:app:testDebugUnitTest` + device install to validate Room persistence end-to-end.
 
-1. Read [SUMMARY.md](SUMMARY.md), then [ROADMAP.md](ROADMAP.md) Phase 1 (`[IN PROGRESS]` checklist — Compose + package + `:core` module are in place) and **Phases 7–10** if picking UX/QoL/UI work.
+1. **New developer checklist:** Read [README.md](../README.md) first (just created), then [SUMMARY.md](SUMMARY.md), then [ROADMAP.md](ROADMAP.md) Phase 1 checklist + **Phases 7–10** (UX/QoL priorities).
 2. Read [MIGRATION_SPEC.md](MIGRATION_SPEC.md) for TS → Kotlin mapping and source file pointers.
 3. Open **`Arteria-Gradle-Edition-V2/`** in Android Studio (project root with `settings.gradle.kts`, `:app`, `:core`).
 4. **Finish Phase 1:** Navigation Compose scaffold with placeholder routes (Skills, Bank, Combat, Settings) per ROADMAP; optionally add first JVM unit test under `:core` with zero `android.*` imports.
@@ -100,10 +105,11 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 | Doc | Role |
 |-----|------|
+| `../README.md` | **Primary entry point** — introduction, quick-start, architecture, project structure, development workflow, contributing |
 | `SUMMARY.md` | Doc hub — paths, AI read order, features/QoL pointers |
 | `ARCHITECTURE.md` | Stack, RN vs Gradle 9, render loop, conventions |
 | `SBOM.md` | Single source: toolchain, SDK targets, dependency inventory, update policy |
-| `ROADMAP.md` | Phased delivery 0–6 |
+| `ROADMAP.md` | Phased delivery 0–10 |
 | `MIGRATION_SPEC.md` | How to port from RN monorepo |
 | `DESIGN_TRANSLATION_AUDIT.md` | Detailed checklist of Split data / skills / content files from V1 |
 | `REFERENCES.md` | External links (Gradle, AGP, Compose, GameActivity, etc.) |
