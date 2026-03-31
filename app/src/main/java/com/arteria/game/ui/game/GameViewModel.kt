@@ -64,7 +64,9 @@ class GameViewModel(
                         actionRegistry = actionRegistry,
                     )
                 }
-                _gameState.value = offlineResult.state
+                val afterOffline = offlineResult.state.copy(lastOfflineTickAppliedAt = now)
+                _gameState.value = afterOffline
+                repository.saveGameState(afterOffline)
                 if (offlineResult.xpGained.isNotEmpty() || offlineResult.resourcesGained.isNotEmpty()) {
                     _offlineReport.value = offlineResult
                 }

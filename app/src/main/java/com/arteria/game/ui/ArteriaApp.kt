@@ -46,7 +46,8 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
             appContext,
             GameDatabase::class.java,
             "arteria_game.db",
-        ).build()
+        ).addMigrations(GameDatabase.MIGRATION_1_2)
+            .build()
     }
     val gameRepository = remember(gameDatabase) {
         GameRepository(

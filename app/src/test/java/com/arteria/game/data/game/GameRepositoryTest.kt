@@ -41,6 +41,16 @@ class GameRepositoryTest {
         assertEquals(2, dao.bankItems.count { it.profileId == "p2" })
         assertNotNull(dao.metaByProfile["p2"])
     }
+
+    @Test
+    fun saveGameState_roundTripsLastOfflineTickAppliedAt() = runTest {
+        val dao = FakeGameDao()
+        val repository = GameRepository(dao)
+        val seed = repository.loadGameState("p3").copy(lastOfflineTickAppliedAt = 999L)
+        repository.saveGameState(seed)
+        val loaded = repository.loadGameState("p3")
+        assertEquals(999L, loaded.lastOfflineTickAppliedAt)
+    }
 }
 
 private class FakeGameDao : GameDao {

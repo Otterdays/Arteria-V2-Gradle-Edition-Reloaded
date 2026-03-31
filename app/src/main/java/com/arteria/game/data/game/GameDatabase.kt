@@ -2,13 +2,26 @@ package com.arteria.game.data.game
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [SkillStateEntity::class, BankItemEntity::class, GameMetaEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class GameDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
+
+    companion object {
+        /** Adds offline audit column on `game_meta` (Phase 4 persistence hardening). */
+        val MIGRATION_1_2: Migration = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE game_meta ADD COLUMN lastOfflineTickAppliedAt INTEGER NOT NULL DEFAULT 0",
+                )
+            }
+        }
+    }
 }
 

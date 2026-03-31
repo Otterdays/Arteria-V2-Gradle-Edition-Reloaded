@@ -1,0 +1,118 @@
+# ROLE
+Game dev mindset: UX > elegance. Ship working code. Iterate fast.
+
+## SYSTEM
+Windows-compatible paths/commands (forward slashes in code).
+**IDE targets:** Cursor, Trae, Antigravity (rules are portable across AI-assisted IDEs)
+
+## PHILOSOPHY
+**KISS** (simple > clever) • **YAGNI** (build when needed) • **DRY** (abstract after 3rd repeat) • **Fail Fast** (surface errors immediately)
+
+## AGENT BEHAVIOR
+**Autonomy:** If a decision is reversible and low-risk, act. If it's irreversible or ambiguous, ask.
+**Conciseness:** Prefer concise responses. Don't repeat the question back. Don't explain obvious changes unless asked.
+**Read before edit:** Always read a file before editing it. Never assume file structure or contents.
+**Multi-file changes:** When making multi-file changes, start from leaf dependencies and work toward the entry point.
+
+## DOCS STRUCTURE (`DOCS/`)
+**Core Files:**
+- **SCRATCHPAD.md**: Active tasks, blockers, last 5 actions — NEVER delete, compact at 500 lines
+- **SUMMARY.md**: Project status overview + quick links
+- **SBOM.md**: Security tracking (update on every package install/remove)
+- **STYLE_GUIDE.md**: Project-specific conventions, trace tag format, comment rules
+- **My_Thoughts.md**: Decisions & rationale
+- **CHANGELOG.md**: Version history (Keep a Changelog format)
+- **ARCHITECTURE.md**: System structure + Mermaid diagrams
+- **debugs/**: Issue tracking (`debug_[timestamp].md`)
+
+**Root:** `README.md` (user-facing)
+
+## WORKFLOW
+**Init:** Read `SUMMARY → SBOM → SCRATCHPAD → STYLE_GUIDE` before coding
+**Update:** Update status docs (SCRATCHPAD, SBOM) during work, not after. Checkpoint after every 3–5 tool calls or after completing each subtask
+**Errors:** Log to `debugs/`, max 3 fix attempts. If still stuck, stop — report what was tried and what failed in SCRATCHPAD, then notify the user
+**Handoff:** Update SCRATCHPAD with state + next steps. If approaching context limit, write a `## MID-TASK CHECKPOINT [DATE]` block with what's done, in progress, and next action — then notify the user
+**Security:** Audit packages before install, update SBOM immediately
+**Cross-reference:** `CLAUDE.md` is the detailed execution guide for this same policy set. If phrasing differs,
+apply the stricter safety/process constraint and annotate doc clarifications with `[AMENDED YYYY-MM-DD]:`.
+
+## DOC UPDATES
+**Order:** Top-down — new updates go to the top, keeping content fresh
+**Golden rule:** NEVER delete or replace existing content. Append, amend, or annotate only
+**Staleness:** Refresh outdated sections when you touch a doc — never delete log-type records
+**Conflict:** Add updates with a `[AMENDED YYYY-MM-DD]:` note; never remove the original
+**Scope of updates:** Proactively update *status docs* (SCRATCHPAD, SBOM, CHANGELOG) as part of normal work. Do NOT amend or rewrite *content docs* (README, ARCHITECTURE, STYLE_GUIDE) unless explicitly instructed by the user
+
+> ⚠️ Every doc in `DOCS/` must keep this header — agents must never remove it:
+> `<!-- PRESERVATION RULE: Never delete or replace content. Append or annotate only. -->`
+
+## SCOPE & ACCURACY
+**Scope:** Do not rename, refactor, or modify anything outside the current task — flag it in SCRATCHPAD under `Out-of-Scope Observations` instead
+**Hallucination:** Never assume a method, API, or flag exists — verify against installed version or docs before using. If unverifiable, leave a `NOTE: verify before shipping` comment
+**Dependencies:** Check existing deps before installing anything new. If adding, state why existing deps don't cover it. Never add packages with known vulnerabilities
+
+## GIT CONVENTIONS
+**Commits:** `<type>(<scope>): <description>` — types: `feat | fix | docs | refactor | chore | test`
+**Branches:** `feature/` `fix/` `chore/` `docs/`
+**When:** After each logical unit — never commit broken code to main
+
+## CODE STANDARDS
+**Naming:** `camelCase` (JS/TS) • `snake_case` (Python) • `kebab-case` (CSS) • `PascalCase` (C#/Kotlin classes)
+**Limits:** 100 char/line • 50 lines/function • 400 lines/file
+**Trace:** `// [TRACE: filename.md]` — link code to relevant doc
+**Comments:** WHY only, never WHAT. Prefixes: `TODO:` `FIXME:` `NOTE:`
+**Types > Comments:** Let TypeScript/Kotlin/C# types document structure
+**Secrets:** Never hardcode environment-specific values (URLs, ports, credentials, API keys) — always use `.env`, `BuildConfig`, `local.properties`, or platform equivalent (gitignored)
+
+## ERROR HANDLING
+- Always use try/catch (or language equivalent) at async boundaries and I/O operations
+- Never silently swallow exceptions — log or propagate
+- Prefer typed errors / sealed results over thrown exceptions where the language supports it (Kotlin `sealed class`, C# `Result`, Rust `Result`)
+- Never return `null` when an error type or Result pattern exists
+- Fail fast at the boundary, recover gracefully in the core
+
+## ASYNC & CONCURRENCY
+- **JS/TS:** `async/await` over raw Promises or callbacks
+- **Python:** `asyncio` for async; avoid threading unless CPU-bound
+- **Kotlin:** Coroutines over threads — `viewModelScope` / `lifecycleScope` only; never `GlobalScope`
+- **C#:** `async/await` throughout; never `.Result` or `.Wait()` on async methods (deadlock risk)
+- **Universal:** Never block the main/UI thread
+
+## TECH STACK DEFAULTS
+> Per-stack details belong in project-level or per-stack rule files when available.
+> This section defines defaults and routing — not exhaustive style guides.
+
+**React Native:** Expo + TS • React Three Fiber for 3D • Playwright for E2E
+**Chrome / E-Commerce:** Chrome Extension Best Practices • Shopify Theme Guidelines
+**Python:** Package manager is strictly `uv`. Frameworks: FastAPI, Django + REST, Flask. Testing: pytest
+**Kotlin / Android:** MVVM + StateFlow/SharedFlow. `data class` for models, `sealed class` for UI state. No business logic in Activities/Fragments — delegate to ViewModels. Follow official Android Kotlin style guide
+**C# / Unity:** Separate game logic from MonoBehaviour — pure C# classes. ScriptableObject for config. No heavy logic in `Update()`. Avoid `FindObjectOfType()` at runtime — use DI or cached refs. Naming: `PascalCase` methods/classes, `_camelCase` private fields
+**SQL:** Explicit column names only (no `SELECT *`). PKs on all tables, indexed FKs. `snake_case` naming. Parameterized queries always. Migrations are append-only. One clause per line, uppercase keywords
+**Shell / Batch:** `set -e` in bash. Quote all variables. Descriptive script names. `echo` for major steps. Windows `.bat` uses `call` before npm/bun commands
+
+## TESTING
+Unit (many) > Integration > E2E (few) • Target: **80% coverage** on business logic
+**Tools:** Vitest/Jest (unit) • Playwright (E2E) • pytest (Python) • JUnit (Kotlin)
+
+## LAUNCH ARTIFACTS
+```batch
+@echo off
+echo Starting server...
+call npm install
+call npm run dev
+pause
+```
+
+## OUTPUT CHECKLIST
+✅ Runnable without modification
+✅ Complete — no placeholder TODOs
+✅ Tested or immediately testable
+✅ Documented — signatures + purpose
+✅ No syntax errors, debug logs, or commented-out code
+✅ No redundant dependencies added
+✅ No hardcoded environment-specific values in any language
+✅ Async/concurrency follows language-appropriate pattern
+✅ Error handling at async boundaries and I/O — no silent failures
+✅ Docs updated: SCRATCHPAD, SBOM, README if applicable
+✅ Nothing deleted from any doc • No silent out-of-scope changes
+✅ Commit message follows Conventional Commits format

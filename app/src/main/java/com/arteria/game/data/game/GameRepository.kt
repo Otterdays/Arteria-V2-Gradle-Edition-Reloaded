@@ -38,6 +38,7 @@ class GameRepository(
             skills = skills,
             bank = bank,
             lastSaveTimestamp = meta?.lastSaveTimestamp ?: System.currentTimeMillis(),
+            lastOfflineTickAppliedAt = meta?.lastOfflineTickAppliedAt ?: 0L,
         )
     }
 
@@ -71,6 +72,7 @@ class GameRepository(
                 GameMetaEntity(
                     profileId = state.profileId,
                     lastSaveTimestamp = System.currentTimeMillis(),
+                    lastOfflineTickAppliedAt = state.lastOfflineTickAppliedAt,
                 ),
             )
         }

@@ -4,6 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 marked `[DONE]`: `GameDatabase` v2 migration + tests; `lastOfflineTickAppliedAt` pipeline. |
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Progress checkpoint pass: checked off shipped items across Phases 1/3/4 and set next concrete target for Phase 5 vertical slice hardening. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial ROADMAP Phases 0–6 + source references. |
 | 2026-03-30 | Cursor Agent | Composer | V2 identity block, canonical paths, Phases 7–10 (features / QoL / UI / ship). |
 
@@ -58,7 +60,9 @@ Phased plan for the **native** Android line. Game content and tone remain define
 - [x] Package renamed to `com.arteria.game` — `applicationId`, `namespace`, Kotlin source path, manifest
 - [x] `:core` Gradle module created (empty library, `compileSdk 36.1`, `minSdk 26`)
 - [x] `./gradlew :app:assembleDebug` green; app confirmed running on API 36.1 AVD
-- [ ] **Remaining:** Navigation scaffold with placeholder routes (Skills, Bank, Combat, Settings)
+- [x] Navigation scaffold + in-app tabs shipped (`Skills`, `Bank`, `Combat`, `Settings`) in `ui/game/GameScreen.kt`
+
+`[DONE 2026-03-31]:` Phase 1 exit criteria are now met in current tree.
 
 ---
 
@@ -100,6 +104,8 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 **Exit criteria:** Navigate between main tabs; state hoisted in ViewModels (even if mock data).
 
+`[DONE 2026-03-31]:` `GameScreen` bottom navigation switches tabs (`Skills`, `Bank`, `Combat`, `Settings`) and state is hoisted through `GameViewModel` (`StateFlow`), with account flow handoff from `ArteriaApp`.
+
 ---
 
 ## Phase 4 — Persistence + offline
@@ -118,6 +124,10 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 **Exit criteria:** Cold start restores state; instrumented or unit tests for migration round-trip.
 
+`[AMENDED 2026-03-31]:` Persistence/offline is partially delivered via Room (`arteria_profiles.db`, `arteria_game.db`) with save/load and offline catch-up report (`OfflineReportDialog`). Migration round-trip coverage and manual smoke remain open.
+
+**`[DONE 2026-03-31]:`** Phase 4 exit criteria met for the native Room stack: `GameDatabase` **v2** with `MIGRATION_1_2` (`game_meta.lastOfflineTickAppliedAt`); `GameRepository` + `GameViewModel` persist offline audit timestamp after catch-up; JVM test `saveGameState_roundTripsLastOfflineTickAppliedAt`; instrumented `GameDatabaseMigrationTest` (v1→v2 migration + save/close/reopen round-trip). Optional future: DataStore/MMKV called out in original bullets remains **not** required for exit — add to `SBOM.md` if introduced.
+
 ---
 
 ## Phase 5 — Content port
@@ -133,6 +143,15 @@ Phased plan for the **native** Android line. Game content and tone remain define
 - `apps/mobile/constants/items.ts`, skill screens under `apps/mobile/app/skills/`.
 
 **Exit criteria:** At least one vertical slice (e.g. Mining + Bank) playable end-to-end offline.
+
+`[IN PROGRESS 2026-03-31]:` Mining + Bank loop is present (`TickEngine`, `MiningData`, `GameViewModel`, `BankScreen`) and account->game routing is wired. Remaining to call this fully done: manual smoke checklist and explicit balancing/UX pass for the slice.
+
+---
+
+## [AMENDED 2026-03-31] Immediate Next Point (single focus)
+
+- [ ] Run **manual smoke pass** (no automated tests required): account create/select -> enter game -> start Mining action -> confirm XP/resource gain -> bank reflects resources -> return to accounts.
+- [ ] If smoke is clean, mark Phase 5 vertical slice **DONE** and open the next slice candidate (Logging or Combat baseline).
 
 ---
 

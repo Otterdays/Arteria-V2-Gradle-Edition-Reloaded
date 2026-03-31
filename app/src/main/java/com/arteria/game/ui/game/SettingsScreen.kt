@@ -1,43 +1,94 @@
 package com.arteria.game.ui.game
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import com.arteria.game.ui.components.ChangelogScreen
 import com.arteria.game.ui.theme.ArteriaPalette
 
 @Composable
 fun SettingsScreen(
     accountDisplayName: String,
+    onBack: () -> Unit,
     onBackToAccounts: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showChangelog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = showChangelog) { showChangelog = false }
+
+    if (showChangelog) {
+        ChangelogScreen(onBack = { showChangelog = false }, modifier = modifier)
+        return
+    }
+
+    val bgBrush = Brush.verticalGradient(
+        colors = listOf(
+            ArteriaPalette.BgDeepSpaceTop,
+            ArteriaPalette.BgDeepSpaceMid,
+            ArteriaPalette.BgDeepSpaceBottom,
+        ),
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(bgBrush)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            text = "SETTINGS",
-            style = MaterialTheme.typography.labelSmall,
-            color = ArteriaPalette.Gold,
-            modifier = Modifier.padding(start = 4.dp),
-        )
+        // Top bar with back arrow
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = ArteriaPalette.TextSecondary,
+                )
+            }
+            Text(
+                text = "SETTINGS",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.Gold,
+            )
+        }
 
+        // Profile card
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
@@ -67,6 +118,7 @@ fun SettingsScreen(
             }
         }
 
+        // Game info card
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
@@ -99,6 +151,16 @@ fun SettingsScreen(
         Spacer(Modifier.height(8.dp))
 
         OutlinedButton(
+            onClick = { showChangelog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = ArteriaPalette.TextSecondary,
+            ),
+        ) {
+            Text("What's New")
+        }
+
+        OutlinedButton(
             onClick = onBackToAccounts,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.outlinedButtonColors(
@@ -109,4 +171,3 @@ fun SettingsScreen(
         }
     }
 }
-

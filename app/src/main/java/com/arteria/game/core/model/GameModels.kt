@@ -33,6 +33,8 @@ data class GameState(
     val skills: Map<SkillId, SkillState>,
     val bank: Map<String, Int>,
     val lastSaveTimestamp: Long,
+    /** Wall-clock ms when offline catch-up was last applied on session load (persisted in `game_meta`). */
+    val lastOfflineTickAppliedAt: Long = 0L,
 )
 
 data class LevelUp(

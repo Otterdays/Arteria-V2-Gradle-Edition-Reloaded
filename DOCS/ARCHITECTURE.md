@@ -4,6 +4,10 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 persistence: `GameDatabase` v2 + `MIGRATION_1_2`; `game_meta.lastOfflineTickAppliedAt`; verification note appended below. |
+| 2026-03-31 | Claude Haiku 4.5 | Anthropic Claude | Updated Agent Credits + `Last updated` date. Animation system entry: `DockingGlitch.kt` (`GlitchMaterializeOverlay` 7-layer Canvas, `AmbientScanOverlay`, `EntryAnimations` orchestrator, `AmbientAnimations` infinite loops, `GlitchLayout` precomputed deterministic per seed); staggered per-card entry (index × 160ms), materialize/scan/glitch/jitter phases, badge spring pop-in; ambient system (infinite ripple/pulse/flow on selected). |
+| 2026-03-31 | Claude Sonnet 4.6 | Anthropic Claude | Added UI Components layer to Responsibilities table documenting `DockingGlitch`, `DockingAccountCard`, `DockingBackground`, `DockingChrome` with their roles and animation capabilities. |
+| 2026-03-31 | Claude Haiku 4.5 | Anthropic Claude | Main menu refactor: moved Settings from bottom nav tab to full-screen overlay (opened via `TopAppBar` gear icon); updated game screen navigation to 3 primary tabs (Skills, Bank, Combat). |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Complete architecture doc rebuild for clarity; split into Current Architecture, Boundaries, and Planned Next Architecture. |
 
 *Future contributors: append a row here when you materially change this doc.*
@@ -12,9 +16,18 @@
 
 # Arteria V2 Gradle Edition Reloaded — Architecture
 
-> Last updated: 2026-03-30
-> Status: Active native Android implementation (Kotlin + Compose + Room)
+> Last updated: 2026-03-31
+> Status: Active native Android implementation (Kotlin + Compose + Room) with full Docking Station animation system
 > Scope: This file documents the architecture that exists today and the planned next architecture.
+
+## [AMENDED 2026-03-31] Verification Snapshot
+
+- **Verified against live code:** `ui/ArteriaApp.kt`, `navigation/NavRoutes.kt`, `ui/game/GameScreen.kt`, `ui/game/SettingsScreen.kt`.
+- **Active nav routes:** `account_select`, `account_create`, `game/{profileId}` (encoded by `NavRoutes.gamePath()`).
+- **Game shell shape:** 3-tab content (`Skills`, `Bank`, `Combat`) + `TopAppBar` settings entry.
+- **Settings flow:** full-screen overlay, back-dismissible, with nested `ChangelogScreen` overlay from “What's New”.
+- **Doc canon reference:** `DOCS/SUMMARY.md` section `Doc Canon (single source rules)`.
+- **`[AMENDED 2026-03-31]:`** `GameDatabase` is **version 2** (`MIGRATION_1_2`); `game_meta` carries `lastOfflineTickAppliedAt` for offline catch-up audit. See `DOCS/SBOM.md` Android Targets table.
 
 ---
 
@@ -29,7 +42,7 @@
 | Persistence | Room (`arteria_profiles.db`, `arteria_game.db`) |
 | Modules | `:app` (active), `:core` (present, minimal) |
 | Toolchain | Gradle 9.6 nightly, AGP 9.1, JDK 21 |
-| Current gameplay state | Account/profile flow live + in-app game hub (Skills/Bank/Combat/Settings) |
+| Current gameplay state | Account/profile flow live + in-app game hub (bottom nav: Skills/Bank/Combat; settings via `TopAppBar` overlay) |
 
 ---
 
@@ -62,7 +75,8 @@ Android OS
 |------|------------|----------------|
 | Entry/UI host | `app/src/main/java/com/arteria/game/MainActivity.kt` | Application entry; Compose host setup |
 | Navigation/UI composition | `app/src/main/java/com/arteria/game/ui/ArteriaApp.kt` | Builds `NavHost`, wires VM to screens, route transitions |
-| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow + in-game hub screens and overlays |
+| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (Skills/Bank/Combat tabs), `TopAppBar` (account name + settings gear), and `SettingsScreen` overlay (full-screen, back-dismissible) |
+| UI Components | `app/src/main/java/com/arteria/game/ui/components/*` | `DockingBackground` (animated space backdrop), `DockingAccountCard` (glitch materialization + timeline sidebar + ambient selected-state), `DockingGlitch` (7-layer Canvas animation system: `GlitchMaterializeOverlay`, `AmbientScanOverlay`, `EntryAnimations`, `AmbientAnimations`, `GlitchLayout`), `DockingChrome` (title block, lore footer, new account slot) |
 | State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations |
 | Navigation contracts | `app/src/main/java/com/arteria/game/navigation/NavRoutes.kt` | Route constants and encoded route-builder API |
 | Persistence boundary | `app/src/main/java/com/arteria/game/data/profile/ProfileRepository.kt` | App-facing persistence contract |

@@ -18,10 +18,19 @@
 **Gradle project root:** `Arteria-Gradle-Edition-V2/` (contains `settings.gradle.kts`, `:app`, `:core`). Open this directory in Android Studio.
 
 **`[AMENDED 2026-03-30]:`** The same project may live in a folder named **`Arteria-V2-Gradle-Edition-Reloaded`** — treat it as the same Gradle root if those files are present.
+**`[AMENDED 2026-03-31]:`** For this repository checkout, prefer **`Arteria-V2-Gradle-Edition-Reloaded/`** as canonical local path naming.
 
 **`[AMENDED 2026-03-30]:`** Any Expo / React Native mentions in this repo are **legacy V1 context only**. Current implementation stack is native Android: **Kotlin + Jetpack Compose + Room + Gradle 9.x + AGP 9.1**.
 
 **`[AMENDED 2026-03-30]:`** Do not add Expo/React Native dependencies or workflow steps to this project.
+
+## [AMENDED 2026-03-31] Doc Canon (single source rules)
+
+- **Canonical local root:** `Arteria-V2-Gradle-Edition-Reloaded/` (this checkout).
+- **Legacy alias in older docs:** `Arteria-Gradle-Edition-V2/` (same project if `settings.gradle.kts`, `:app`, `:core` exist).
+- **Stack truth for this repo:** native Android only (`Kotlin + Compose + Room + Gradle/AGP`).
+- **Design truth precedence:** monorepo `../DOCU/` first, bundled `DOCS/ARTERIA-V1-DOCS/DOCU/` second.
+- **Operational doc precedence:** `SBOM.md` (versions), `ARCHITECTURE.md` (runtime shape), `ROADMAP.md` (phase status), `SCRATCHPAD.md` (live handoff).
 
 ---
 

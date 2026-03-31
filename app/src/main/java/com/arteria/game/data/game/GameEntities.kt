@@ -23,5 +23,7 @@ data class BankItemEntity(
 data class GameMetaEntity(
     val profileId: String,
     val lastSaveTimestamp: Long,
+    /** Set when offline simulation runs on cold start; 0 if never applied. */
+    val lastOfflineTickAppliedAt: Long = 0L,
 )
 
