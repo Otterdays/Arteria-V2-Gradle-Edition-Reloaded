@@ -4,6 +4,9 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Build Toolchain note: optional `org.gradle.java.home` in `gradle.properties` (JDK 21) for consistent Gradle JVM; status line refresh. |
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Synced SBOM `Declared` version columns to match upgraded Gradle dependency coordinates. |
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Bulk dependency modernization pass in Gradle files (`:app` + `:core`) to SBOM latest-known versions. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Added Room + lifecycle Compose + KSP + coroutines-test + room-testing entries for persistent startup profile/session system. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SBOM tables, toolchain inventory, whitepaper supersession notice. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Android SDK targets amendment: API 36.1 compile via `CompileSdkSpec`, links to AGP 9.1 + Android 16 migration. |
@@ -21,7 +24,7 @@
 # SBOM (Software Bill of Materials) — Arteria Gradle Edition V2
 
 > **`[AMENDED 2026-03-30]:`** Same document as historically titled "v1.2" — repo path **`Arteria-Gradle-Edition-V2/`**.
-> **Last updated:** 2026-03-30
+> **Last updated:** 2026-03-30 (dependency modernization + JDK pin note)
 > **Status:** Single source of truth for toolchain, SDK targets, and all declared dependencies.
 
 ---
@@ -32,7 +35,7 @@
 |-----------|---------|----------------|
 | Gradle | 9.6.0-nightly (`20260322000231+0000`) | Pinned snapshot — [distributions-snapshots](https://services.gradle.org/distributions-snapshots/) |
 | Android Gradle Plugin | 9.1.0 | Root `build.gradle.kts` `plugins { }` |
-| JDK (daemon + bytecode) | **21** / vendor **ADOPTIUM** | `gradle/gradle-daemon-jvm.properties` (Foojay auto-provision); `compileOptions` `JavaVersion.VERSION_21` in `:app` and `:core` |
+| JDK (daemon + bytecode) | **21** / vendor **ADOPTIUM** | `gradle/gradle-daemon-jvm.properties` (Foojay auto-provision); `compileOptions` `JavaVersion.VERSION_21` in `:app` and `:core`. **`[AMENDED 2026-03-30]:`** Optional explicit Gradle JVM: `org.gradle.java.home` in root `gradle.properties` (full JDK path, not JRE-only) — avoids `JAVA_COMPILER` errors when the OS default Java is a JRE. |
 | Kotlin | (AGP-bundled) | Kotlin compiler version managed by AGP 9.1.0 built-in Kotlin |
 | CMake / NDK | **Not active** | No `externalNativeBuild` in current `:app` / `:core`. Will be added when C++/OpenGL GPU island lands (see `ARCHITECTURE.md` Phase 5+). |
 
@@ -83,19 +86,19 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 
 | Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
 |--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `implementation` | `androidx.core:core-ktx` | 1.13.1 | 1.18.0 | 2026-03-22 | Core Kotlin extensions |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | 2.8.4 | 2.10.0 | 2026-03-22 | Lifecycle coroutines |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | 2.8.4 | 2.10.0 | 2026-03-30 | Lifecycle-aware state collection in Compose |
-| `:app` | `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | 2.8.4 | 2.10.0 | 2026-03-30 | Compose `viewModel()` integration |
-| `:app` | `implementation` | `androidx.activity:activity-compose` | 1.9.1 | 1.13.0 | 2026-03-22 | Compose entry Activity |
-| `:app` | `implementation` | `androidx.compose:compose-bom` | `platform` 2024.06.00 | `platform` 2026.03.00 | 2026-03-22 | BOM pins Compose library versions |
+| `:app` | `implementation` | `androidx.core:core-ktx` | 1.18.0 | 1.18.0 | 2026-03-30 | Core Kotlin extensions |
+| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | 2.10.0 | 2.10.0 | 2026-03-30 | Lifecycle coroutines |
+| `:app` | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | 2.10.0 | 2.10.0 | 2026-03-30 | Lifecycle-aware state collection in Compose |
+| `:app` | `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | 2.10.0 | 2.10.0 | 2026-03-30 | Compose `viewModel()` integration |
+| `:app` | `implementation` | `androidx.activity:activity-compose` | 1.13.0 | 1.13.0 | 2026-03-30 | Compose entry Activity |
+| `:app` | `implementation` | `androidx.compose:compose-bom` | `platform` 2026.03.00 | `platform` 2026.03.00 | 2026-03-30 | BOM pins Compose library versions |
 | `:app` | `implementation` | `androidx.compose.ui:ui` | (via BOM) | (via newer BOM) | — | UI core |
 | `:app` | `implementation` | `androidx.compose.ui:ui-graphics` | (via BOM) | (via newer BOM) | — | Graphics primitives |
 | `:app` | `implementation` | `androidx.compose.ui:ui-tooling-preview` | (via BOM) | (via newer BOM) | — | `@Preview` |
 | `:app` | `implementation` | `androidx.compose.material3:material3` | (via BOM) | (via newer BOM) | — | Material 3 |
-| `:app` | `implementation` | `androidx.navigation:navigation-compose` | 2.8.0 | 2.9.7 | 2026-03-22 | Compose navigation |
-| `:app` | `implementation` | `androidx.room:room-runtime` | 2.6.1 | 2.8.0 | 2026-03-30 | Room runtime for profile persistence |
-| `:app` | `implementation` | `androidx.room:room-ktx` | 2.6.1 | 2.8.0 | 2026-03-30 | Coroutines + transaction helpers for Room |
+| `:app` | `implementation` | `androidx.navigation:navigation-compose` | 2.9.7 | 2.9.7 | 2026-03-30 | Compose navigation |
+| `:app` | `implementation` | `androidx.room:room-runtime` | 2.8.0 | 2.8.0 | 2026-03-30 | Room runtime for profile persistence |
+| `:app` | `implementation` | `androidx.room:room-ktx` | 2.8.0 | 2.8.0 | 2026-03-30 | Coroutines + transaction helpers for Room |
 
 ### `:app` — `debugImplementation`
 
@@ -108,24 +111,24 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 
 | Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
 |--------|-------|-------------|----------|--------------|---------|-------|
-| `:app` | `androidTestImplementation` | `androidx.compose:compose-bom` | `platform` 2024.06.00 | `platform` 2026.03.00 | 2026-03-22 | Keep in sync with `implementation` BOM |
+| `:app` | `androidTestImplementation` | `androidx.compose:compose-bom` | `platform` 2026.03.00 | `platform` 2026.03.00 | 2026-03-30 | Keep in sync with `implementation` BOM |
 | `:app` | `androidTestImplementation` | `androidx.compose.ui:ui-test-junit4` | (via BOM) | (via newer BOM) | — | Compose UI tests |
-| `:app` | `androidTestImplementation` | `androidx.test.ext:junit` | 1.2.1 | 1.3.0 | 2026-03-22 | AndroidX JUnit extensions |
-| `:app` | `androidTestImplementation` | `androidx.test.espresso:espresso-core` | 3.6.1 | 3.7.0 | 2026-03-22 | UI test harness |
-| `:app` | `androidTestImplementation` | `androidx.room:room-testing` | 2.6.1 | 2.8.0 | 2026-03-30 | In-memory Room test helpers |
+| `:app` | `androidTestImplementation` | `androidx.test.ext:junit` | 1.3.0 | 1.3.0 | 2026-03-30 | AndroidX JUnit extensions |
+| `:app` | `androidTestImplementation` | `androidx.test.espresso:espresso-core` | 3.7.0 | 3.7.0 | 2026-03-30 | UI test harness |
+| `:app` | `androidTestImplementation` | `androidx.room:room-testing` | 2.8.0 | 2.8.0 | 2026-03-30 | In-memory Room test helpers |
 
 ### `:app` — `testImplementation`
 
 | Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
 |--------|-------|-------------|----------|--------------|---------|-------|
 | `:app` | `testImplementation` | `junit:junit` | 4.13.2 | 4.13.2 | 2026-03-22 | JVM unit tests (current for JUnit 4 line) |
-| `:app` | `testImplementation` | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.8.1 | 1.10.2 | 2026-03-30 | Main dispatcher override + coroutine testing |
+| `:app` | `testImplementation` | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.10.2 | 1.10.2 | 2026-03-30 | Main dispatcher override + coroutine testing |
 
 ### `:core`
 
 | Module | Scope | Coordinates | Declared | Latest known | Checked | Notes |
 |--------|-------|-------------|----------|--------------|---------|-------|
-| `:core` | `implementation` | `androidx.core:core-ktx` | 1.13.1 | 1.18.0 | 2026-03-22 | Keep aligned with `:app` |
+| `:core` | `implementation` | `androidx.core:core-ktx` | 1.18.0 | 1.18.0 | 2026-03-30 | Keep aligned with `:app` |
 | `:core` | `testImplementation` | `junit:junit` | 4.13.2 | 4.13.2 | 2026-03-22 | JVM unit tests |
 
 ### Gradle Plugins
@@ -163,6 +166,7 @@ Shipped as **`app/src/main/res/font/`** resources (no Gradle coordinate). Update
 
 | Date | Tool | Result |
 |------|------|--------|
+| 2026-03-30 | Manual review (post-bump) | Re-verify after dependency modernization pass; prior 2026-03-22 assessment still expected for Google/AndroidX — confirm on next release bump. |
 | 2026-03-22 | Manual review | 0 known vulnerabilities. All deps are first-party Google/AndroidX. Re-check after any version bump. |
 
 ---

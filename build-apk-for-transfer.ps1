@@ -48,7 +48,8 @@ if (-not $built) {
 $dist = Join-Path $root "dist"
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$destName = "Arteria-v1.2-$Variant-$stamp.apk"
+# Product name: Arteria V2 Gradle Edition Reloaded (kebab-case for safe filenames).
+$destName = "Arteria-V2-Gradle-Edition-Reloaded-$Variant-$stamp.apk"
 $dest = Join-Path $dist $destName
 
 Copy-Item -LiteralPath $built.FullName -Destination $dest -Force

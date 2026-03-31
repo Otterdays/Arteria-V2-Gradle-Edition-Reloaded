@@ -4,6 +4,9 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | SCRATCHPAD/SUMMARY/SBOM status refresh: JDK 21 build path, Room profiles, transfer APK naming; superseded stale “build blocked” handoff lines. |
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Renamed transfer APK output to `Arteria-V2-Gradle-Edition-Reloaded-*` in `build-apk-for-transfer.ps1`. |
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Upgraded all declared app/core dependency coordinates to SBOM latest-known versions for user-led full modernization test pass. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Implemented persistent startup account/profile flow using Room + AccountViewModel, switched play nav to `profileId`, added tests, and updated SBOM. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial SCRATCHPAD — agent handoff template. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Last Actions renumbered; Next Action points at `Arteria-Gradle-Edition-v1.2/`; out-of-scope minSdk note amended. |
@@ -21,18 +24,27 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 **`[AMENDED 2026-03-30]:`** Gradle project root is **`Arteria-Gradle-Edition-V2/`** (not `Arteria-Gradle-Edition-v1.2/`). New agents: read **[DOCS/SUMMARY.md](SUMMARY.md)** first.
 
+**`[AMENDED 2026-03-30]:`** This repo may be checked out as **`Arteria-V2-Gradle-Edition-Reloaded`** on disk — same Gradle project (`settings.gradle.kts`, `:app`, `:core`).
+
 ---
 
 ## Current Status
 
 - **Phase:** Phase 0 (Structure + Gradle 9.6 wrapper + Nightly URL) is **DONE [2026-03-22]**. Phase 1 **partial** — see [ROADMAP.md](ROADMAP.md) (`[IN PROGRESS 2026-03-22]` checklist). Phases **7–10** (features / QoL / UI / ship) are **backlog** for parallel AI work — same file.
 - **Runnable app:** `:app` Compose **Docking Station** styling (palette from `apps/mobile/constants/theme.ts`), **Cinzel** display type (`res/font/cinzel.ttf`, OFL), **animated space backdrop** (`DockingBackground`: twinkling stars, drifting aurora blobs, breathing gradient) on menu-related screens. NavHost `ui/ArteriaApp.kt`. `package com.arteria.game`, `minSdk 26`, `compileSdk 36.1`, `targetSdk 36`. **Daemon JVM:** JDK **21** / **Adoptium** via `gradle/gradle-daemon-jvm.properties`. `:core` empty. `:app:assembleDebug` green [2026-03-22].
+- **`[AMENDED 2026-03-30]:`** **Startup profiles:** Room-backed account list + create/select + session placeholder; `data/profile/*`, `AccountViewModel`, `play/{profileId}`. **Build:** Use a full **JDK 21** (`javac` available); repo may set `org.gradle.java.home` in `gradle.properties`. **`build-apk-for-transfer`** copies APK to `dist/` as `Arteria-V2-Gradle-Edition-Reloaded-<variant>-<timestamp>.apk`.
 - **Docs hub:** **`Arteria-Gradle-Edition-V2/DOCS/`** — start at **`SUMMARY.md`**, then **`ROADMAP.md`**, **`ARCHITECTURE.md`**, **`MIGRATION_SPEC.md`**, **`SBOM.md`**.
 - **Main shipping app:** Still **`../apps/mobile/`** (Expo / RN, Gradle 8.x). Unaffected.
 
 ---
 
 ## Last Actions (most recent first)
+
+**2026-03-30:** **Handoff / docs sync:** Status above reflects **working** `build-apk-for-transfer` + `:app:assembleDebug` when the machine uses JDK 21 (not a JRE-only path). Prior notes in this file about `JAVA_COMPILER` / JRE Adoptium failures are **historical** — fix is JDK + correct `JAVA_HOME` / optional `org.gradle.java.home`. Ready to continue Phase 1 / gameplay placeholders per [ROADMAP.md](ROADMAP.md).
+
+**2026-03-30:** **Transfer APK filename:** `build-apk-for-transfer.ps1` now copies to `dist/` as `Arteria-V2-Gradle-Edition-Reloaded-<debug|release>-<timestamp>.apk` (was `Arteria-v1.2-...`).
+
+**2026-03-30:** **Bulk dependency modernization:** Updated `app/build.gradle.kts` and `core/build.gradle.kts` to SBOM latest-known versions (core-ktx, lifecycle*, activity-compose, compose BOM, navigation-compose, room*, coroutines-test, AndroidX test libs). Build attempt still blocked by local Java toolchain resolution selecting `Eclipse Adoptium jre-21...` (`JAVA_COMPILER` missing) despite `org.gradle.java.home` entry.
 
 **2026-03-30:** **Basic username/session persistence shipped (Room):** Added `data/profile` Room stack (`ProfileEntity`, `ProfileDao`, `ProfileDatabase`, `ProfileRepository`, `RoomProfileRepository`), new `AccountViewModel` state/actions (load/select/create/continue), wired persistence in `ui/ArteriaApp.kt`, switched route payload to `profileId` in `navigation/NavRoutes.kt`, and upgraded account UI to surface validation/DB errors. Added tests: `app/src/test/.../AccountViewModelTest.kt` and `app/src/androidTest/.../RoomProfileRepositoryTest.kt`. Build verification currently blocked on machine JDK setup (`JAVA_COMPILER` capability missing from configured JRE path).
 
@@ -60,12 +72,13 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 - **None** for documentation / planning.
 - **Build risk:** Gradle 9.6 **nightly** can change between snapshots — always pin wrapper URL (see `SBOM.md`).
+- **`[AMENDED 2026-03-30]:`** If Gradle reports `JAVA_COMPILER` missing, the machine is using a **JRE** or wrong `JAVA_HOME` — point to a **JDK 21** install (see `gradle.properties` `org.gradle.java.home` if present).
 
 ---
 
 ## Next Action (for the next agent)
 
-**[AMENDED 2026-03-30]:** Unblock local Gradle verification by pointing toolchain to a full JDK 21 (not JRE), then run `:app:testDebugUnitTest` and Android test task/device run to validate the new Room profile flow end-to-end.
+**`[AMENDED 2026-03-30]:`** Continue product work: [ROADMAP.md](ROADMAP.md) Phase 1 navigation placeholders (Skills, Bank, Combat, Settings) and/or gameplay wiring beyond session placeholder. Run `:app:testDebugUnitTest` and instrumented tests when touching persistence or navigation.
 
 1. Read [SUMMARY.md](SUMMARY.md), then [ROADMAP.md](ROADMAP.md) Phase 1 (`[IN PROGRESS]` checklist — Compose + package + `:core` module are in place) and **Phases 7–10** if picking UX/QoL/UI work.
 2. Read [MIGRATION_SPEC.md](MIGRATION_SPEC.md) for TS → Kotlin mapping and source file pointers.

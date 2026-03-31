@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Amended hub: local checkout folder name `Arteria-V2-Gradle-Edition-Reloaded` vs doc `Arteria-Gradle-Edition-V2/` alias. |
 | 2026-03-30 | Cursor Agent | Composer | Initial `DOCS/SUMMARY.md` — V2 hub, canonical paths, AI workflow for features/QoL/UI. |
 
 *Future contributors: append a row when you materially change this doc.*
@@ -15,6 +16,8 @@
 **What this is:** Native Android track (Kotlin, Jetpack Compose, Gradle 9.x line). The shipping React Native app remains under monorepo root `apps/mobile/`; this folder is the **parallel native product**.
 
 **Gradle project root:** `Arteria-Gradle-Edition-V2/` (contains `settings.gradle.kts`, `:app`, `:core`). Open this directory in Android Studio.
+
+**`[AMENDED 2026-03-30]:`** The same project may live in a folder named **`Arteria-V2-Gradle-Edition-Reloaded`** — treat it as the same Gradle root if those files are present.
 
 ---
 
