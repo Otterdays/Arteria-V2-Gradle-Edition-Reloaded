@@ -23,6 +23,57 @@
 @rem
 @rem ##########################################################################
 
+@rem AGP (androidJdkImage / JdkImageTransform) needs jlink.exe. Cursor/VS Code Red Hat Java
+@rem sets JAVA_HOME to a JRE (no jlink). If we clear JAVA_HOME but no jdk-* exists under
+@rem Program Files\Java, gradlew falls through to java.exe on PATH — still the bad JRE.
+@rem So: strip poisoned JAVA_HOME, scan common full JDK installs, then refuse PATH fallback
+@rem for Android builds (forces a clear install-JDK error instead of cryptic jlink failure).
+if defined JAVA_HOME (
+  set "_ART_JH=%JAVA_HOME:"=%"
+  echo.%_ART_JH%| findstr /I ".cursor redhat.java" >nul && set "JAVA_HOME="
+  set "_ART_JH="
+)
+if defined JAVA_HOME (
+  if not exist "%JAVA_HOME%\bin\jlink.exe" set "JAVA_HOME="
+)
+if not defined JAVA_HOME (
+  if exist "%ProgramFiles%\Java\jdk-21.0.10\bin\jlink.exe" (
+    set "JAVA_HOME=%ProgramFiles%\Java\jdk-21.0.10"
+  )
+)
+if not defined JAVA_HOME (
+  if exist "%ProgramFiles%\Java\jdk-26\bin\jlink.exe" (
+    set "JAVA_HOME=%ProgramFiles%\Java\jdk-26"
+  )
+)
+if not defined JAVA_HOME (
+  if exist "%ProgramFiles%\Java\jdk-21\bin\jlink.exe" (
+    set "JAVA_HOME=%ProgramFiles%\Java\jdk-21"
+  )
+)
+if not defined JAVA_HOME (
+  if exist "%ProgramFiles%\Eclipse Adoptium\" (
+    for /d %%J in ("%ProgramFiles%\Eclipse Adoptium\jdk-*") do (
+      if exist "%%J\bin\jlink.exe" (
+        set "JAVA_HOME=%%J"
+        goto __arteria_jdk_after_adoptium
+      )
+    )
+  )
+)
+:__arteria_jdk_after_adoptium
+if not defined JAVA_HOME (
+  if exist "%ProgramFiles%\Microsoft\" (
+    for /d %%J in ("%ProgramFiles%\Microsoft\jdk-*") do (
+      if exist "%%J\bin\jlink.exe" (
+        set "JAVA_HOME=%%J"
+        goto __arteria_jdk_after_ms
+      )
+    )
+  )
+)
+:__arteria_jdk_after_ms
+
 @rem Set local scope for the variables, and ensure extensions are enabled
 setlocal EnableExtensions
 
@@ -38,18 +89,15 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
-@rem Find java.exe
+@rem Find java.exe — require a full JDK for this Android project (do not use PATH JRE).
 if defined JAVA_HOME goto findJavaFromJavaHome
 
-set JAVA_EXE=java.exe
-%JAVA_EXE% -version >NUL 2>&1
-if %ERRORLEVEL% equ 0 goto execute
-
 echo. 1>&2
-echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo ERROR: No full JDK with bin\jlink.exe found for Android Gradle builds. 1>&2
 echo. 1>&2
-echo Please set the JAVA_HOME variable in your environment to match the 1>&2
-echo location of your Java installation. 1>&2
+echo Install Temurin JDK 21+ ^(or Oracle JDK^), or set JAVA_HOME to that JDK. 1>&2
+echo Checked: %ProgramFiles%\Java\jdk-21.0.10, jdk-26, jdk-21, Eclipse Adoptium\jdk-*, 1>&2
+echo Microsoft\jdk-*. Cursor/VS Code JAVA_HOME is ignored when it has no jlink. 1>&2
 
 "%COMSPEC%" /c exit 1
 

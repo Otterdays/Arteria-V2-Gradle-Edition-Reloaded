@@ -9,17 +9,30 @@ if not exist "%JDK_HOME%\bin\java.exe" (
     echo ERROR: java.exe not found under "%JDK_HOME%"
     exit /b 1
 )
+if not exist "%JDK_HOME%\bin\jlink.exe" (
+    echo ERROR: jlink.exe not found under "%JDK_HOME%\bin"
+    echo        Android AGP needs a full JDK ^(not a JRE^). Install Temurin JDK 21+ or Oracle JDK.
+    exit /b 1
+)
+
+rem Cursor/VS Code often sets JAVA_HOME to an extension JRE without jlink; AGP's JdkImageTransform
+rem follows JAVA_HOME. Force the same full JDK as Gradle's JVM.
+set "JAVA_HOME=%JDK_HOME%"
+set "PATH=%JDK_HOME%\bin;%PATH%"
 
 cd /d "%~dp0"
 set "APK_DIR=%CD%\app\build\outputs\apk\debug"
 set "APK_PATH=%APK_DIR%\app-debug.apk"
 set "DIST_DIR=%CD%\dist"
 
+rem Drop stale daemons that may have started under a JRE-only JAVA_HOME (jlink path sticks).
+call gradlew.bat -Dorg.gradle.java.home="%JDK_HOME%" --stop >nul 2>&1
+
 if "%~1"=="" (
     echo No Gradle task supplied. Defaulting to :app:assembleDebug
-    call gradlew.bat -Dorg.gradle.java.home="%JDK_HOME%" :app:assembleDebug
+    call gradlew.bat --no-daemon -Dorg.gradle.java.home="%JDK_HOME%" :app:assembleDebug
 ) else (
-    call gradlew.bat -Dorg.gradle.java.home="%JDK_HOME%" %*
+    call gradlew.bat --no-daemon -Dorg.gradle.java.home="%JDK_HOME%" %*
 )
 
 if errorlevel 1 exit /b %errorlevel%

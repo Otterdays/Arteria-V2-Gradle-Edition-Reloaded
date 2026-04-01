@@ -71,6 +71,7 @@ clarification to the touched doc.
 **Windows gotchas:**
 - `FileSystemException` on `.jar`: Close Android Studio, run `./gradlew --stop`, retry.
 - `JAVA_COMPILER` missing: Machine has a JRE, not a JDK. Point `org.gradle.java.home` in `gradle.properties` to a full **JDK 21** install.
+- `jlink.exe does not exist` under `.cursor\extensions\redhat.java\...`: **JAVA_HOME** is a JRE. Repo `gradlew.bat` strips `.cursor` / `redhat.java` paths, requires `bin\jlink.exe`, and scans `%ProgramFiles%\Java\jdk-*`, **Eclipse Adoptium\jdk-***, **Microsoft\jdk-***; it no longer falls back to `java` on PATH (that was still Cursor’s JRE). `build-apk-for-transfer.ps1` sets the same **JAVA_HOME** before Gradle. Run `gradlew --stop` after JDK changes.
 
 ---
 

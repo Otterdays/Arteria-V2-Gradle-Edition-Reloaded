@@ -7,6 +7,9 @@
 | 2026-03-31 | Cursor Agent | Composer | **README polish:** multi-row shields (KSP, Navigation, Lifecycle, Coroutines, compileSdk 36.1, JVM 21 vs JDK 26 build story), quick start + tree for `build-with-jdk26.bat`, prerequisites/toolchain/troubleshooting aligned with `DOCS/SBOM.md`. |
 | 2026-04-01 | Cursor Agent | Composer | **Settings V1 parity slice:** `updateDisplayName` on profiles; `AccountSessionInfo`; `SettingsScreen` rename dialog, last played, `BuildConfig` version, tick/save cadence, test sound; `GameScreen`/`ArteriaApp` wiring; `FakeProfileRepository` updated; `ARCHITECTURE`/`SBOM`/`master_settings_suggestions_doc.md`; `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Cursor Agent | Composer | **Herblore + Scavenging:** `HerbloreData.kt` (8 potions, 1× `HarvestingData` herb each via `inputItems`), `ScavengingData.kt` (8 salvage tiers); `SkillDataRegistry`; docs `CLAUDE` / `ARCHITECTURE` / `README`. |
+| 2026-03-31 | Cursor Agent | Composer | **Transfer script + JDK:** `gradlew.bat` strips `.cursor`/`redhat.java` `JAVA_HOME`, scans Eclipse Adoptium + Microsoft `jdk-*`, **removes PATH java fallback** (was still Cursor JRE). `build-apk-for-transfer.ps1` resolves same JDK + `gradlew --stop` before build. `CLAUDE.md` gotcha updated. |
+| 2026-03-31 | Cursor Agent | Composer | **Transfer script + JDK:** `gradlew.bat` strips `.cursor`/`redhat.java` `JAVA_HOME`, scans Eclipse Adoptium + Microsoft `jdk-*`, removes PATH `java` fallback; `build-apk-for-transfer.ps1` resolves JDK + `gradlew --stop`. `CLAUDE.md` gotcha updated. |
+| 2026-03-31 | Cursor Agent | Composer | **Windows / Cursor JDK:** `gradlew.bat` preamble drops `JAVA_HOME` when `bin\jlink.exe` missing (fixes AGP `JdkImageTransform` using Red Hat JRE); falls back to `%ProgramFiles%\Java\jdk-21.0.10` then `jdk-26` / `jdk-21`. `build-with-jdk26.bat` runs `--stop` then `--no-daemon`. `CLAUDE.md` Windows gotcha line. |
 | 2026-03-31 | Cursor Agent | Composer | **In-app What's New v1.3.0:** `ChangelogScreen.kt` new top `APP_CHANGELOG` entry (six skills, Coming Soon dialog, DB v2/offline audit, transactional saves, background tick sim, custom bottom bar); `app/build.gradle.kts` `versionName` **1.3.0**, `versionCode` **2**. |
 | 2026-04-01 | Cursor Agent | Composer | **Harvesting** skill content: `HarvestingData.kt` (8 gather nodes, items + XP aligned with `LoggingData`); wired in `SkillDataRegistry`; `CLAUDE.md` skill-add note; `:app:compileDebugKotlin` green. |
 | 2026-03-31 | Cursor Agent | Composer | Docs: `ARCHITECTURE.md` (snapshot + Screen UI row), `CLAUDE.md` (skill flow, Key Files, Game State), `README.md` (feature + diagram line) for Coming Soon skill modal. |
@@ -100,6 +103,10 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-03-31:** **build-apk-for-transfer + jlink:** `gradlew.bat` no longer falls back to `java` on PATH when no JDK found (PATH was still Red Hat JRE). Added Eclipse Adoptium + Microsoft `jdk-*` scan; strip `JAVA_HOME` if path contains `.cursor` or `redhat.java`. `build-apk-for-transfer.ps1` resolves JDK the same way, sets `JAVA_HOME`/`Path`, runs `gradlew --stop` before assemble.
+
+**2026-03-31:** **Gradle jlink / Cursor JRE:** Root `gradlew.bat` now clears `JAVA_HOME` when `%JAVA_HOME%\bin\jlink.exe` is absent, then picks `%ProgramFiles%\Java\jdk-21.0.10` / `jdk-26` / `jdk-21` if present. `build-with-jdk26.bat` runs `gradlew --stop` then builds with `--no-daemon` so AGP `JdkImageTransform` does not keep using a Red Hat JRE path.
 
 **2026-04-01:** **Herblore + Scavenging:** `HerbloreData.kt` (brews from `flax_bundle` … `star_herb`); `ScavengingData.kt` (junk heap → echo dump, logging-aligned XP/times). Registry + `CLAUDE.md` (`SkillAction` / skill-add task / Key Files), `ARCHITECTURE.md`, `README.md` Skills UX.
 
