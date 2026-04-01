@@ -83,12 +83,15 @@ fun GameScreen(
     val offlineReport by gameViewModel.offlineReport.collectAsStateWithLifecycle()
     val activeRandomEvent by gameViewModel.activeRandomEvent.collectAsStateWithLifecycle()
     val achievements by gameViewModel.achievements.collectAsStateWithLifecycle()
+    val companions by gameViewModel.companions.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var expandedSkillId by remember { mutableStateOf<SkillId?>(null) }
     var comingSoonSkillId by remember { mutableStateOf<SkillId?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     var showChronicle by remember { mutableStateOf(false) }
+    var showEquipment by remember { mutableStateOf(false) }
+    var showCompanions by remember { mutableStateOf(false) }
 
     // Track recent level-ups for the Hub screen (1g)
     val recentLevelUps = remember { mutableStateListOf<Pair<SkillId, Int>>() }
@@ -116,9 +119,13 @@ fun GameScreen(
         }
     }
 
-    // Close settings, coming-soon dialog, chronicle, or skill detail (settings takes priority)
+    // Close overlays in reverse priority: settings > companions > equipment > chronicle > dialogs > detail
     BackHandler(enabled = showSettings) { showSettings = false }
-    BackHandler(enabled = showChronicle && !showSettings) { showChronicle = false }
+    BackHandler(enabled = showCompanions && !showSettings) { showCompanions = false }
+    BackHandler(enabled = showEquipment && !showSettings && !showCompanions) { showEquipment = false }
+    BackHandler(enabled = showChronicle && !showSettings && !showEquipment && !showCompanions) {
+        showChronicle = false
+    }
     BackHandler(enabled = comingSoonSkillId != null && !showSettings) {
         comingSoonSkillId = null
     }
@@ -160,6 +167,41 @@ fun GameScreen(
         ChronicleScreen(
             achievements = achievements,
             onBack = { showChronicle = false },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(bgBrush),
+        )
+        return
+    }
+
+    // Equipment overlay — full-screen, sits above game content
+    if (showEquipment) {
+        val currentState = gameState
+        val playerLevel = currentState?.skills?.values
+            ?.sumOf { com.arteria.game.core.skill.XPTable.levelForXp(it.xp) } ?: 1
+        EquipmentScreen(
+            equippedGear = currentState?.equippedGear ?: com.arteria.game.core.model.EquippedGear(),
+            playerLevel = playerLevel,
+            bank = currentState?.bank ?: emptyMap(),
+            onEquip = gameViewModel::equip,
+            onUnequip = gameViewModel::unequip,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(bgBrush),
+        )
+        return
+    }
+
+    // Companions overlay — full-screen, sits above game content
+    if (showCompanions) {
+        val currentState = gameState
+        val playerLevel = currentState?.skills?.values
+            ?.sumOf { com.arteria.game.core.skill.XPTable.levelForXp(it.xp) } ?: 1
+        CompanionsScreen(
+            ownedCompanions = companions,
+            playerLevel = playerLevel,
+            onSummon = gameViewModel::equipCompanion,
+            onDismiss = { gameViewModel.dismissCompanion() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(bgBrush),
@@ -268,6 +310,18 @@ fun GameScreen(
                             )
                         },
                         actions = {
+                            IconButton(onClick = { showEquipment = true }) {
+                                Text(
+                                    text = "⚔️",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
+                            IconButton(onClick = { showCompanions = true }) {
+                                Text(
+                                    text = "🐾",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                             IconButton(onClick = { showChronicle = true }) {
                                 Text(
                                     text = "🏆",

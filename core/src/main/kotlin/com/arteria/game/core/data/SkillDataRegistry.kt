@@ -20,6 +20,10 @@ object SkillDataRegistry {
         putAll(ScavengingData.actionRegistry)
         putAll(SmithingData.actionRegistry)
         putAll(CookingData.actionRegistry)
+        putAll(FarmingData.actionRegistry)
+        putAll(ThievingData.actionRegistry)
+        putAll(WoodworkingData.actionRegistry)
+        putAll(TailoringData.actionRegistry)
     }
 
     /** All known item definitions across every implemented skill, keyed by item id. */
@@ -32,19 +36,27 @@ object SkillDataRegistry {
         putAll(ScavengingData.items)
         putAll(SmithingData.items)
         putAll(CookingData.items)
+        putAll(FarmingData.items)
+        putAll(ThievingData.items)
+        putAll(WoodworkingData.items)
+        putAll(TailoringData.items)
     }
 
     /** Actions available for a given skill, in display order. */
     fun actionsForSkill(skillId: SkillId): List<SkillAction> = when (skillId) {
-        SkillId.MINING    -> MiningData.actions
-        SkillId.LOGGING   -> LoggingData.actions
-        SkillId.FISHING   -> FishingData.actions
-        SkillId.HARVESTING -> HarvestingData.actions
-        SkillId.SCAVENGING -> ScavengingData.actions
-        SkillId.SMITHING  -> SmithingData.actions
-        SkillId.HERBLORE  -> HerbloreData.actions
-        SkillId.COOKING   -> CookingData.actions
-        else              -> emptyList()
+        SkillId.MINING       -> MiningData.actions
+        SkillId.LOGGING      -> LoggingData.actions
+        SkillId.FISHING      -> FishingData.actions
+        SkillId.HARVESTING   -> HarvestingData.actions
+        SkillId.SCAVENGING   -> ScavengingData.actions
+        SkillId.SMITHING     -> SmithingData.actions
+        SkillId.HERBLORE     -> HerbloreData.actions
+        SkillId.COOKING      -> CookingData.actions
+        SkillId.FARMING      -> FarmingData.actions
+        SkillId.THIEVING     -> ThievingData.actions
+        SkillId.WOODWORKING  -> WoodworkingData.actions
+        SkillId.TAILORING    -> TailoringData.actions
+        else                 -> emptyList()
     }
 
     /** True when this skill has at least one trainable action in the registry. */

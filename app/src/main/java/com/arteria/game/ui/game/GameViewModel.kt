@@ -5,11 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arteria.game.core.data.AchievementRegistry
+import com.arteria.game.core.data.CompanionRegistry
+import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.engine.TickEngine
 import com.arteria.game.core.model.AchievementProgress
 import com.arteria.game.core.model.ActiveRandomEvent
 import com.arteria.game.core.model.AchievementCondition
+import com.arteria.game.core.model.CompanionState
+import com.arteria.game.core.model.EquipmentSlots
+import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.RandomEventRegistry
@@ -30,9 +35,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -181,6 +189,57 @@ class GameViewModel(
                 it.copy(skills = updatedSkills)
             }
         }
+    }
+
+    /** All companions from the registry, summoned state derived from activeCompanionId. */
+    val companions: StateFlow<List<CompanionState>> = _gameState
+        .map { state ->
+            val activeId = state?.activeCompanionId
+            CompanionRegistry.all.map { c ->
+                CompanionState(companionId = c.id, isSummoned = c.id == activeId)
+            }
+        }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly, emptyList())
+
+    fun equip(itemId: String) {
+        val equipment = EquipmentRegistry.getById(itemId) ?: return
+        _gameState.update { state ->
+            state?.let {
+                val gear = it.equippedGear
+                val updated = when (equipment.slot) {
+                    EquipmentSlots.WEAPON.id -> gear.copy(weapon = itemId)
+                    EquipmentSlots.TOOL.id -> gear.copy(tool = itemId)
+                    EquipmentSlots.ARMOR.id -> gear.copy(armor = itemId)
+                    EquipmentSlots.ACCESSORY.id -> gear.copy(accessory = itemId)
+                    else -> gear
+                }
+                it.copy(equippedGear = updated)
+            }
+        }
+    }
+
+    fun unequip(slotId: String) {
+        _gameState.update { state ->
+            state?.let {
+                val gear = it.equippedGear
+                val updated = when (slotId) {
+                    EquipmentSlots.WEAPON.id -> gear.copy(weapon = null)
+                    EquipmentSlots.TOOL.id -> gear.copy(tool = null)
+                    EquipmentSlots.ARMOR.id -> gear.copy(armor = null)
+                    EquipmentSlots.ACCESSORY.id -> gear.copy(accessory = null)
+                    else -> gear
+                }
+                it.copy(equippedGear = updated)
+            }
+        }
+    }
+
+    fun equipCompanion(companionId: String) {
+        _gameState.update { state -> state?.copy(activeCompanionId = companionId) }
+    }
+
+    fun dismissCompanion() {
+        _gameState.update { state -> state?.copy(activeCompanionId = null) }
     }
 
     private fun startTickLoop() {

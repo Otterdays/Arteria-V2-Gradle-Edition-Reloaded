@@ -1,5 +1,6 @@
 package com.arteria.game.data.game
 
+import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.skill.SkillId
@@ -33,12 +34,21 @@ class GameRepository(
 
         val bank = bankEntities.associate { it.itemId to it.quantity }
 
+        val equippedGear = EquippedGear(
+            weapon = meta?.equippedWeapon,
+            tool = meta?.equippedTool,
+            armor = meta?.equippedArmor,
+            accessory = meta?.equippedAccessory,
+        )
+
         return GameState(
             profileId = profileId,
             skills = skills,
             bank = bank,
             lastSaveTimestamp = meta?.lastSaveTimestamp ?: System.currentTimeMillis(),
             lastOfflineTickAppliedAt = meta?.lastOfflineTickAppliedAt ?: 0L,
+            equippedGear = equippedGear,
+            activeCompanionId = meta?.activeCompanionId,
         )
     }
 
@@ -73,6 +83,11 @@ class GameRepository(
                     profileId = state.profileId,
                     lastSaveTimestamp = System.currentTimeMillis(),
                     lastOfflineTickAppliedAt = state.lastOfflineTickAppliedAt,
+                    equippedWeapon = state.equippedGear.weapon,
+                    equippedTool = state.equippedGear.tool,
+                    equippedArmor = state.equippedGear.armor,
+                    equippedAccessory = state.equippedGear.accessory,
+                    activeCompanionId = state.activeCompanionId,
                 ),
             )
         }

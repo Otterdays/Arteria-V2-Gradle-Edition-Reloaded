@@ -57,6 +57,78 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.5.0",
+        date = "2026-04-01",
+        tag = "SKILLS",
+        tagEmoji = "🎪",
+        tagColor = ArteriaPalette.BalancedEnd,
+        changes = listOf(
+            "4 new playable skills — Farming (8 crop tiers), Thieving (8 pickpocket tiers), " +
+                "Woodworking (crafts from Logging materials), Tailoring (crafts from Harvesting materials)",
+            "Equipment system live — ⚔️ button in TopAppBar opens gear slots; " +
+                "equip weapons, tools, armor, and accessories that boost XP and skill performance",
+            "Companions system live — 🐾 button opens companion roster; " +
+                "summon from 11 familiars across 5 rarities for passive XP and resource bonuses",
+            "XP multipliers apply in real-time — equipped gear and active companion bonuses " +
+                "calculated per tick in TickEngine for all skills",
+            "Gear persisted — equipped slots saved to Room `game_meta` table (DB migration v3)",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.4.5",
+        date = "2026-04-01",
+        tag = "RELEASE",
+        tagEmoji = "📌",
+        tagColor = ArteriaPalette.Gold,
+        changes = listOf(
+            "Version alignment — Settings About, README release badge, and this What's New list " +
+                "match `versionName` **1.4.5** / `versionCode` **7** in `app/build.gradle.kts`",
+            "Skills screen tablet layout — width-based column count (2–5) and centered max width " +
+                "so skill cards stay readable on large screens",
+            "Shared `PanelBackHeader` — consistent back affordance on Changelog, Open Source, and Credits",
+            "Skills crossover chips — FlowRow + compact labels so multi-target skills (e.g. Logging) " +
+                "don't break the grid",
+            "Chronicle / achievements — deeper registry and refreshed Chronicle UI (categories, " +
+                "rarity, progress)",
+            "Native skills playbook — `DOCS/SKILLS_EXPANSION_NATIVE.md` kept current with roster and " +
+                "implementation status",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.4.3",
+        date = "2026-04-01",
+        tag = "POLISH",
+        tagEmoji = "✨",
+        tagColor = ArteriaPalette.AccentWeb,
+        changes = listOf(
+            "What's New screen polish — staggered entry animations (160ms per card), tag emoji badges, " +
+                "left accent stripes (tag-colored), glass highlight, improved spacing",
+            "Interactive border color animation on card tap (tag color reveal)",
+            "Premium typography — larger headers, Cinzel font on version labels",
+            "Accessibility: respects reduce-motion setting; all colors from design tokens",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.4.2",
+        date = "2026-04-01",
+        tag = "QoL",
+        tagEmoji = "⚡",
+        tagColor = ArteriaPalette.VoidAccent,
+        changes = listOf(
+            "Achievement system: 18 achievements across 6 categories (Combat, Gathering, Crafting, Exploration, Mastery, Prestige), " +
+                "with 🏆 icon in TopAppBar",
+            "Bank enhancements: search + 4-mode sort (type/name/quantity/rarity) + withdraw presets",
+            "Haptics: tactile feedback on training start/stop and achievement unlocks",
+            "Random Events: 6 weighted events (tick-triggered dialog), adds game narrative",
+            "Equipment/Gear system: 4 slots (head/body/hands/feet), 19 items with stat modifiers, " +
+                "EquipmentScreen with drag-to-equip flow",
+            "Companions/Familiars: 11 summonable companions, 5 rarities, passive skill bonuses, " +
+                "CompanionsScreen with rarity filters",
+            "Prestige/Ascension system: reset progression to gain 6 permanent perks (XP multiplier, " +
+                "resource boost, etc.), PrestigeScreen with ascend flow confirmation",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.4.1",
         date = "2026-03-31",
         tag = "DOCS",

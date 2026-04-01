@@ -46,7 +46,7 @@
 
 **Product · status**
 
-[![App version](https://img.shields.io/badge/release-1.4.1-FF6B35?style=for-the-badge)](app/build.gradle.kts)
+[![App version](https://img.shields.io/badge/release-1.5.0-FF6B35?style=for-the-badge)](app/build.gradle.kts)
 [![Platform](https://img.shields.io/badge/Android-16_%28API_36%29-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
 [![Material 3](https://img.shields.io/badge/UI-Material_3-6750A4?style=for-the-badge)](https://m3.material.io/)
 [![Status](https://img.shields.io/badge/Status-Phase_5_slice-FF6B35?style=for-the-badge)](DOCS/ROADMAP.md)

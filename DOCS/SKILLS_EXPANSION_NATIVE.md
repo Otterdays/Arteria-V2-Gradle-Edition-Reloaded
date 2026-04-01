@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). |
 | 2026-04-01 | Cursor Agent | Composer | Initial **SKILLS_EXPANSION_NATIVE.md**: V1 design sources → V2 native playbook; roster vs implementation; vertical-slice steps; synergy/UI deferrals; cross-links to bundled V1 DOCU. |
 | 2026-04-01 | Cascade | SWE-1.5 | Added **Section 7**: Prioritized skill expansion recommendations; skill split proposals (Firemaking → Bonfire Craft, Runecrafting → Glyph Inscription); implementation phases; synergy opportunities. |
 | 2026-04-01 | opencode | qwen3.6-plus-free | **Section 9**: New skill recommendations (Gemcutting, Salvaging, Jewelcrafting); economy loop analysis; checklist status audit; game mode integration notes; v1.5.0 feature hooks. |
@@ -19,6 +20,8 @@
 > **Purpose:** Give contributors a single place to understand how **skill roster expansion** works in **Gradle V2 (Kotlin / `:core` / Room)** and how to use **bundled V1 docs** for *content and UX intent* without copying RN/Expo implementation detail literally.  
 > **Audience:** Implementers, designers, and AI agents extending trainable skills.  
 > **Last updated:** 2026-04-01
+
+**`[AMENDED 2026-04-01]:`** **Shipped app version** for player-facing parity is **1.4.5** — keep in sync with `app/build.gradle.kts` (`versionName` / `versionCode`), the top entry in `ChangelogScreen.kt` → `APP_CHANGELOG`, and the README release badge.
 
 ---
 

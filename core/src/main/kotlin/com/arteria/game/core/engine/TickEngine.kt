@@ -1,5 +1,9 @@
 package com.arteria.game.core.engine
 
+import com.arteria.game.core.data.CompanionRegistry
+import com.arteria.game.core.data.EquipmentRegistry
+import com.arteria.game.core.model.CompanionBonus
+import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.SkillAction
@@ -11,6 +15,35 @@ import com.arteria.game.core.skill.XPTable
 object TickEngine {
     /** Default wall-clock cap for offline catch-up (one day). */
     const val DEFAULT_MAX_OFFLINE_MS: Long = 24L * 60 * 60 * 1000L
+
+    /**
+     * Computes the combined XP multiplier from equipped gear for the given skill.
+     * Each equipped item contributes its globalXpMultiplier and any per-skill boost.
+     */
+    private fun gearXpMultiplier(gear: EquippedGear, skillId: SkillId): Double {
+        var multiplier = 1.0
+        listOfNotNull(gear.weapon, gear.tool, gear.armor, gear.accessory).forEach { itemId ->
+            val equip = EquipmentRegistry.getById(itemId) ?: return@forEach
+            multiplier *= equip.globalXpMultiplier
+            val boost = equip.skillBoosts[skillId] ?: 0.0
+            multiplier *= (1.0 + boost)
+        }
+        return multiplier
+    }
+
+    /**
+     * Computes the XP multiplier from the active companion for the given skill.
+     * Only XpBoost bonuses affect XP. Others (OfflineEfficiency, BankCapacity, ResourceBoost)
+     * are handled elsewhere or reserved for future work.
+     */
+    private fun companionXpMultiplier(activeCompanionId: String?, skillId: SkillId): Double {
+        val companion = activeCompanionId?.let { CompanionRegistry.getById(it) } ?: return 1.0
+        return when (val bonus = companion.passiveBonus) {
+            is CompanionBonus.XpBoost ->
+                if (bonus.skillId == null || bonus.skillId == skillId) bonus.multiplier else 1.0
+            else -> 1.0
+        }
+    }
 
     fun processTick(
         state: GameState,
@@ -50,6 +83,9 @@ object TickEngine {
                 continue
             }
 
+            val xpMultiplier = gearXpMultiplier(state.equippedGear, skillId) *
+                companionXpMultiplier(state.activeCompanionId, skillId)
+
             var progressMs = skill.actionProgressMs + deltaMs
             var xp = skill.xp
             var tickXp = 0.0
@@ -71,8 +107,9 @@ object TickEngine {
                 }
 
                 progressMs -= action.actionTimeMs
-                xp += action.xpPerAction
-                tickXp += action.xpPerAction
+                val earnedXp = action.xpPerAction * xpMultiplier
+                xp += earnedXp
+                tickXp += earnedXp
 
                 if (action.resourceId != null) {
                     resourcesGained[action.resourceId] =

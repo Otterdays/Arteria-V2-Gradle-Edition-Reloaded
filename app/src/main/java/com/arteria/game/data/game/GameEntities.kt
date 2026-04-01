@@ -25,5 +25,12 @@ data class GameMetaEntity(
     val lastSaveTimestamp: Long,
     /** Set when offline simulation runs on cold start; 0 if never applied. */
     val lastOfflineTickAppliedAt: Long = 0L,
+    // Equipped gear slots (null = nothing equipped in that slot)
+    val equippedWeapon: String? = null,
+    val equippedTool: String? = null,
+    val equippedArmor: String? = null,
+    val equippedAccessory: String? = null,
+    /** Active companion id (null = no companion summoned). */
+    val activeCompanionId: String? = null,
 )
 

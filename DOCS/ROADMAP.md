@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **v1.4.5 release hygiene:** `versionName` **1.4.5** / `versionCode` **7** in `app/build.gradle.kts`; README release shield; `ChangelogScreen` `APP_CHANGELOG` top card; Settings About matches build. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.1 docs hygiene:** What's New + `versionName` **1.4.1** / `versionCode` **4**; policy in `SCRATCHPAD` + `CLAUDE.md` — handoffs pair with `ChangelogScreen` `APP_CHANGELOG` prepend. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.0 pointer:** Phase 5 / UX slice shipped as app **1.4.0** — Hub tab, Herblore + Scavenging, settings parity, expanded `SkillId` roster; see `ChangelogScreen` `APP_CHANGELOG`. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 marked `[DONE]`: `GameDatabase` v2 migration + tests; `lastOfflineTickAppliedAt` pipeline. |
