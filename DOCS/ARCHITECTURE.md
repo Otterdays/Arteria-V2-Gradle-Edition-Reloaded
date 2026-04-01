@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | Settings backlog: DataStore `UserPreferencesRepository`, `MainActivity` `ArteriaRoot` (theme/system + reduce motion locals), light `ArteriaTheme` + space brush; `GameViewModel` + `UserPreferencesProvider`, offline cap/report prefs; `GameRepository` reset/delete; profile `deleteById`; OSS/Credits overlays; danger zone; verification snapshot amended. |
 | 2026-04-01 | Cursor Agent | Composer | Settings V1 parity slice: profile rename (`ProfileDao.updateDisplayName`, `AccountViewModel`), `AccountSessionInfo` + `GameScreen`/`ArteriaApp` wiring; `SettingsScreen` About (`BuildConfig`), tick/save cadence copy, test sound; verification snapshot line amended. |
 | 2026-04-01 | Cursor Agent | Composer | Content note: `HerbloreData` / `ScavengingData` + registry wiring; verification snapshot amended for harvest→herb craft chain. |
 | 2026-03-31 | Cursor Agent | Composer | Doc sync: verification snapshot + Screen UI row for `SkillComingSoonDialog`, `SkillDataRegistry.isSkillImplemented`, `OfflineReportDialog` overlay pattern. |
@@ -32,6 +33,7 @@
 - **`[AMENDED 2026-04-01]:`** **Skill content:** `HerbloreData` brews potions using `HarvestingData` item ids in `SkillAction.inputItems` (consumed in `TickEngine` from bank); `ScavengingData` is pure gathering like `LoggingData`.
 - **Settings flow:** full-screen overlay, back-dismissible, with nested `ChangelogScreen` overlay from “What's New”.
 - **`[AMENDED 2026-04-01]:`** **Settings parity slice:** profile display name edit (Room `profiles.displayName`), last-played line, `BuildConfig` version string, informational tick/save cadence (`GameViewModel` constants), **Test sound** (`ToneGenerator`); rename + session refresh flow: `ArteriaApp` holds `AccountSessionInfo`, `GameScreen` passes `onRenameDisplayName` / `onRefreshAccountSession`.
+- **`[AMENDED 2026-04-01]:`** **Settings expansion:** `user_preferences` DataStore (`ThemePreference`, motion, haptics, sound, offline report, soundscapes stub, DEBUG offline-cap bypass); `LocalUserPreferencesRepository`, `LocalArteriaDarkSpace`, `LocalReduceMotion`; `GameRepository.resetProgressForProfile` / `deleteAllGameDataForProfile`; `ProfileDao.deleteById`; nested **Open source notices** (`ARTERIA_OSS_NOTICES`) + **Credits** screens; danger dialogs (reset progress, delete profile).
 - **Doc canon reference:** `DOCS/SUMMARY.md` section `Doc Canon (single source rules)`.
 - **`[AMENDED 2026-03-31]:`** `GameDatabase` is **version 2** (`MIGRATION_1_2`); `game_meta` carries `lastOfflineTickAppliedAt` for offline catch-up audit. See `DOCS/SBOM.md` Android Targets table.
 
@@ -81,6 +83,8 @@ Android OS
 |------|------------|----------------|
 | Entry/UI host | `app/src/main/java/com/arteria/game/MainActivity.kt` | Application entry; Compose host setup |
 | Navigation/UI composition | `app/src/main/java/com/arteria/game/ui/ArteriaApp.kt` | Builds `NavHost`, wires VM to screens, route transitions |
+| App entry / theme locals | `app/src/main/java/com/arteria/game/MainActivity.kt` | `ArteriaRoot`: collects DataStore prefs, resolves light/dark + reduce motion, provides `LocalUserPreferencesRepository` / `LocalArteriaDarkSpace` / `LocalReduceMotion`, wraps `ArteriaTheme` |
+| User preferences (DataStore) | `app/src/main/java/com/arteria/game/data/preferences/*` | `UserPreferences`, `UserPreferencesRepository` (`user_preferences` file), `UserPreferencesProvider` adapter for `GameViewModel` |
 | Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (Skills/Bank/Combat tabs), `TopAppBar` (account name + settings gear), `SettingsScreen` overlay (full-screen, back-dismissible), `OfflineReportDialog` / `SkillComingSoonDialog` (modal dialogs over hub), `SkillDetailScreen` (in-tab push for implemented skills) |
 | UI Components | `app/src/main/java/com/arteria/game/ui/components/*` | `DockingBackground` (animated space backdrop), `DockingAccountCard` (glitch materialization + timeline sidebar + ambient selected-state), `DockingGlitch` (7-layer Canvas animation system: `GlitchMaterializeOverlay`, `AmbientScanOverlay`, `EntryAnimations`, `AmbientAnimations`, `GlitchLayout`), `DockingChrome` (title block, lore footer, new account slot) |
 | State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations; **`[AMENDED 2026-04-01]:`** `resolveSession`, `updateDisplayName` for in-game settings rename |

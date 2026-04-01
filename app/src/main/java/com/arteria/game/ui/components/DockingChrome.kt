@@ -13,10 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arteria.game.ui.theme.ArteriaContentColors
 import com.arteria.game.ui.theme.ArteriaPalette
 
 @Composable
@@ -40,14 +40,14 @@ fun DockingTitleBlock(
         Text(
             text = title,
             style = MaterialTheme.typography.displaySmall,
-            color = ArteriaPalette.TextPrimary,
+            color = ArteriaContentColors.primary(),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 4.dp),
         )
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFC8CDDC).copy(alpha = 0.55f),
+            color = ArteriaContentColors.secondary().copy(alpha = 0.75f),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp),
         )
@@ -79,7 +79,7 @@ fun DockingNewAccountSlot(
         Text(
             text = "New account",
             style = MaterialTheme.typography.bodySmall,
-            color = ArteriaPalette.LuminarEnd.copy(alpha = 0.75f),
+            color = ArteriaContentColors.secondary(),
             modifier = Modifier.padding(top = 4.dp),
         )
     }
@@ -92,7 +92,7 @@ fun DockingLoreFooter(
     Text(
         text = "\"Every Anchor is a weight against the Unraveling. The cosmos keeps count.\"\n— Blibbertooth, probably",
         style = MaterialTheme.typography.bodySmall,
-        color = Color(0xFFC8CDDC).copy(alpha = 0.28f),
+        color = ArteriaContentColors.muted().copy(alpha = 0.55f),
         textAlign = TextAlign.Center,
         modifier = modifier
             .fillMaxWidth()

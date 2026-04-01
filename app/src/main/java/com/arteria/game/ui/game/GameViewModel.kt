@@ -11,8 +11,11 @@ import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.SkillAction
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.model.TickResult
+import com.arteria.game.BuildConfig
 import com.arteria.game.core.skill.SkillId
 import com.arteria.game.data.game.GameRepository
+import com.arteria.game.data.preferences.UserPreferences
+import com.arteria.game.data.preferences.UserPreferencesProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,6 +35,7 @@ import kotlinx.coroutines.withContext
 class GameViewModel(
     private val profileId: String,
     private val repository: GameRepository,
+    private val userPreferencesProvider: UserPreferencesProvider,
     /** If false, skips the periodic tick/save loop (used in unit tests). */
     private val enableTickLoop: Boolean = true,
 ) : ViewModel() {
@@ -65,23 +69,29 @@ class GameViewModel(
 
     init {
         viewModelScope.launch {
+            val prefs = userPreferencesProvider.current()
             val loaded = repository.loadGameState(profileId)
 
             val now = nowProvider()
             val elapsed = now - loaded.lastSaveTimestamp
             if (elapsed > TICK_INTERVAL_MS * 2) {
+                val maxOffline = offlineCapMs(prefs)
                 val offlineResult = withContext(Dispatchers.Default) {
                     TickEngine.processOffline(
                         state = loaded,
                         elapsedMs = elapsed,
                         tickIntervalMs = TICK_INTERVAL_MS,
                         actionRegistry = actionRegistry,
+                        maxOfflineMs = maxOffline,
                     )
                 }
                 val afterOffline = offlineResult.state.copy(lastOfflineTickAppliedAt = now)
                 _gameState.value = afterOffline
                 repository.saveGameState(afterOffline)
-                if (offlineResult.xpGained.isNotEmpty() || offlineResult.resourcesGained.isNotEmpty()) {
+                val showReport = prefs.showOfflineReport
+                if (showReport &&
+                    (offlineResult.xpGained.isNotEmpty() || offlineResult.resourcesGained.isNotEmpty())
+                ) {
                     _offlineReport.value = offlineResult
                 }
             } else {
@@ -94,8 +104,23 @@ class GameViewModel(
         }
     }
 
+    private fun offlineCapMs(prefs: UserPreferences): Long =
+        if (BuildConfig.DEBUG && prefs.debugRemoveOfflineCap) {
+            Long.MAX_VALUE
+        } else {
+            TickEngine.DEFAULT_MAX_OFFLINE_MS
+        }
+
     fun dismissOfflineReport() {
         _offlineReport.value = null
+    }
+
+    /** Reload persisted state after settings “reset progress” (same profile id). */
+    fun reloadAfterReset() {
+        viewModelScope.launch {
+            _offlineReport.value = null
+            _gameState.value = repository.loadGameState(profileId)
+        }
     }
 
     fun startTraining(skillId: SkillId, actionId: String) {
@@ -177,12 +202,16 @@ class GameViewModel(
         const val TICK_INTERVAL_MS = 600L
         const val SAVE_INTERVAL_MS = 10_000L
 
-        fun factory(profileId: String, repository: GameRepository): ViewModelProvider.Factory =
+        fun factory(
+            profileId: String,
+            repository: GameRepository,
+            userPreferencesProvider: UserPreferencesProvider,
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
-                        return GameViewModel(profileId, repository) as T
+                        return GameViewModel(profileId, repository, userPreferencesProvider) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }

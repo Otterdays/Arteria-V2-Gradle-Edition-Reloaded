@@ -6,6 +6,8 @@ import com.arteria.game.data.game.GameDao
 import com.arteria.game.data.game.GameMetaEntity
 import com.arteria.game.data.game.GameRepository
 import com.arteria.game.data.game.SkillStateEntity
+import com.arteria.game.data.preferences.UserPreferences
+import com.arteria.game.data.preferences.UserPreferencesProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -24,6 +26,8 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+
+private val testPrefsProvider = UserPreferencesProvider { UserPreferences.DEFAULT }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameViewModelTest {
@@ -44,6 +48,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel(
             profileId = "p1",
             repository = repository,
+            userPreferencesProvider = testPrefsProvider,
             enableTickLoop = false,
         )
         waitUntilLoaded(viewModel)
@@ -89,6 +94,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel(
             profileId = "p2",
             repository = repository,
+            userPreferencesProvider = testPrefsProvider,
             enableTickLoop = false,
         )
         waitUntilLoaded(viewModel)
@@ -127,6 +133,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel(
             profileId = "p3",
             repository = repository,
+            userPreferencesProvider = testPrefsProvider,
             enableTickLoop = true,
         )
         viewModel.setNowProviderForTests { testScheduler.currentTime }
@@ -165,6 +172,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel(
             profileId = "p4",
             repository = repository,
+            userPreferencesProvider = testPrefsProvider,
             enableTickLoop = true,
         )
         viewModel.setNowProviderForTests { testScheduler.currentTime }
@@ -224,6 +232,14 @@ private class FakeGameDao(
     override suspend fun upsertGameMeta(meta: GameMetaEntity) {
         metaByProfile[meta.profileId] = meta
         upsertGameMetaCalls += 1
+    }
+
+    override suspend fun deleteSkillStatesForProfile(profileId: String) {
+        skillStates.removeAll { it.profileId == profileId }
+    }
+
+    override suspend fun deleteGameMetaForProfile(profileId: String) {
+        metaByProfile.remove(profileId)
     }
 }
 

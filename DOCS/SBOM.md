@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | Settings backlog: `androidx.datastore:datastore-preferences:1.2.0`; app prefs + theme/motion/audio/haptics/offline-report; OSS/Credits screens; reset/delete profile + `GameDao` deletes; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `:app:compileDebugKotlin` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | `:app` `buildFeatures.buildConfig = true` for `BuildConfig.VERSION_NAME` / `VERSION_CODE` in Settings About row (no new Maven coordinates). |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Dependency sweep (no-bump pass): verified live Gradle declarations and held current pins; only newer options are alpha/nightly channels for core AndroidX/AGP lines. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 close: documented `GameDatabase` schema v2 + `MIGRATION_1_2` in Android Targets appendix row. |
@@ -97,6 +98,7 @@
 | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | `2.10.0` | `2.11.0-alpha` |
 | `implementation` | `androidx.lifecycle:lifecycle-viewmodel-compose` | `2.10.0` | `2.11.0-alpha` |
 | `implementation` | `androidx.activity:activity-compose` | `1.13.0` | `1.13.0` (current stable) |
+| `implementation` | `androidx.datastore:datastore-preferences` | `1.2.0` | `verify on monthly pass` |
 | `implementation` | `androidx.compose:compose-bom` | `platform(2026.03.01)` | `next monthly BOM` |
 | `implementation` | `androidx.compose.ui:ui` | `via BOM` | `via next BOM` |
 | `implementation` | `androidx.compose.ui:ui-graphics` | `via BOM` | `via next BOM` |

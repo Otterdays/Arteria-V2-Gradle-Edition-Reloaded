@@ -75,11 +75,23 @@ fun ArteriaBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Skills tab — XP ring when training
+            // Hub tab — anchor icon, slightly larger as focal point (1a, 2a, 2d)
             NavTab(
                 selected = selectedTab == 0,
-                label = "Skills",
+                label = "Hub",
                 onClick = { onTabSelected(0) },
+                modifier = Modifier.weight(1f),
+            ) { tint ->
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)) {
+                    AnchorIcon(color = tint, modifier = Modifier.size(24.dp))
+                }
+            }
+
+            // Skills tab — XP ring when training
+            NavTab(
+                selected = selectedTab == 1,
+                label = "Skills",
+                onClick = { onTabSelected(1) },
                 modifier = Modifier.weight(1f),
             ) { tint ->
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.size(38.dp)) {
@@ -96,9 +108,9 @@ fun ArteriaBottomBar(
 
             // Bank tab — gold dot badge when crafting is affordable
             NavTab(
-                selected = selectedTab == 1,
+                selected = selectedTab == 2,
                 label = "Bank",
-                onClick = { onTabSelected(1) },
+                onClick = { onTabSelected(2) },
                 modifier = Modifier.weight(1f),
             ) { tint ->
                 Box(modifier = Modifier.size(38.dp)) {
@@ -121,9 +133,9 @@ fun ArteriaBottomBar(
 
             // Combat tab
             NavTab(
-                selected = selectedTab == 2,
+                selected = selectedTab == 3,
                 label = "Combat",
-                onClick = { onTabSelected(2) },
+                onClick = { onTabSelected(3) },
                 modifier = Modifier.weight(1f),
             ) { tint ->
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.size(38.dp)) {
@@ -320,6 +332,56 @@ private fun VaultIcon(color: Color, modifier: Modifier = Modifier) {
                 cap = StrokeCap.Round,
             )
         }
+    }
+}
+
+/** Anchor — hub / command center icon (2a, 2d) */
+@Composable
+private fun AnchorIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val stroke = w * 0.09f
+
+        // Vertical shank: top ring center → bottom
+        drawLine(
+            color = color,
+            start = Offset(w * 0.5f, h * 0.22f),
+            end = Offset(w * 0.5f, h * 0.88f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+
+        // Top ring (small circle)
+        drawCircle(
+            color = color,
+            radius = w * 0.11f,
+            center = Offset(w * 0.5f, h * 0.14f),
+            style = Stroke(width = stroke),
+        )
+
+        // Crossbar (horizontal)
+        drawLine(
+            color = color,
+            start = Offset(w * 0.25f, h * 0.44f),
+            end = Offset(w * 0.75f, h * 0.44f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+
+        // Left fluke (curved arm)
+        val leftFluke = Path().apply {
+            moveTo(w * 0.14f, h * 0.68f)
+            quadraticTo(w * 0.14f, h * 0.90f, w * 0.5f, h * 0.88f)
+        }
+        drawPath(leftFluke, color, style = Stroke(width = stroke, cap = StrokeCap.Round))
+
+        // Right fluke (curved arm)
+        val rightFluke = Path().apply {
+            moveTo(w * 0.86f, h * 0.68f)
+            quadraticTo(w * 0.86f, h * 0.90f, w * 0.5f, h * 0.88f)
+        }
+        drawPath(rightFluke, color, style = Stroke(width = stroke, cap = StrokeCap.Round))
     }
 }
 

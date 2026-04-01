@@ -3,7 +3,10 @@ package com.arteria.game.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -43,6 +46,19 @@ object ArteriaPalette {
     val LuminarEnd = Color(0xFF5B8CFF)
     val VoidAccent = Color(0xFF9B59B6)
     val BalancedEnd = Color(0xFF2ECC71)
+
+    /** Combat pillar accent (skills grid / detail headers). */
+    val CombatAccent = Color(0xFFE74C3C)
+
+    /** Day / follow-system light shell (game + settings + docking). */
+    val LightSpaceTop = Color(0xFFE4E9F5)
+    val LightSpaceMid = Color(0xFFD4DCEF)
+    val LightSpaceBottom = Color(0xFFC8D4E8)
+    val LightBgCard = Color(0xFFF2F4FA)
+    val LightTextPrimary = Color(0xFF1A1F2E)
+    val LightTextSecondary = Color(0xFF4A5168)
+    val LightTextMuted = Color(0xFF6B7288)
+    val LightBorder = Color(0xFFC5CDDF)
 }
 
 private val ArteriaDarkScheme = darkColorScheme(
@@ -62,6 +78,25 @@ private val ArteriaDarkScheme = darkColorScheme(
     onSurfaceVariant = ArteriaPalette.TextSecondary,
     outline = ArteriaPalette.Border,
     outlineVariant = ArteriaPalette.Divider,
+)
+
+private val ArteriaLightScheme = lightColorScheme(
+    primary = Color(0xFF2A6BB5),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD3E4FA),
+    onPrimaryContainer = Color(0xFF0D2847),
+    secondary = Color(0xFFB45309),
+    onSecondary = Color.White,
+    tertiary = Color(0xFF6D28D9),
+    onTertiary = Color.White,
+    background = ArteriaPalette.LightSpaceTop,
+    onBackground = ArteriaPalette.LightTextPrimary,
+    surface = ArteriaPalette.LightBgCard,
+    onSurface = ArteriaPalette.LightTextPrimary,
+    surfaceVariant = Color(0xFFE8ECF5),
+    onSurfaceVariant = ArteriaPalette.LightTextSecondary,
+    outline = ArteriaPalette.LightBorder,
+    outlineVariant = Color(0xFFD8DEEA),
 )
 
 /**
@@ -126,10 +161,38 @@ private val ArteriaTypography = Typography(
 )
 
 @Composable
-fun ArteriaTheme(content: @Composable () -> Unit) {
+fun ArteriaTheme(
+    darkTheme: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     MaterialTheme(
-        colorScheme = ArteriaDarkScheme,
+        colorScheme = if (darkTheme) ArteriaDarkScheme else ArteriaLightScheme,
         typography = ArteriaTypography,
         content = content,
+    )
+}
+
+@Composable
+fun rememberArteriaSpaceBackgroundBrush(useDarkSpace: Boolean): Brush {
+    return remember(useDarkSpace) {
+        arteriaSpaceBackgroundBrush(useDarkSpace)
+    }
+}
+
+fun arteriaSpaceBackgroundBrush(useDarkSpace: Boolean): Brush = if (useDarkSpace) {
+    Brush.verticalGradient(
+        colors = listOf(
+            ArteriaPalette.BgDeepSpaceTop,
+            ArteriaPalette.BgDeepSpaceMid,
+            ArteriaPalette.BgDeepSpaceBottom,
+        ),
+    )
+} else {
+    Brush.verticalGradient(
+        colors = listOf(
+            ArteriaPalette.LightSpaceTop,
+            ArteriaPalette.LightSpaceMid,
+            ArteriaPalette.LightSpaceBottom,
+        ),
     )
 }

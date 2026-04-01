@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.arteria.game.core.data.MiningData
+import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.model.TickResult
 import com.arteria.game.ui.theme.ArteriaPalette
 import java.text.NumberFormat
@@ -93,8 +93,7 @@ fun OfflineReportDialog(
                     )
                     Spacer(Modifier.height(4.dp))
                     for ((itemId, qty) in report.resourcesGained) {
-                        val name = MiningData.items[itemId]?.name
-                            ?: itemId.replace("_", " ").replaceFirstChar { it.uppercase() }
+                        val name = SkillDataRegistry.itemName(itemId)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

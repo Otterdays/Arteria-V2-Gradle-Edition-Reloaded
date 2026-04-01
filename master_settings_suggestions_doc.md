@@ -44,13 +44,13 @@ Use this to sequence work; mark complete when shipped and tested.
 
 - [x] **P0 — Shell:** Settings entry, back navigation, section list layout (matches `ArteriaPalette` / typography rules).
 - [x] **P1 — About + Account:** Version/build, profile card, switch account (existing), nickname edit if in scope.
-- [ ] **P2 — Appearance:** Theme mode (min: follow system + app dark); extend to named themes when tokens exist.
-- [ ] **P3 — Audio:** Master mute + SFX toggle + test sound (no engine dependency beyond stub OK) — **test sound only** shipped 2026-04-01.
-- [ ] **P4 — Accessibility:** Reduce motion + haptics master toggle + TalkBack labels on new controls.
-- [ ] **P5 — Gameplay info:** Read-only offline cap / save cadence copy (no false promises) — **tick/save cadence** line shipped 2026-04-01; offline cap copy still open.
-- [ ] **P6 — Economy links:** Lumina/login bonus entry points when those systems exist in V2.
-- [ ] **P7 — Danger zone:** Delete local / reset with confirmation + optional export/import placeholders.
-- [ ] **P8 — Notifications:** Per-channel toggles once push/local scheduling exists.
+- [x] **P2 — Appearance:** Theme **Dark / Follow system** + light shell (`ArteriaTheme`, space brush, Docking). Named themes (Sepia/Midnight) still open.
+- [x] **P3 — Audio:** Master sound toggle + test sound; per-SFX/music split still open.
+- [x] **P4 — Accessibility:** Reduce motion (system animator scale + app toggle) + haptics master; full TalkBack audit still open.
+- [x] **P5 — Gameplay info:** Offline cap copy + tick/save cadence; monetization-aligned cap doc still open.
+- [ ] **P6 — Economy links:** Stub row “planned”; real Lumina/login bonus when systems exist.
+- [x] **P7 — Danger zone:** Reset progress + delete profile (confirmed); export/import not shipped.
+- [ ] **P8 — Notifications:** Disabled stub row; real channels when infra exists.
 
 ---
 
@@ -70,16 +70,16 @@ Legend: **Must** = P0–P2 core UX · **Should** = next slice · **Could** = bac
 
 *Sources: `THEMING.md`, `TECHNICAL_USER_MANUAL.md`*
 
-- [ ] **Must** — Theme mode: System / Dark (minimum); extend to Light / Sepia / Midnight when palette tokens defined
-- [ ] **Should** — Semantic palette only in UI (no ad-hoc hex in settings screens)
-- [ ] **Should** — Status bar / system nav contrast follows chosen theme
+- [x] **Must** — Theme mode: **Follow system** + **Dark** (light shell when system light); Sepia/Midnight still open
+- [x] **Should** — Semantic palette only in UI (`ArteriaPalette` / `ArteriaContentColors`)
+- [ ] **Should** — Status bar / system nav contrast follows chosen theme (edge-to-edge follow-up)
 - [ ] **Could** — Font scale / display size hook (or defer to system-only)
 - [ ] **Could** — High-contrast or colorblind-friendly palette variant
 
 ### 4.3 Gameplay & simulation
 
-- [ ] **Should** — Offline progression cap explained (informational; align with `TRUTH_DOCTRINE` / monetization doc when written)
-- [ ] **Should** — WYWA / offline report: auto-show vs suppressed / summary-only (match product decision)
+- [x] **Should** — Offline progression cap explained (uses `TickEngine.DEFAULT_MAX_OFFLINE_MS` / 24h in UI copy)
+- [x] **Should** — WYWA / offline report: show vs suppress (DataStore `showOfflineReport`)
 - [ ] **Could** — Explicit “collect & continue” vs auto-apply offline gains (V1 RN emphasized explicit apply — decide V2 policy)
 - [x] **Could** — Tick / save cadence transparency (Settings shows interval seconds from `GameViewModel` constants)
 - [ ] **Could** — Combat auto/offline AI preferences (when combat engine ships)
@@ -89,10 +89,10 @@ Legend: **Must** = P0–P2 core UX · **Should** = next slice · **Could** = bac
 
 *Sources: `TECHNICAL_USER_MANUAL.md`, `IMPROVEMENTS.md`, `CURRENT_IMPROVEMENTS.md`*
 
-- [ ] **Should** — Master volume or global mute
+- [x] **Should** — Master volume or global mute (boolean **Sound** toggle)
 - [ ] **Should** — Split: SFX vs music (when music exists)
 - [ ] **Could** — Per-category: tick SFX, UI SFX, ambient
-- [ ] **Could** — Idle soundscapes toggle + honest “Coming soon” sublabel if loops absent
+- [x] **Could** — Idle soundscapes toggle + honest “Coming soon” sublabel if loops absent
 - [x] **Should** — Test sound button
 - [ ] **Could** — Per-skill / per-soundscape sliders when asset IDs exist
 
@@ -100,7 +100,7 @@ Legend: **Must** = P0–P2 core UX · **Should** = next slice · **Could** = bac
 
 *Sources: `IMPROVEMENTS.md`, `DOCS/ROADMAP.md` Phase 7*
 
-- [ ] **Should** — Global haptics on/off
+- [x] **Should** — Global haptics on/off (level-up haptic wired)
 - [ ] **Could** — Per-event class: level-up, rare drop, bank sell, errors (document mapping table in code or doc appendix)
 - [ ] **Could** — Intensity / “light tap only”
 
@@ -108,8 +108,8 @@ Legend: **Must** = P0–P2 core UX · **Should** = next slice · **Could** = bac
 
 *Sources: `DOCS/ROADMAP.md` Phase 7*
 
-- [ ] **Should** — Reduce motion: respect `android.settings` / Compose accessibility + optional in-app override
-- [ ] **Could** — Docking / glitch “lite” mode or intensity slider
+- [x] **Should** — Reduce motion: `ANIMATOR_DURATION_SCALE` + in-app toggle; Docking/Glitch respect
+- [ ] **Could** — Docking / glitch “lite” mode or intensity slider (beyond on/off)
 - [ ] **Could** — Starfield / nebula / particle density (when parameters exist)
 
 ### 4.7 Notifications
@@ -145,24 +145,24 @@ Legend: **Must** = P0–P2 core UX · **Should** = next slice · **Could** = bac
 
 ### 4.11 Data, privacy, danger zone
 
-- [ ] **Should** — Delete local data / reset profile (with confirmation + irreversibility copy)
+- [x] **Should** — Delete local data / reset profile (with confirmation + irreversibility copy)
 - [ ] **Could** — Export save
 - [ ] **Could** — Import save
 - [ ] **Could** — Clear cache / resync
 - [ ] **Could** — Analytics off / crash reporting off (if SDKs added)
-- [ ] **Should** — Open-source licenses / third-party notices (often under About)
+- [x] **Should** — Open-source licenses / third-party notices (`OpenSourceNoticesScreen` + `ARTERIA_OSS_NOTICES`)
 
 ### 4.12 About & meta
 
 - [x] **Must** — App version / build string (`BuildConfig.VERSION_NAME` / `VERSION_CODE`, `buildConfig = true`)
-- [ ] **Should** — What’s New / changelog entry point
-- [ ] **Could** — Credits / attribution
+- [x] **Should** — What’s New / changelog entry point
+- [x] **Could** — Credits / attribution (`CreditsScreen`)
 - [ ] **Could** — External links: docs, roadmap, support
 - [ ] **Could** — Easter egg entry (discoverability policy TBD)
 
 ### 4.13 Developer / advanced
 
-- [ ] **Could** — Debug-only panel: FPS, tick debug, offline sim helpers (guard with `BuildConfig.DEBUG` or equivalent)
+- [x] **Could** — Debug-only panel: **Remove offline time cap** (`BuildConfig.DEBUG` + `debugRemoveOfflineCap`)
 
 ### 4.14 Accessibility & localization
 
@@ -205,6 +205,7 @@ When checking a box above, confirm:
 
 | Date | Change |
 |------|--------|
+| 2026-04-01 | **Backlog wave:** DataStore prefs, theme/motion/haptics/sound/offline-report, OSS+Credits, reset/delete profile, DEBUG offline cap, `TickEngine.DEFAULT_MAX_OFFLINE_MS`, `MainActivity` locals. |
 | 2026-04-01 | Shipped parity slice: profile rename (`Room` + `AccountViewModel`), last played, About/version, tick/save cadence copy, test sound; wired via `AccountSessionInfo` / `GameScreen` / `ArteriaApp`. |
 | — | Initial master design + checklist (converted from mega-list) |
 

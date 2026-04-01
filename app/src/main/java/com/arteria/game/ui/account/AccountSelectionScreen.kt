@@ -49,7 +49,9 @@ import com.arteria.game.ui.components.DockingLoreFooter
 import com.arteria.game.ui.components.DockingNewAccountSlot
 import com.arteria.game.ui.components.DockingTitleBlock
 import com.arteria.game.ui.components.dockingGradientForIndex
+import com.arteria.game.ui.theme.ArteriaContentColors
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalReduceMotion
 
 data class AccountSlot(
     val id: String,
@@ -104,7 +106,7 @@ fun AccountSelectionScreen(
                 Text(
                     text = "No accounts yet.\nTap below to create your first slot.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ArteriaPalette.TextSecondary,
+                    color = ArteriaContentColors.secondary(),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,16 +134,21 @@ fun AccountSelectionScreen(
                     }
                     // Terminal node + new account slot
                     item {
+                        val reduceMotion = LocalReduceMotion.current
                         val termPulse = rememberInfiniteTransition(label = "term")
-                        val termAlpha = termPulse.animateFloat(
-                            initialValue = 0.28f,
-                            targetValue = 0.55f,
-                            animationSpec = infiniteRepeatable(
-                                tween(2400, easing = LinearEasing),
-                                RepeatMode.Reverse,
-                            ),
-                            label = "term_a",
-                        ).value
+                        val termAlpha = if (reduceMotion) {
+                            0.42f
+                        } else {
+                            termPulse.animateFloat(
+                                initialValue = 0.28f,
+                                targetValue = 0.55f,
+                                animationSpec = infiniteRepeatable(
+                                    tween(2400, easing = LinearEasing),
+                                    RepeatMode.Reverse,
+                                ),
+                                label = "term_a",
+                            ).value
+                        }
 
                         Row(
                             modifier = Modifier
@@ -191,7 +198,7 @@ fun AccountSelectionScreen(
                     containerColor = ArteriaPalette.AccentPrimary,
                     contentColor = Color.White,
                     disabledContainerColor = ArteriaPalette.BgCard,
-                    disabledContentColor = ArteriaPalette.TextMuted,
+                    disabledContentColor = ArteriaContentColors.muted(),
                 ),
             ) {
                 Text("Enter timeline")
@@ -204,7 +211,7 @@ fun AccountSelectionScreen(
                 Text(
                     text = "What's New",
                     style = MaterialTheme.typography.bodySmall,
-                    color = ArteriaPalette.TextMuted,
+                    color = ArteriaContentColors.muted(),
                 )
             }
 

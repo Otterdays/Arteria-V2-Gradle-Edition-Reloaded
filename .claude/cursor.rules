@@ -31,7 +31,7 @@ Windows-compatible paths/commands (forward slashes in code).
 **Init:** Read `SUMMARY → SBOM → SCRATCHPAD → STYLE_GUIDE` before coding
 **Update:** Update status docs (SCRATCHPAD, SBOM) during work, not after. Checkpoint after every 3–5 tool calls or after completing each subtask
 **Errors:** Log to `debugs/`, max 3 fix attempts. If still stuck, stop — report what was tried and what failed in SCRATCHPAD, then notify the user
-**Handoff:** Update SCRATCHPAD with state + next steps. If approaching context limit, write a `## MID-TASK CHECKPOINT [DATE]` block with what's done, in progress, and next action — then notify the user
+**Handoff:** Update SCRATCHPAD with state + next steps. If approaching context limit, write a `## MID-TASK CHECKPOINT [DATE]` block with what's done, in progress, and next action — then notify the user. **Player-facing ship:** prepend `ChangelogScreen.kt` `APP_CHANGELOG`, bump `app/build.gradle.kts` `versionCode`/`versionName`, README release badge — see `CLAUDE.md` Doc Update Rules
 **Security:** Audit packages before install, update SBOM immediately
 **Cross-reference:** `CLAUDE.md` is the detailed execution guide for this same policy set. If phrasing differs,
 apply the stricter safety/process constraint and annotate doc clarifications with `[AMENDED YYYY-MM-DD]:`.

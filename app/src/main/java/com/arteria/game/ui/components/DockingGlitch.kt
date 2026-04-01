@@ -133,14 +133,22 @@ data class AmbientAnimations(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-fun rememberEntryAnimations(entryIndex: Int): EntryAnimations {
+fun rememberEntryAnimations(entryIndex: Int, reduceMotion: Boolean = false): EntryAnimations {
     val materialize = remember { Animatable(0f) }
     val scanSweep = remember { Animatable(0f) }
     val glitchIntensity = remember { Animatable(1f) }
     val jitterPhase = remember { Animatable(0f) }
     val badgeScale = remember { Animatable(0f) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(reduceMotion, entryIndex) {
+        if (reduceMotion) {
+            materialize.snapTo(1f)
+            scanSweep.snapTo(1f)
+            glitchIntensity.snapTo(0f)
+            jitterPhase.snapTo(80f)
+            badgeScale.snapTo(1f)
+            return@LaunchedEffect
+        }
         delay(entryIndex * 160L)
         coroutineScope {
             launch {
@@ -179,8 +187,16 @@ fun rememberEntryAnimations(entryIndex: Int): EntryAnimations {
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-fun rememberAmbientAnimations(active: Boolean): AmbientAnimations {
+fun rememberAmbientAnimations(active: Boolean, reduceMotion: Boolean = false): AmbientAnimations {
     if (!active) return AmbientAnimations.IDLE
+    if (reduceMotion) {
+        return AmbientAnimations(
+            scanY = 0.5f,
+            borderPulse = 0.5f,
+            nodeScale = 1.08f,
+            connectorFlow = 0f,
+        )
+    }
 
     val inf = rememberInfiniteTransition(label = "ambient_glow")
 

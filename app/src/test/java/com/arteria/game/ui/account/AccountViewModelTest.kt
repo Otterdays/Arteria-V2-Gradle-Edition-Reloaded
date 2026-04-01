@@ -110,6 +110,14 @@ private class FakeProfileRepository : ProfileRepository {
     override suspend fun getActiveProfile(): ProfileRecord? =
         data.value.firstOrNull { it.isActive }
 
+    override suspend fun deleteProfile(profileId: String): Result<Unit> {
+        if (data.value.none { it.id == profileId }) {
+            return Result.failure(IllegalStateException("Profile not found."))
+        }
+        data.value = data.value.filter { it.id != profileId }
+        return Result.success(Unit)
+    }
+
     override suspend fun updateDisplayName(profileId: String, displayName: String): Result<Unit> {
         val trimmed = displayName.trim()
         if (data.value.none { it.id == profileId }) {

@@ -32,7 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.arteria.game.ui.theme.ArteriaPalette
 
 // ─────────────────────────────────────────────────────────────────────────
-//  Version history data
+//  Version history data — keep first entry + app/build.gradle.kts in sync
+//  when shipping (see CLAUDE.md / SCRATCHPAD release hygiene).
 // ─────────────────────────────────────────────────────────────────────────
 
 data class ChangelogEntry(
@@ -44,6 +45,35 @@ data class ChangelogEntry(
 )
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
+    ChangelogEntry(
+        version = "1.4.1",
+        date = "2026-03-31",
+        tag = "DOCS",
+        tagColor = ArteriaPalette.Gold,
+        changes = listOf(
+            "v1.4.1 — Settings About and What's New match this build number",
+            "Release notes: this screen is the player-facing history; new ships get a new top card + version bump",
+            "Contributors: when you update SCRATCHPAD for shipped work, also refresh this list and " +
+                "app/build.gradle.kts version (see CLAUDE.md Doc Update Rules)",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.4.0",
+        date = "2026-04-01",
+        tag = "HUB",
+        tagColor = ArteriaPalette.AccentPrimary,
+        changes = listOf(
+            "Hub as your home tab — dismissible offline gains card keeps flow instead of a blocking dialog",
+            "Active training panel, quick stats, next-milestone nudge, smart bank-based suggestion, " +
+                "recent level-up cards, and shortcuts into Skills",
+            "Fourth bottom tab with Anchor hub icon — Skills, Bank, and Combat follow",
+            "Herblore and Scavenging — new trainable lines with actions, XP, and bank inputs/outputs",
+            "Settings parity: edit display name, last played, About version, tick/save cadence notes, " +
+                "test sound",
+            "Skill roster expanded toward V1 parity (incl. Cosmic pillar); unwired skills still use " +
+                "Coming Soon",
+        ),
+    ),
     ChangelogEntry(
         version = "1.3.0",
         date = "2026-04-01",

@@ -117,14 +117,15 @@ MainActivity (ComponentActivity)
 
 ### Skill system
 
-**16 skills across 4 pillars** (defined in `SkillId.kt`):
+**41 skills across 5 pillars** (defined in `SkillId.kt`):
 
-| Pillar | Skills |
-|--------|--------|
-| GATHERING | Mining, Logging, Fishing, Harvesting, Scavenging |
-| CRAFTING | Smithing, Cooking, Runecrafting, Herblore, Forging |
-| COMBAT | Attack, Strength, Defence, Hitpoints |
-| SUPPORT | Agility, Wizardry |
+- **Gathering (7):** Mining, Logging, Fishing, Harvesting, Scavenging, Farming, Thieving
+- **Crafting (11):** Smithing, Cooking, Runecrafting, Herblore, Forging, Firemaking, Woodworking,
+  Tailoring, Fletching, Construction, Alchemy
+- **Combat (8):** Attack, Strength, Defence, Hitpoints, Ranged, Constitution, Sorcery, Slayer
+- **Support (10):** Agility, Wizardry, Exploration, Astrology, Summoning, Cleansing, Barter, Research,
+  Leadership, Resonance
+- **Cosmic (5):** Chaos Theory, Aether Weaving, Void Walking, Celestial Binding, Chronomancy
 
 `SkillId.byPillar(pillar)` returns all skills for a given pillar. Each `SkillId` carries `displayName`, `pillar`, and `description`.
 
@@ -221,7 +222,7 @@ Branches: `feature/` · `fix/` · `chore/` · `docs/`
 | Text | `TextPrimary`, `TextSecondary`, `TextMuted` |
 | Accent | `AccentPrimary`, `AccentHover`, `AccentWeb`, `Gold`, `GoldDim` |
 | Surfaces | `Border`, `Divider` |
-| Special | `LuminarEnd` (blue), `VoidAccent` (purple), `BalancedEnd` (green) — used for pillar gradients |
+| Special | `LuminarEnd` (blue), `VoidAccent` (purple), `BalancedEnd` (green), `CombatAccent` (red) — pillar UI + gradients |
 
 ### Typography — `MaterialTheme.typography.*` only
 
@@ -300,6 +301,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 - **Content docs** (`ARCHITECTURE.md`, `README.md`, `STYLE_GUIDE.md`) — only amend when explicitly instructed.
 - **SCRATCHPAD.md:** Compact at 500 lines. Always update Agent Credits + Last Actions + Next Action at session end.
 - **SBOM.md:** Update immediately when any package is added or removed.
+- **What's New + version (player-facing):** When you ship user-visible or handoff-worthy changes and touch `SCRATCHPAD.md`, also **prepend** a card to `APP_CHANGELOG` in `ui/components/ChangelogScreen.kt`, bump `versionCode` + `versionName` in `app/build.gradle.kts`, and refresh the README release badge so Settings **About** / **What's New** stay truthful.
 
 ---
 
@@ -344,6 +346,7 @@ Before considering any task complete:
 - [ ] Error handling at coroutine boundaries and I/O
 - [ ] No silent exception swallowing
 - [ ] Docs updated: `SCRATCHPAD.md` Agent Credits + Last Actions
+- [ ] If the change is worth telling players: `ChangelogScreen.kt` `APP_CHANGELOG` + `versionName`/`versionCode` + README badge
 - [ ] `SBOM.md` updated if any dependency changed
 - [ ] Nothing deleted from any doc
 - [ ] Commit message follows Conventional Commits format
@@ -364,12 +367,13 @@ Before considering any task complete:
 | `navigation/NavRoutes.kt` | Route constants + `gamePath()` helper |
 | `ui/theme/ArteriaTheme.kt` | Material 3 theme, `ArteriaPalette`, Cinzel typography |
 | `core/model/GameModels.kt` | Domain data classes (SkillState, GameState, TickResult…) |
-| `core/skill/SkillId.kt` | All 16 skills + 4 pillars enum |
+| `core/skill/SkillId.kt` | All 41 skills + 5 pillars enum (`SkillPillar` includes `COSMIC`) |
 | `core/engine/TickEngine.kt` | Offline tick simulation |
 | `core/data/SkillDataRegistry.kt` | Skill actions/items; `isSkillImplemented`, `actionsForSkill` |
 | `core/data/HerbloreData.kt` | Potions from `HarvestingData` inputs (`inputItems`) |
 | `core/data/ScavengingData.kt` | Salvage gathering tiers |
 | `ui/game/SkillComingSoonDialog.kt` | Modal when a skill has no registry actions yet |
+| `ui/components/ChangelogScreen.kt` | What's New — `APP_CHANGELOG` (prepend on release); keep in sync with `versionName` |
 | `data/game/GameRepository.kt` | Safe game state load/save (transactional) |
 | `data/profile/ProfileRepository.kt` | Profile persistence interface |
 | `DOCS/SCRATCHPAD.md` | **Read this first** — live session state |

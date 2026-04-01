@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalReduceMotion
 import kotlin.random.Random
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -144,9 +145,10 @@ fun DockingAccountCard(
 ) {
     val shape = RoundedCornerShape(12.dp)
 
+    val reduceMotion = LocalReduceMotion.current
     // Animation systems
-    val entry = rememberEntryAnimations(entryIndex)
-    val ambient = rememberAmbientAnimations(active = selected)
+    val entry = rememberEntryAnimations(entryIndex, reduceMotion = reduceMotion)
+    val ambient = rememberAmbientAnimations(active = selected, reduceMotion = reduceMotion)
     val layout = rememberGlitchLayout(seed = displayName.hashCode() + entryIndex)
 
     // Hex ghost text — frozen random string per card

@@ -9,6 +9,9 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
 
 object TickEngine {
+    /** Default wall-clock cap for offline catch-up (one day). */
+    const val DEFAULT_MAX_OFFLINE_MS: Long = 24L * 60 * 60 * 1000L
+
     fun processTick(
         state: GameState,
         deltaMs: Long,
@@ -122,7 +125,7 @@ object TickEngine {
         elapsedMs: Long,
         tickIntervalMs: Long,
         actionRegistry: Map<String, SkillAction>,
-        maxOfflineMs: Long = 24 * 60 * 60 * 1000L,
+        maxOfflineMs: Long = DEFAULT_MAX_OFFLINE_MS,
     ): TickResult {
         val capped = elapsedMs.coerceAtMost(maxOfflineMs)
         val tickCount = capped / tickIntervalMs

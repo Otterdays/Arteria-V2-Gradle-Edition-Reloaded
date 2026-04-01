@@ -69,4 +69,9 @@ class RoomProfileRepository(
             check(rows > 0) { "Profile not found." }
         }
     }
+
+    override suspend fun deleteProfile(profileId: String): Result<Unit> = runCatching {
+        val rows = dao.deleteById(profileId)
+        check(rows > 0) { "Profile not found." }
+    }
 }

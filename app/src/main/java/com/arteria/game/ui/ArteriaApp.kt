@@ -135,6 +135,18 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
                     accountViewModel.resolveSession(profileId)?.let { accountSession = it }
                 },
                 onRenameDisplayName = { newName -> accountViewModel.updateDisplayName(profileId, newName) },
+                onResetGameProgress = {
+                    runCatching { gameRepository.resetProgressForProfile(profileId) }
+                },
+                onDeleteProfileEverywhere = {
+                    runCatching {
+                        gameRepository.deleteAllGameDataForProfile(profileId)
+                        repository.deleteProfile(profileId).getOrThrow()
+                    }
+                },
+                onProfileFullyDeleted = {
+                    navController.popBackStack(NavRoutes.AccountSelect, inclusive = false)
+                },
                 onBackToAccounts = {
                     navController.popBackStack(NavRoutes.AccountSelect, inclusive = false)
                 },

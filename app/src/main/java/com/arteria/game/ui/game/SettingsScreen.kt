@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -26,6 +28,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,18 +40,34 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arteria.game.BuildConfig
+import com.arteria.game.core.engine.TickEngine
+import com.arteria.game.data.preferences.ThemePreference
+import com.arteria.game.data.preferences.UserPreferences
 import com.arteria.game.ui.account.AccountSessionInfo
 import com.arteria.game.ui.components.ChangelogScreen
+import com.arteria.game.ui.components.CreditsScreen
+import com.arteria.game.ui.components.OpenSourceNoticesScreen
+import com.arteria.game.ui.theme.ArteriaContentColors
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalArteriaDarkSpace
+import com.arteria.game.ui.theme.LocalUserPreferencesRepository
+import com.arteria.game.ui.theme.rememberArteriaSpaceBackgroundBrush
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.launch
 
-// [TRACE: master_settings_suggestions_doc.md — V1 parity settings slice]
+// [TRACE: master_settings_suggestions_doc.md — settings backlog]
+
+private sealed class SettingsSubScreen {
+    data object None : SettingsSubScreen()
+    data object Changelog : SettingsSubScreen()
+    data object Licenses : SettingsSubScreen()
+    data object Credits : SettingsSubScreen()
+}
 
 @Composable
 fun SettingsScreen(
@@ -58,36 +78,66 @@ fun SettingsScreen(
     onBackToAccounts: () -> Unit,
     onRenameDisplayName: suspend (String) -> String?,
     onRenameSuccess: () -> Unit,
+    onResetGameProgress: suspend () -> Result<Unit>,
+    onAfterResetProgress: () -> Unit,
+    onDeleteProfileEverywhere: suspend () -> Result<Unit>,
+    onProfileDeleted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showChangelog by remember { mutableStateOf(false) }
+    val prefsRepo = LocalUserPreferencesRepository.current
+    val prefs by prefsRepo.userPreferences.collectAsStateWithLifecycle(UserPreferences.DEFAULT)
+    var subScreen by remember { mutableStateOf<SettingsSubScreen>(SettingsSubScreen.None) }
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var dangerError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val darkSpace = LocalArteriaDarkSpace.current
+    val bgBrush = rememberArteriaSpaceBackgroundBrush(darkSpace)
 
-    BackHandler(enabled = showChangelog) { showChangelog = false }
-
-    if (showChangelog) {
-        ChangelogScreen(onBack = { showChangelog = false }, modifier = modifier)
-        return
+    val backSubOrSelf: () -> Unit = {
+        when (subScreen) {
+            is SettingsSubScreen.None -> onBack()
+            else -> subScreen = SettingsSubScreen.None
+        }
     }
 
-    val bgBrush = Brush.verticalGradient(
-        colors = listOf(
-            ArteriaPalette.BgDeepSpaceTop,
-            ArteriaPalette.BgDeepSpaceMid,
-            ArteriaPalette.BgDeepSpaceBottom,
-        ),
-    )
+    BackHandler(onBack = backSubOrSelf)
+
+    when (subScreen) {
+        is SettingsSubScreen.Changelog -> {
+            ChangelogScreen(onBack = { subScreen = SettingsSubScreen.None }, modifier = modifier)
+            return
+        }
+        is SettingsSubScreen.Licenses -> {
+            OpenSourceNoticesScreen(onBack = { subScreen = SettingsSubScreen.None }, modifier = modifier)
+            return
+        }
+        is SettingsSubScreen.Credits -> {
+            CreditsScreen(onBack = { subScreen = SettingsSubScreen.None }, modifier = modifier)
+            return
+        }
+        is SettingsSubScreen.None -> { }
+    }
 
     val tickSeconds = tickIntervalMs / 1000f
     val saveSeconds = saveIntervalMs / 1000f
     val cadenceLine = "Ticks every ${tickSeconds}s while active; saves about every ${saveSeconds}s."
+    val offlineHours = TickEngine.DEFAULT_MAX_OFFLINE_MS / 3_600_000L
+    val offlineCapLine = "Offline catch-up is capped at about ${offlineHours}h of simulated time."
+
+    fun updatePrefs(block: (UserPreferences) -> UserPreferences) {
+        scope.launch { prefsRepo.update(block) }
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(bgBrush)
             .statusBarsPadding()
-            .padding(horizontal = 16.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
@@ -97,11 +147,11 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = backSubOrSelf) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = ArteriaPalette.TextSecondary,
+                    tint = ArteriaContentColors.secondary(),
                 )
             }
             Text(
@@ -111,122 +161,196 @@ fun SettingsScreen(
             )
         }
 
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, ArteriaPalette.Border, RoundedCornerShape(12.dp)),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+        dangerError?.let { err ->
+            Text(err, color = ArteriaPalette.GoldDim, style = MaterialTheme.typography.bodySmall)
+        }
+
+        settingsCard(title = "Profile") {
+            Text(
+                text = accountSession.displayName,
+                style = MaterialTheme.typography.headlineMedium,
+                color = ArteriaContentColors.primary(),
+            )
+            Text(
+                text = "Game mode · ${accountSession.gameMode}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaPalette.AccentHover,
+            )
+            Text(
+                text = "Last played · ${formatLastPlayed(accountSession.lastPlayedAtEpochMs)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.secondary(),
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { showRenameDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentPrimary),
             ) {
-                Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.TextMuted,
-                )
-                Text(
-                    text = accountSession.displayName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = ArteriaPalette.TextPrimary,
-                )
-                Text(
-                    text = "Game mode · ${accountSession.gameMode}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ArteriaPalette.AccentHover,
-                )
-                Text(
-                    text = "Last played · ${formatLastPlayed(accountSession.lastPlayedAtEpochMs)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ArteriaPalette.TextSecondary,
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { showRenameDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = ArteriaPalette.AccentPrimary,
-                    ),
+                Text("Edit display name")
+            }
+        }
+
+        settingsCard(title = "Appearance") {
+            Text("Theme", style = MaterialTheme.typography.bodyMedium, color = ArteriaContentColors.primary())
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val darkSel = prefs.themePreference == ThemePreference.DARK
+                TextButtonChip(label = "Dark", selected = darkSel) {
+                    updatePrefs { it.copy(themePreference = ThemePreference.DARK) }
+                }
+                TextButtonChip(
+                    label = "Follow system",
+                    selected = prefs.themePreference == ThemePreference.FOLLOW_SYSTEM,
                 ) {
-                    Text("Edit display name")
+                    updatePrefs { it.copy(themePreference = ThemePreference.FOLLOW_SYSTEM) }
                 }
             }
+            settingsSwitchRow(
+                title = "Reduce motion",
+                subtitle = "Less animation in menus and backgrounds",
+                checked = prefs.reduceMotion,
+                onCheckedChange = { v -> updatePrefs { it.copy(reduceMotion = v) } },
+            )
         }
 
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, ArteriaPalette.Border, RoundedCornerShape(12.dp)),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+        settingsCard(title = "Feedback") {
+            settingsSwitchRow(
+                title = "Haptic feedback",
+                subtitle = "Vibration on level-up (when supported)",
+                checked = prefs.hapticsEnabled,
+                onCheckedChange = { v -> updatePrefs { it.copy(hapticsEnabled = v) } },
+            )
+        }
+
+        settingsCard(title = "Gameplay") {
+            settingsSwitchRow(
+                title = "Show offline gains report",
+                subtitle = "Summary after time away",
+                checked = prefs.showOfflineReport,
+                onCheckedChange = { v -> updatePrefs { it.copy(showOfflineReport = v) } },
+            )
+            Text(
+                offlineCapLine,
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.muted(),
+            )
+        }
+
+        settingsCard(title = "Game") {
+            Text(
+                "Arteria Gradle Edition V2",
+                style = MaterialTheme.typography.bodyLarge,
+                color = ArteriaContentColors.primary(),
+            )
+            Text(
+                "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaContentColors.secondary(),
+            )
+            Text(
+                cadenceLine,
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.muted(),
+            )
+        }
+
+        settingsCard(title = "Audio") {
+            settingsSwitchRow(
+                title = "Sound",
+                subtitle = "Master toggle for game audio",
+                checked = prefs.soundEnabled,
+                onCheckedChange = { v -> updatePrefs { it.copy(soundEnabled = v) } },
+            )
+            settingsSwitchRow(
+                title = "Idle soundscapes",
+                subtitle = "Coming soon — preference saved; no audio yet",
+                checked = prefs.idleSoundscapesEnabled,
+                onCheckedChange = { v -> updatePrefs { it.copy(idleSoundscapesEnabled = v) } },
+            )
+            TestSoundButton(soundEnabled = prefs.soundEnabled)
+        }
+
+        settingsCard(title = "Notifications") {
+            settingsSwitchRow(
+                title = "Quest & daily reminders",
+                subtitle = "Requires notification permission (not wired yet)",
+                checked = false,
+                enabled = false,
+                onCheckedChange = { },
+            )
+        }
+
+        settingsCard(title = "Economy") {
+            Text(
+                "Lumina, shop, and login bonus — planned.",
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.muted(),
+            )
+        }
+
+        settingsCard(title = "About") {
+            OutlinedButton(
+                onClick = { subScreen = SettingsSubScreen.Changelog },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaContentColors.secondary()),
             ) {
-                Text(
-                    text = "Game",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.TextMuted,
-                )
-                Text(
-                    text = "Arteria Gradle Edition V2",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = ArteriaPalette.TextPrimary,
-                )
-                Text(
-                    text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ArteriaPalette.TextSecondary,
-                )
-                Text(
-                    text = cadenceLine,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ArteriaPalette.TextMuted,
+                Text("What's New")
+            }
+            OutlinedButton(
+                onClick = { subScreen = SettingsSubScreen.Licenses },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaContentColors.secondary()),
+            ) {
+                Text("Open source notices")
+            }
+            OutlinedButton(
+                onClick = { subScreen = SettingsSubScreen.Credits },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaContentColors.secondary()),
+            ) {
+                Text("Credits")
+            }
+        }
+
+        if (BuildConfig.DEBUG) {
+            settingsCard(title = "Debug") {
+                settingsSwitchRow(
+                    title = "Remove offline time cap",
+                    subtitle = "DEBUG: can simulate very long away times",
+                    checked = prefs.debugRemoveOfflineCap,
+                    onCheckedChange = { v -> updatePrefs { it.copy(debugRemoveOfflineCap = v) } },
                 )
             }
         }
 
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, ArteriaPalette.Border, RoundedCornerShape(12.dp)),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+        settingsCard(title = "Danger zone") {
+            Text(
+                "These actions cannot be undone.",
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaPalette.GoldDim,
+            )
+            OutlinedButton(
+                onClick = { showResetConfirm = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentHover),
             ) {
-                Text(
-                    text = "Audio",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.TextMuted,
-                )
-                TestSoundButton()
+                Text("Reset game progress")
+            }
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.GoldDim),
+            ) {
+                Text("Delete this profile")
             }
         }
 
         Spacer(Modifier.height(8.dp))
 
         OutlinedButton(
-            onClick = { showChangelog = true },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = ArteriaPalette.TextSecondary,
-            ),
-        ) {
-            Text("What's New")
-        }
-
-        OutlinedButton(
             onClick = onBackToAccounts,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = ArteriaPalette.AccentPrimary,
-            ),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentPrimary),
         ) {
             Text("Switch Account")
         }
@@ -243,6 +367,139 @@ fun SettingsScreen(
             },
         )
     }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            containerColor = ArteriaContentColors.cardSurface(),
+            title = { Text("Reset progress?", color = ArteriaContentColors.primary()) },
+            text = {
+                Text(
+                    "All skills, bank items, and training state for this profile will be wiped.",
+                    color = ArteriaContentColors.secondary(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            onResetGameProgress().fold(
+                                onSuccess = {
+                                    showResetConfirm = false
+                                    dangerError = null
+                                    onAfterResetProgress()
+                                },
+                                onFailure = { dangerError = it.message ?: "Reset failed." },
+                            )
+                        }
+                    },
+                ) { Text("Reset", color = ArteriaPalette.GoldDim) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) {
+                    Text("Cancel", color = ArteriaContentColors.secondary())
+                }
+            },
+        )
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            containerColor = ArteriaContentColors.cardSurface(),
+            title = { Text("Delete profile?", color = ArteriaContentColors.primary()) },
+            text = {
+                Text(
+                    "Removes this account and all saved game data. This cannot be undone.",
+                    color = ArteriaContentColors.secondary(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            onDeleteProfileEverywhere().fold(
+                                onSuccess = {
+                                    showDeleteConfirm = false
+                                    onProfileDeleted()
+                                },
+                                onFailure = { dangerError = it.message ?: "Delete failed." },
+                            )
+                        }
+                    },
+                ) { Text("Delete", color = ArteriaPalette.GoldDim) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel", color = ArteriaContentColors.secondary())
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun settingsCard(title: String, content: @Composable () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = ArteriaContentColors.cardSurface().copy(alpha = 0.94f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, ArteriaContentColors.border(), RoundedCornerShape(12.dp)),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaContentColors.muted(),
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+private fun settingsSwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyMedium, color = ArteriaContentColors.primary())
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = ArteriaContentColors.muted())
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = ArteriaPalette.AccentPrimary,
+                checkedTrackColor = ArteriaPalette.AccentPrimary.copy(alpha = 0.45f),
+            ),
+        )
+    }
+}
+
+@Composable
+private fun TextButtonChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = if (selected) ArteriaPalette.AccentPrimary else ArteriaContentColors.secondary(),
+        ),
+    ) {
+        Text(label)
+    }
 }
 
 @Composable
@@ -258,9 +515,9 @@ private fun RenameDisplayNameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = ArteriaPalette.BgCard,
-        titleContentColor = ArteriaPalette.TextPrimary,
-        textContentColor = ArteriaPalette.TextSecondary,
+        containerColor = ArteriaContentColors.cardSurface(),
+        titleContentColor = ArteriaContentColors.primary(),
+        textContentColor = ArteriaContentColors.secondary(),
         title = { Text("Display name", style = MaterialTheme.typography.titleMedium) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -276,10 +533,10 @@ private fun RenameDisplayNameDialog(
                         error?.let { Text(it, color = ArteriaPalette.GoldDim) }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = ArteriaPalette.TextPrimary,
-                        unfocusedTextColor = ArteriaPalette.TextPrimary,
+                        focusedTextColor = ArteriaContentColors.primary(),
+                        unfocusedTextColor = ArteriaContentColors.primary(),
                         focusedBorderColor = ArteriaPalette.AccentPrimary,
-                        unfocusedBorderColor = ArteriaPalette.Border,
+                        unfocusedBorderColor = ArteriaContentColors.border(),
                         cursorColor = ArteriaPalette.AccentHover,
                     ),
                     modifier = Modifier.fillMaxWidth(),
@@ -304,26 +561,29 @@ private fun RenameDisplayNameDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = ArteriaPalette.TextSecondary)
+                Text("Cancel", color = ArteriaContentColors.secondary())
             }
         },
     )
 }
 
 @Composable
-private fun TestSoundButton() {
+private fun TestSoundButton(soundEnabled: Boolean) {
     val context = LocalContext.current
     OutlinedButton(
         onClick = {
+            if (!soundEnabled) return@OutlinedButton
             runCatching {
                 val tg = ToneGenerator(AudioManager.STREAM_MUSIC, 80)
                 tg.startTone(ToneGenerator.TONE_PROP_BEEP, 160)
                 android.os.Handler(context.mainLooper).postDelayed({ tg.release() }, 220L)
             }
         },
+        enabled = soundEnabled,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = ArteriaPalette.TextSecondary,
+            contentColor = ArteriaContentColors.secondary(),
+            disabledContentColor = ArteriaContentColors.muted(),
         ),
     ) {
         Text("Test sound")

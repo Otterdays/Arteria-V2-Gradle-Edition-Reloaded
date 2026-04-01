@@ -84,5 +84,13 @@ private class FakeGameDao : GameDao {
     override suspend fun upsertGameMeta(meta: GameMetaEntity) {
         metaByProfile[meta.profileId] = meta
     }
+
+    override suspend fun deleteSkillStatesForProfile(profileId: String) {
+        skillStates.removeAll { it.profileId == profileId }
+    }
+
+    override suspend fun deleteGameMetaForProfile(profileId: String) {
+        metaByProfile.remove(profileId)
+    }
 }
 

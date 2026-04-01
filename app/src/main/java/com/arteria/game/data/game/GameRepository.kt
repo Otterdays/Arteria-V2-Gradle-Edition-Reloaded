@@ -77,5 +77,30 @@ class GameRepository(
             )
         }
     }
+
+    /** Removes all persisted rows for the profile (skills, bank, meta). */
+    suspend fun deleteAllGameDataForProfile(profileId: String) {
+        runInTransaction {
+            dao.deleteSkillStatesForProfile(profileId)
+            dao.clearBank(profileId)
+            dao.deleteGameMetaForProfile(profileId)
+        }
+    }
+
+    /** Wipes save data and writes a fresh default game state for the profile. */
+    suspend fun resetProgressForProfile(profileId: String) {
+        deleteAllGameDataForProfile(profileId)
+        val now = System.currentTimeMillis()
+        val freshSkills = SkillId.entries.associateWith { skillId -> SkillState(skillId = skillId) }
+        saveGameState(
+            GameState(
+                profileId = profileId,
+                skills = freshSkills,
+                bank = emptyMap(),
+                lastSaveTimestamp = now,
+                lastOfflineTickAppliedAt = 0L,
+            ),
+        )
+    }
 }
 

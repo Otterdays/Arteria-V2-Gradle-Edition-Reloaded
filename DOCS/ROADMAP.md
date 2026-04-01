@@ -4,6 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | Composer | **v1.4.1 docs hygiene:** What's New + `versionName` **1.4.1** / `versionCode` **4**; policy in `SCRATCHPAD` + `CLAUDE.md` — handoffs pair with `ChangelogScreen` `APP_CHANGELOG` prepend. |
+| 2026-03-31 | Cursor Agent | Composer | **v1.4.0 pointer:** Phase 5 / UX slice shipped as app **1.4.0** — Hub tab, Herblore + Scavenging, settings parity, expanded `SkillId` roster; see `ChangelogScreen` `APP_CHANGELOG`. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 marked `[DONE]`: `GameDatabase` v2 migration + tests; `lastOfflineTickAppliedAt` pipeline. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Progress checkpoint pass: checked off shipped items across Phases 1/3/4 and set next concrete target for Phase 5 vertical slice hardening. |
 | 2026-03-22 | Cursor Agent (Composer) | Cursor | Initial ROADMAP Phases 0–6 + source references. |
@@ -145,6 +147,8 @@ Phased plan for the **native** Android line. Game content and tone remain define
 **Exit criteria:** At least one vertical slice (e.g. Mining + Bank) playable end-to-end offline.
 
 `[IN PROGRESS 2026-03-31]:` Mining + Bank loop is present (`TickEngine`, `MiningData`, `GameViewModel`, `BankScreen`) and account->game routing is wired. Remaining to call this fully done: manual smoke checklist and explicit balancing/UX pass for the slice.
+
+**`[AMENDED 2026-03-31]:`** **App v1.4.0** bundles additional Phase 5–adjacent delivery: **Hub** command-center tab (inline offline summary, training panel, nudges), **Herblore** + **Scavenging** skill data in `SkillDataRegistry`, **settings parity** (rename, last played, About version, cadence copy, test sound), and **41-skill / 5-pillar** enum expansion with Coming Soon for unwired skills. Player-facing summary: `ChangelogScreen.kt` → `APP_CHANGELOG` entry **1.4.0**; `versionName` / `versionCode` in `app/build.gradle.kts`.
 
 ---
 

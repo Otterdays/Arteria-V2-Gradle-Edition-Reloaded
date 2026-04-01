@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +31,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,12 +54,39 @@ import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
 import java.text.NumberFormat
 
+// ─── Pillar colour palette (shared with SkillDetailScreen & HubScreen) ───────
+
 internal val pillarColor = mapOf(
     SkillPillar.GATHERING to ArteriaPalette.BalancedEnd,
     SkillPillar.CRAFTING  to ArteriaPalette.Gold,
-    SkillPillar.COMBAT    to Color(0xFFE74C3C),
+    SkillPillar.COMBAT to ArteriaPalette.CombatAccent,
     SkillPillar.SUPPORT   to ArteriaPalette.LuminarEnd,
+    SkillPillar.COSMIC    to ArteriaPalette.VoidAccent,
 )
+
+// ─── 3c. Crossover relationships (gathering feeds crafting, etc.) ─────────────
+
+internal val skillCrossover: Map<SkillId, List<SkillId>> = mapOf(
+    SkillId.MINING     to listOf(SkillId.SMITHING, SkillId.FORGING),
+    SkillId.LOGGING    to listOf(SkillId.WOODWORKING, SkillId.FIREMAKING, SkillId.FLETCHING),
+    SkillId.FISHING    to listOf(SkillId.COOKING),
+    SkillId.HARVESTING to listOf(SkillId.HERBLORE, SkillId.COOKING),
+    SkillId.SCAVENGING to listOf(SkillId.SMITHING, SkillId.ALCHEMY),
+    SkillId.SMITHING   to listOf(SkillId.FORGING),
+    SkillId.RUNECRAFTING to listOf(SkillId.SORCERY),
+    SkillId.HERBLORE   to listOf(SkillId.ALCHEMY),
+    SkillId.FLETCHING  to listOf(SkillId.RANGED),
+)
+
+// ─── 3f. Sort order ──────────────────────────────────────────────────────────
+
+internal enum class SkillSortOrder(val label: String) {
+    DEFAULT("Default"),
+    ACTIVE_FIRST("Active"),
+    LEVEL_DESC("Level ↓"),
+}
+
+// ─── Main screen ─────────────────────────────────────────────────────────────
 
 @Composable
 fun SkillsScreen(
@@ -62,86 +94,241 @@ fun SkillsScreen(
     onSkillClick: (SkillId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 12.dp),
-    ) {
-        // Top label
-        item(span = { GridItemSpan(2) }) {
-            Text(
-                text = "SKILLS",
-                style = MaterialTheme.typography.labelSmall,
-                color = ArteriaPalette.Gold,
-                modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp),
+    // 3f: filter / sort state
+    var filterPillar by remember { mutableStateOf<SkillPillar?>(null) }
+    var sortOrder    by remember { mutableStateOf(SkillSortOrder.DEFAULT) }
+    // 3g: view toggle
+    var showStarMap  by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier.fillMaxSize()) {
+
+        // ── Filter + sort + view-toggle bar (3f / 3g) ────────────────────────
+        FilterSortBar(
+            filterPillar  = filterPillar,
+            onPillarClick = { filterPillar = if (filterPillar == it) null else it },
+            sortOrder     = sortOrder,
+            onSortCycle   = {
+                sortOrder = SkillSortOrder.entries[
+                    (sortOrder.ordinal + 1) % SkillSortOrder.entries.size
+                ]
+            },
+            showStarMap    = showStarMap,
+            onToggleView   = { showStarMap = !showStarMap },
+        )
+
+        // ── Content area ─────────────────────────────────────────────────────
+        if (showStarMap) {
+            // 3g — constellation view
+            SkillStarMap(
+                skills       = skills,
+                onSkillClick = onSkillClick,
+                modifier     = Modifier.fillMaxSize(),
             )
-        }
-
-        // Render each pillar section with a header then its skill cards
-        SkillPillar.entries.forEach { pillar ->
-            val pillarSkills = SkillId.byPillar(pillar)
-            val color = pillarColor[pillar] ?: ArteriaPalette.AccentPrimary
-
-            item(span = { GridItemSpan(2) }) {
-                PillarSectionHeader(
-                    pillar = pillar,
-                    color = color,
-                    skillCount = pillarSkills.size,
-                )
+        } else {
+            val pillarsToShow = if (filterPillar != null) {
+                listOf(filterPillar!!)
+            } else {
+                SkillPillar.entries
             }
 
-            items(pillarSkills, key = { it.name }) { skillId ->
-                val state = skills[skillId] ?: SkillState(skillId = skillId)
-                val implemented = remember(skillId) { SkillDataRegistry.isSkillImplemented(skillId) }
-                SkillCard(
-                    skillId = skillId,
-                    state = state,
-                    pillarColor = color,
-                    implemented = implemented,
-                    onClick = { onSkillClick(skillId) },
-                )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement   = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
+            ) {
+                item(span = { GridItemSpan(2) }) {
+                    Text(
+                        text = "SKILLS",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ArteriaPalette.Gold,
+                        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 2.dp),
+                    )
+                }
+
+                pillarsToShow.forEach { pillar ->
+                    val pillarSkills = SkillId.byPillar(pillar)
+                    val color = pillarColor[pillar] ?: ArteriaPalette.AccentPrimary
+                    val pillarStates = pillarSkills.map { skills[it] ?: SkillState(skillId = it) }
+
+                    // 3e — pillar summary header
+                    item(span = { GridItemSpan(2) }) {
+                        PillarSectionHeader(
+                            pillar      = pillar,
+                            color       = color,
+                            pillarStates = pillarStates,
+                        )
+                    }
+
+                    // 3f — apply sort within pillar
+                    val sorted = when (sortOrder) {
+                        SkillSortOrder.DEFAULT      -> pillarSkills
+                        SkillSortOrder.ACTIVE_FIRST -> pillarSkills
+                            .sortedByDescending { skills[it]?.isTraining == true }
+                        SkillSortOrder.LEVEL_DESC   -> pillarSkills
+                            .sortedByDescending { skills[it]?.xp ?: 0.0 }
+                    }
+
+                    items(sorted, key = { it.name }) { skillId ->
+                        val state = skills[skillId] ?: SkillState(skillId = skillId)
+                        val implemented = remember(skillId) {
+                            SkillDataRegistry.isSkillImplemented(skillId)
+                        }
+                        SkillCard(
+                            skillId = skillId,
+                            state = state,
+                            accentColor = color,
+                            implemented = implemented,
+                            crossoverTargets = skillCrossover[skillId] ?: emptyList(),
+                            onClick = { onSkillClick(skillId) },
+                        )
+                    }
+                }
+
+                item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(12.dp)) }
             }
         }
-
-        // Bottom spacing so last row clears the nav bar
-        item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(12.dp)) }
     }
 }
 
-// ─── Pillar Section Header ────────────────────────────────────────────────────
+// ─── 3f. Filter / sort bar ───────────────────────────────────────────────────
 
 @Composable
-private fun PillarSectionHeader(
-    pillar: SkillPillar,
-    color: Color,
-    skillCount: Int,
+private fun FilterSortBar(
+    filterPillar: SkillPillar?,
+    onPillarClick: (SkillPillar) -> Unit,
+    sortOrder: SkillSortOrder,
+    onSortCycle: () -> Unit,
+    showStarMap: Boolean,
+    onToggleView: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Pillar filter chips (horizontally scrollable)
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            SkillPillar.entries.forEach { pillar ->
+                val selected = filterPillar == pillar
+                val color = pillarColor[pillar] ?: ArteriaPalette.AccentPrimary
+                FilterChip(
+                    label    = pillar.displayName.take(4).uppercase(),
+                    color    = color,
+                    selected = selected,
+                    onClick  = { onPillarClick(pillar) },
+                )
+            }
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // Sort cycle button
+        FilterChip(
+            label    = sortOrder.label,
+            color    = ArteriaPalette.AccentPrimary,
+            selected = sortOrder != SkillSortOrder.DEFAULT,
+            onClick  = onSortCycle,
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        // Star map toggle
+        FilterChip(
+            label    = if (showStarMap) "List" else "Map",
+            color    = ArteriaPalette.AccentWeb,
+            selected = showStarMap,
+            onClick  = onToggleView,
+        )
+    }
+}
+
+@Composable
+private fun FilterChip(
+    label: String,
+    color: Color,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bg by animateColorAsState(
+        targetValue = if (selected) color.copy(alpha = 0.20f) else ArteriaPalette.BgCard,
+        animationSpec = tween(200),
+        label = "chip_bg",
+    )
+    val border by animateColorAsState(
+        targetValue = if (selected) color else ArteriaPalette.Border,
+        animationSpec = tween(200),
+        label = "chip_border",
+    )
+
+    Surface(
+        shape  = RoundedCornerShape(20.dp),
+        color  = bg,
+        modifier = modifier
+            .border(1.dp, border, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick),
+    ) {
+        Text(
+            text  = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected) color else ArteriaPalette.TextMuted,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        )
+    }
+}
+
+// ─── 3e. Pillar Section Header ───────────────────────────────────────────────
+
+@Composable
+private fun PillarSectionHeader(
+    pillar: SkillPillar,
+    color: Color,
+    pillarStates: List<SkillState>,
+    modifier: Modifier = Modifier,
+) {
+    val liveCount  = pillarStates.count { SkillDataRegistry.isSkillImplemented(it.skillId) }
+    val totalCount = pillarStates.size
+    val withXp     = pillarStates.filter { it.xp > 0 }
+    val avgLevel   = if (withXp.isNotEmpty()) {
+        withXp.sumOf { XPTable.levelForXp(it.xp) } / withXp.size
+    } else 1
+    val activeCount = pillarStates.count { it.isTraining }
+
+    // Build summary string: "3/7 live · avg Lv 8" or "+ 1 active" suffix
+    val summary = buildString {
+        append("$liveCount/$totalCount live")
+        if (withXp.isNotEmpty()) append(" · avg Lv $avgLevel")
+        if (activeCount > 0) append(" · $activeCount active")
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
             .padding(top = 10.dp, bottom = 2.dp)
             .drawBehind {
-                // Left accent stripe
-                drawRect(
-                    color = color,
-                    size = Size(3.dp.toPx(), size.height),
-                )
+                drawRect(color = color, size = Size(3.dp.toPx(), size.height))
             }
             .padding(start = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = pillar.displayName.uppercase(),
+            text  = pillar.displayName.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = color,
         )
         Text(
-            text = "$skillCount skills",
+            text  = summary,
             style = MaterialTheme.typography.bodySmall,
             color = ArteriaPalette.TextMuted,
         )
@@ -154,20 +341,22 @@ private fun PillarSectionHeader(
 private fun SkillCard(
     skillId: SkillId,
     state: SkillState,
-    pillarColor: Color,
+    accentColor: Color,
     implemented: Boolean,
+    crossoverTargets: List<SkillId>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val level = XPTable.levelForXp(state.xp)
+    val cardColor = accentColor
+    val level    = XPTable.levelForXp(state.xp)
     val progress = XPTable.progressToNextLevel(state.xp)
     val cardShape = RoundedCornerShape(12.dp)
 
     val borderColor by animateColorAsState(
         targetValue = when {
-            state.isTraining -> pillarColor
-            !implemented -> ArteriaPalette.Border.copy(alpha = 0.4f)
-            else -> ArteriaPalette.Border
+            state.isTraining -> cardColor
+            !implemented     -> ArteriaPalette.Border.copy(alpha = 0.4f)
+            else             -> ArteriaPalette.Border
         },
         animationSpec = tween(350),
         label = "card_border_${skillId.name}",
@@ -183,46 +372,47 @@ private fun SkillCard(
         shape = cardShape,
         color = when {
             state.isTraining -> ArteriaPalette.BgCardHover
-            !implemented -> ArteriaPalette.BgCard.copy(alpha = 0.6f)
-            else -> ArteriaPalette.BgCard
+            !implemented     -> ArteriaPalette.BgCard.copy(alpha = 0.6f)
+            else             -> ArteriaPalette.BgCard
         },
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment   = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = skillId.displayName,
+                        text  = skillId.displayName,
                         style = MaterialTheme.typography.titleMedium,
                         color = ArteriaPalette.TextPrimary.copy(alpha = cardAlpha),
                         maxLines = 1,
                     )
                     when {
                         state.isTraining -> Text(
-                            text = "TRAINING",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = pillarColor,
+                            text  = "TRAINING",
+                            style = MaterialTheme.typography.labelSmall
+                                .copy(fontWeight = FontWeight.Bold),
+                            color = cardColor,
                         )
                         !implemented -> Text(
-                            text = "SOON",
+                            text  = "SOON",
                             style = MaterialTheme.typography.labelSmall,
                             color = ArteriaPalette.TextMuted,
                         )
                         else -> Text(
-                            text = skillId.pillar.displayName,
+                            text  = skillId.pillar.displayName,
                             style = MaterialTheme.typography.bodySmall,
-                            color = pillarColor.copy(alpha = 0.7f),
+                            color = cardColor.copy(alpha = 0.7f),
                         )
                     }
                 }
 
                 LevelBadge(
-                    level = level,
-                    progress = progress,
-                    color = pillarColor.copy(alpha = cardAlpha),
+                    level       = level,
+                    progress    = progress,
+                    color       = cardColor.copy(alpha = cardAlpha),
                     implemented = implemented,
                 )
             }
@@ -230,22 +420,47 @@ private fun SkillCard(
             Spacer(Modifier.height(8.dp))
 
             LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
+                progress   = { progress },
+                modifier   = Modifier
                     .fillMaxWidth()
                     .height(3.dp)
                     .clip(RoundedCornerShape(1.5.dp)),
-                color = pillarColor.copy(alpha = cardAlpha),
+                color      = cardColor.copy(alpha = cardAlpha),
                 trackColor = ArteriaPalette.Border.copy(alpha = 0.4f),
             )
 
             if (state.xp > 0.0) {
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = "${NumberFormat.getIntegerInstance().format(state.xp.toLong())} XP",
+                    text  = "${NumberFormat.getIntegerInstance().format(state.xp.toLong())} XP",
                     style = MaterialTheme.typography.bodySmall,
                     color = ArteriaPalette.TextMuted.copy(alpha = cardAlpha),
                 )
+            }
+
+            // 3c — crossover "feeds into" tags
+            if (crossoverTargets.isNotEmpty()) {
+                Spacer(Modifier.height(5.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    crossoverTargets.take(3).forEach { target ->
+                        val tColor = pillarColor[target.pillar] ?: ArteriaPalette.AccentPrimary
+                        Text(
+                            text  = "→ ${target.displayName}",
+                            style = MaterialTheme.typography.labelSmall
+                                .copy(fontSize = 9.sp),
+                            color = tColor.copy(alpha = 0.65f),
+                            modifier = Modifier
+                                .background(
+                                    tColor.copy(alpha = 0.08f),
+                                    RoundedCornerShape(4.dp),
+                                )
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                        )
+                    }
+                }
             }
         }
     }
@@ -273,31 +488,25 @@ private fun LevelBadge(
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val stroke = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
-            // Track ring
             drawArc(
                 color = color.copy(alpha = 0.15f),
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                style = stroke,
+                startAngle = -90f, sweepAngle = 360f,
+                useCenter = false, style = stroke,
             )
-            // XP fill
             if (animatedProgress > 0f) {
                 drawArc(
                     color = color.copy(alpha = 0.75f),
-                    startAngle = -90f,
-                    sweepAngle = 360f * animatedProgress,
-                    useCenter = false,
-                    style = stroke,
+                    startAngle = -90f, sweepAngle = 360f * animatedProgress,
+                    useCenter = false, style = stroke,
                 )
             }
         }
         Text(
-            text = if (implemented) "$level" else "—",
+            text  = if (implemented) "$level" else "—",
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                textAlign = TextAlign.Center,
+                fontSize   = 15.sp,
+                textAlign  = TextAlign.Center,
             ),
             color = color,
         )

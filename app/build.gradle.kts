@@ -20,8 +20,8 @@ android {
         targetSdk {
             version = release(36)
         }
-        versionCode = 2
-        versionName = "1.3.0"
+        versionCode = 4
+        versionName = "1.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -68,6 +68,8 @@ dependencies {
     
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.9.7")
+
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 
     // Room persistence
     implementation("androidx.room:room-runtime:2.8.4")

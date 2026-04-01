@@ -27,5 +27,11 @@ interface GameDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertGameMeta(meta: GameMetaEntity)
+
+    @Query("DELETE FROM skill_states WHERE profileId = :profileId")
+    suspend fun deleteSkillStatesForProfile(profileId: String)
+
+    @Query("DELETE FROM game_meta WHERE profileId = :profileId")
+    suspend fun deleteGameMetaForProfile(profileId: String)
 }
 

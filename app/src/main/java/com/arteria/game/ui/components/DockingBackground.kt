@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalArteriaDarkSpace
+import com.arteria.game.ui.theme.LocalReduceMotion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -54,8 +56,11 @@ private data class Nebula(
 
 @Composable
 fun DockingBackground(modifier: Modifier = Modifier) {
+    val darkSpace = LocalArteriaDarkSpace.current
+    val reduceMotion = LocalReduceMotion.current
+
     val infinite = rememberInfiniteTransition(label = "docking_space")
-    val cosmic01 = infinite.animateFloat(
+    val cosmicRaw = infinite.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -65,7 +70,7 @@ fun DockingBackground(modifier: Modifier = Modifier) {
         label = "cosmic",
     ).value
 
-    val twinkle01 = infinite.animateFloat(
+    val twinkleRaw = infinite.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -74,6 +79,9 @@ fun DockingBackground(modifier: Modifier = Modifier) {
         ),
         label = "twinkle",
     ).value
+
+    val cosmic01 = if (reduceMotion) 0f else cosmicRaw
+    val twinkle01 = if (reduceMotion) 0f else twinkleRaw
 
     val stars = remember {
         val rnd = Random(42)
@@ -127,32 +135,46 @@ fun DockingBackground(modifier: Modifier = Modifier) {
 
     Box(modifier.fillMaxSize()) {
         Canvas(Modifier.fillMaxSize()) {
-            val breath = 0.5f + 0.5f * sin(tau * 0.85f)
-            val midShift = lerp(
-                ArteriaPalette.BgDeepSpaceMid,
-                Color(0xFF071018),
-                breath * 0.35f,
-            )
-            val bottomShift = lerp(
-                ArteriaPalette.BgDeepSpaceBottom,
-                Color(0xFF0a0e22),
-                0.5f + 0.5f * sin(tau * 0.6f + 1.2f) * 0.22f,
-            )
+            if (darkSpace) {
+                val breath = 0.5f + 0.5f * sin(tau * 0.85f)
+                val midShift = lerp(
+                    ArteriaPalette.BgDeepSpaceMid,
+                    Color(0xFF071018),
+                    breath * 0.35f,
+                )
+                val bottomShift = lerp(
+                    ArteriaPalette.BgDeepSpaceBottom,
+                    Color(0xFF0a0e22),
+                    0.5f + 0.5f * sin(tau * 0.6f + 1.2f) * 0.22f,
+                )
 
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        ArteriaPalette.BgDeepSpaceTop,
-                        midShift,
-                        bottomShift,
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            ArteriaPalette.BgDeepSpaceTop,
+                            midShift,
+                            bottomShift,
+                        ),
                     ),
-                ),
-            )
+                )
+            } else {
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            ArteriaPalette.LightSpaceTop,
+                            ArteriaPalette.LightSpaceMid,
+                            ArteriaPalette.LightSpaceBottom,
+                        ),
+                    ),
+                )
+            }
 
             val w = size.width
             val h = size.height
             val minDim = minOf(w, h)
 
+            val nebulaOuter = if (darkSpace) 0.10f else 0.06f
+            val nebulaInner = if (darkSpace) 0.03f else 0.02f
             for (n in nebulae) {
                 val ox = n.nx * w + sin(tau * n.driftA + n.phase) * w * 0.045f
                 val oy = n.ny * h + cos(tau * n.driftB + n.phase * 1.3f) * h * 0.038f
@@ -161,8 +183,8 @@ fun DockingBackground(modifier: Modifier = Modifier) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            n.core.copy(alpha = 0.10f),
-                            n.core.copy(alpha = 0.03f),
+                            n.core.copy(alpha = nebulaOuter),
+                            n.core.copy(alpha = nebulaInner),
                             Color.Transparent,
                         ),
                         center = center,
@@ -176,10 +198,12 @@ fun DockingBackground(modifier: Modifier = Modifier) {
             for (s in stars) {
                 val wobble = 0.38f + 0.62f * ((sin(twinkleAngle * s.speed + s.phase) + 1f) * 0.5f)
                 val slowPulse = 0.88f + 0.12f * ((sin(tau * 0.4f + s.phase) + 1f) * 0.5f)
-                val alpha = (s.baseAlpha * wobble * slowPulse).coerceIn(0.04f, 0.95f)
+                val base = if (darkSpace) s.baseAlpha else s.baseAlpha * 0.35f
+                val alpha = (base * wobble * slowPulse).coerceIn(0.04f, 0.95f)
                 val rPulse = s.radius * (0.94f + 0.06f * sin(twinkleAngle * s.speed * 1.1f + s.phase))
+                val starColor = if (darkSpace) Color.White else ArteriaPalette.LightTextSecondary
                 drawCircle(
-                    color = Color.White.copy(alpha = alpha),
+                    color = starColor.copy(alpha = alpha),
                     radius = rPulse,
                     center = Offset(s.nx * w, s.ny * h),
                 )

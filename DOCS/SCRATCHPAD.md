@@ -4,6 +4,12 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | Composer | **v1.4.1 docs + version modal sync:** `APP_CHANGELOG` top card (DOCS tag, release hygiene copy); `versionName` **1.4.1** / `versionCode` **4**; README release shield; `CLAUDE.md` Doc Update Rules + Output Checklist + Key Files (`ChangelogScreen`). Policy: SCRATCHPAD handoffs for shipped work should pair with What's New + version bump. |
+| 2026-04-01 | Cursor Agent | Composer | **Settings plan (10+ options):** DataStore `UserPreferencesRepository`; `MainActivity` `ArteriaRoot` + `CompositionLocal`s; light/dark `ArteriaTheme`, `arteriaSpaceBackgroundBrush`, `DockingBackground`/`DockingGlitch` reduce-motion; `SettingsScreen` toggles + OSS/Credits + danger zone + DEBUG cap bypass; `GameRepository` reset/delete; `ProfileDao.deleteById`; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `UserPreferencesProvider` + `GameViewModel` wiring; `:app:testDebugUnitTest` green; `SBOM`/`ARCHITECTURE`/`master_settings` updated. |
+| 2026-03-31 | Cursor Agent | Composer | **v1.4.0 release notes:** `APP_CHANGELOG` top entry (Hub, 4-tab bar, Herblore/Scavenging, settings parity, expanded skill roster note); `versionName` **1.4.0** / `versionCode` **3** in `app/build.gradle.kts`; README release badge **1.4.0**. |
+| 2026-03-31 | Cursor Agent | Composer | **Skill roster expansion (V1 canon):** `SkillPillar.COSMIC`; 25 new `SkillId` entries (Farming, Thieving, Firemaking, Woodworking, Tailoring, Fletching, Construction, Alchemy, Ranged, Constitution, Sorcery, Slayer, Exploration, Astrology, Summoning, Cleansing, Barter, Research, Leadership, Resonance, Chaos Theory, Aether Weaving, Void Walking, Celestial Binding, Chronomancy); regrouped enum by pillar; `ArteriaPalette.CombatAccent` + `SkillsScreen` pillar colors; `ChangelogScreen` **v1.4.0**, `versionCode` 3; `CLAUDE.md` skill inventory. |
+| 2026-03-31 | Claude Sonnet 4.6 | Anthropic Claude | **Final 5 checklist items (3c/3e/3f/3g/5f):** `SkillStarMap.kt` — pentagon pillar layout, fan-spread skill nodes, XP arc rings, crossover dashed edges, level labels, tap-to-navigate. `SkillsScreen.kt` — `skillCrossover` map + "→ Target" chips (3c); `PillarSectionHeader` live/avg/active summary (3e); `FilterSortBar` pillar chips + sort cycle + Map/List toggle (3f/3g). `HubScreen.kt` — `dismissedNudges` state, stable nudge keys, "×" dismiss buttons, 2-nudge cap (5f). Build green, checklist 30/30. |
+| 2026-03-31 | Claude Opus 4.6 | Anthropic Claude | **Hub Screen (Command Center):** `HubScreen.kt` (items 1a–1h from checklist) — inline offline gains card replacing blocking dialog, active training panel with level ring + pulsing dot + XP-to-level estimate, quick stats row (total level / bank items / top skill), next milestone nudge with progress bar + unlock detection, smart suggestion engine (craft opportunity > idle skill), recent level-up mini-cards, empty-hub prompt. Updated `ArteriaBottomBar.kt` with Anchor icon (4 tabs: Hub/Skills/Bank/Combat), `quadraticBezierTo` → `quadraticTo` deprecation fix. Rewired `GameScreen.kt` tab indices, `recentLevelUps` tracking via `mutableStateListOf`. Fixed `OfflineReportDialog.kt` `MiningData` → `SkillDataRegistry`. |
 | 2026-03-31 | Claude Opus 4.6 | Anthropic Claude | **Playability expansion + UI overhaul:** Added Logging, Fishing, Smithing, Cooking skill data with cross-economy `inputItems`; TickEngine bank consumption + auto-stop on material shortage; one-skill-at-a-time enforcement in `GameViewModel.startTraining`; custom `ArteriaBottomBar` (Canvas icons, XP ring, bank badge, glow effects); pillar-grouped `SkillsScreen` redesign with animated borders/arcs; `SkillDetailScreen` hero header with live training row + `LevelCircle`; `ActionCard` sweep fill progress. |
 | 2026-03-31 | Cursor Agent | Composer | **README polish:** multi-row shields (KSP, Navigation, Lifecycle, Coroutines, compileSdk 36.1, JVM 21 vs JDK 26 build story), quick start + tree for `build-with-jdk26.bat`, prerequisites/toolchain/troubleshooting aligned with `DOCS/SBOM.md`. |
 | 2026-04-01 | Cursor Agent | Composer | **Settings V1 parity slice:** `updateDisplayName` on profiles; `AccountSessionInfo`; `SettingsScreen` rename dialog, last played, `BuildConfig` version, tick/save cadence, test sound; `GameScreen`/`ArteriaApp` wiring; `FakeProfileRepository` updated; `ARCHITECTURE`/`SBOM`/`master_settings_suggestions_doc.md`; `:app:compileDebugKotlin` green. |
@@ -65,11 +71,14 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 - Native Android V2 stack is active (`Kotlin + Compose + Room + Gradle/AGP`).
 - Core gameplay routing is live: `account_select` -> `account_create` -> `game/{profileId}`.
-- Game shell is live with 3 tabs (`Skills`, `Bank`, `Combat`) and settings/changelog overlays.
+- Game shell is live with 4 tabs (`Hub`, `Skills`, `Bank`, `Combat`) and settings/changelog overlays. **`[AMENDED 2026-03-31]:`** Hub is default landing; older “3 tabs” mentions superseded.
 - **`[AMENDED 2026-03-31]:`** Tapping a skill with no actions in `SkillDataRegistry` shows `SkillComingSoonDialog` instead of `SkillDetailScreen` (implemented skills unchanged).
 - **`[AMENDED 2026-04-01]:`** **Harvesting** is playable: `HarvestingData` registered in `SkillDataRegistry` (gathering pillar).
 - **`[AMENDED 2026-04-01]:`** **Settings** includes V1-style **display name edit** (persisted on `profiles`), **last played** line, **About** version from `BuildConfig`, **tick/save cadence** copy, and **Test sound**; see `master_settings_suggestions_doc.md` checklist updates.
+- **`[AMENDED 2026-04-01]:`** **Settings expansion (DataStore):** theme **Dark / Follow system**, reduce motion, haptics, sound master, offline report toggle, offline cap copy, idle soundscapes pref (no audio yet), notifications/economy stubs, open-source list + credits, **reset progress** + **delete profile**, DEBUG offline-cap bypass; `GameViewModel.reloadAfterReset()`.
 - **`[AMENDED 2026-04-01]:`** **Herblore** (crafting, `inputItems` from harvest) and **Scavenging** (gathering) registered; same tick/bank rules as Cooking/Smithing.
+- **`[AMENDED 2026-03-31]:`** **`SkillId` roster = 41 skills, 5 pillars** (`COSMIC` added). New entries are **Coming Soon** until `SkillDataRegistry` lists actions; `GameRepository` still merges all enum keys on load/save.
+- **`[AMENDED 2026-03-31]:`** **Release hygiene:** When documenting shipped work here (`SCRATCHPAD`), also prepend `ChangelogScreen.kt` `APP_CHANGELOG`, bump `app/build.gradle.kts` `versionCode`/`versionName`, and README badge so **What's New** and **About** stay accurate (`CLAUDE.md` lists the checklist).
 - Toolchain snapshot remains Gradle nightly `9.6.0-20260331012943+0000`, AGP `9.1.0`, JDK `21`.
 - **`[AMENDED 2026-03-31]:`** Maintainer builds often run the **Gradle JVM on JDK 26** (`build-with-jdk26.bat` or `org.gradle.java.home`); Foojay daemon pin in-repo stays **JDK 21**; `:app`/`:core` bytecode target stays **Java 21** (see `README.md` + `DOCS/SBOM.md`).
 - `[AMENDED 2026-03-31]:` Any older mention of `play/{profileId}` is superseded by `game/{profileId}`.
@@ -107,6 +116,26 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 ## Last Actions (most recent first)
 
+**2026-03-31:** **v1.4.1 — docs, version modal, policy:**
+- `ChangelogScreen.kt` — new top `APP_CHANGELOG` entry (tag DOCS): About / What's New alignment, contributor note linking `SCRATCHPAD` + version bump + `CLAUDE.md`.
+- `app/build.gradle.kts` — `versionName` **1.4.1**, `versionCode` **4**.
+- `README.md` — release shield **1.4.1**.
+- `CLAUDE.md` — Doc Update Rules (What's New + version), Output Checklist line, Key Files row for `ChangelogScreen.kt`.
+- `SCRATCHPAD.md` — Active Status release hygiene bullet + this Last Actions block + Agent Credits.
+
+**2026-03-31:** **v1.4.0 — changelog + version bump:**
+- `ChangelogScreen.kt` — `APP_CHANGELOG` first card documents Hub command center, fourth tab + Anchor, Herblore/Scavenging, settings parity, expanded skill roster / Coming Soon.
+- `app/build.gradle.kts` — `versionName` **1.4.0**, `versionCode` **3** (already aligned).
+- `README.md` — release shield **1.4.0**.
+- `DOCS/ROADMAP.md` — `[AMENDED]` under Phase 5 for v1.4.0 scope pointer.
+
+**2026-03-31:** **Hub Screen / Command Center (Claude Opus 4.6):**
+- `HubScreen.kt` — new landing tab covering checklist items 1a–1h: inline offline gains card (dismissible, not blocking dialog), active training panel (level ring, pulsing dot, action name, cycle progress bar, time-to-level estimate), quick stats row (total level, bank items, top skill), next milestone nudge card (closest level-up with progress bar + unlock detection), smart suggestion card (craftable opportunity from bank > idle skill prompt), recent level-up mini-cards, empty-hub prompt with "Go to Skills" shortcut.
+- `ArteriaBottomBar.kt` — added `AnchorIcon` (Canvas: ring + shank + crossbar + curved flukes); 4 tabs now (Hub/Skills/Bank/Combat); fixed `quadraticBezierTo` → `quadraticTo` deprecation.
+- `GameScreen.kt` — tab indices shifted (+1 for Skills/Bank/Combat); added `recentLevelUps: mutableStateListOf` populated from `levelUpEvents`; wired `HubScreen` as tab 0 with offline report, skill tap, and cross-tab navigation callbacks.
+- `OfflineReportDialog.kt` — replaced stale `MiningData.items` reference with `SkillDataRegistry.itemName()`.
+- Build: `:app:compileDebugKotlin` green, zero warnings.
+
 **2026-03-31:** **Playability expansion + alive UI overhaul (Claude Opus 4.6):**
 - **4 new skill data files:** `LoggingData.kt` (8 actions), `FishingData.kt` (8), `SmithingData.kt` (7, ore→bar via `inputItems`), `CookingData.kt` (8, raw fish→cooked via `inputItems`).
 - **`SkillDataRegistry.kt`:** Central registry merging all skill data; `actionsForSkill()`, `isSkillImplemented()`, `itemName()`.
@@ -119,6 +148,8 @@ Use this section as the live handoff source. Older repeated status/next-action b
 - **`GameScreen.kt`:** `AnimatedContent` push/pop transitions for skill detail, `derivedStateOf` for training progress/bank opportunity, wired `ArteriaBottomBar` + `SkillComingSoonDialog`.
 
 **2026-03-31:** **build-apk-for-transfer + jlink:** `gradlew.bat` no longer falls back to `java` on PATH when no JDK found (PATH was still Red Hat JRE). Added Eclipse Adoptium + Microsoft `jdk-*` scan; strip `JAVA_HOME` if path contains `.cursor` or `redhat.java`. `build-apk-for-transfer.ps1` resolves JDK the same way, sets `JAVA_HOME`/`Path`, runs `gradlew --stop` before assemble.
+
+**2026-03-31:** **Skill roster → 41 / 5 pillars:** `SkillId.kt` + `SkillPillar.COSMIC`; `SkillsScreen` / `SkillDetailScreen` pillar tint via `pillarColor`; `CombatAccent` in `ArteriaPalette`; `ChangelogScreen` v1.4.0 + `app/build.gradle.kts` version bump; `CLAUDE.md` tables. **Build unblock:** `MainActivity` `LocalContext` + `getValue`; `UserPreferences.asProvider` + `flow.first`; `SkillStarMap` `nativeCanvas` import (shared `skillCrossover` from `SkillsScreen`); `SkillCard` accent vs map shadowing; `ArteriaApp` wires `GameScreen` reset/delete profile callbacks. `:app:compileDebugKotlin` green.
 
 **2026-03-31:** **Gradle jlink / Cursor JRE:** Root `gradlew.bat` now clears `JAVA_HOME` when `%JAVA_HOME%\bin\jlink.exe` is absent, then picks `%ProgramFiles%\Java\jdk-21.0.10` / `jdk-26` / `jdk-21` if present. `build-with-jdk26.bat` runs `gradlew --stop` then builds with `--no-daemon` so AGP `JdkImageTransform` does not keep using a Red Hat JRE path.
 
@@ -153,7 +184,7 @@ Verified by running `build-with-jdk26.bat` with no args; build completed and pri
 
 **2026-03-31:** **Animation system build verified + docs updated:** `:app:compileDebugKotlin` and `:app:assembleDebug` both pass. Added terminal timeline node pulse animation (2.4s period, 0.28→0.55 alpha) to `AccountSelectionScreen.kt`. Fixed `DockingAccountCard.kt` `drawBehind` scale reference (applied to radius not transform). Documented full animation architecture: `DockingGlitch.kt` (7-layer glitch engine with precomputed layouts, entry orchestrator via `Animatable`, ambient infinite transitions with IDLE sentinel); `DockingAccountCard.kt` (timeline sidebar with ripple ring + energy flow, hex ghost text overlay, skill badge spring pop-in, pulsing border/tint wash on selected); `AccountSelectionScreen.kt` (terminal node pulse). Updated `SCRATCHPAD.md` agent credits.
 
-**2026-03-31:** **CLAUDE.md overhaul + cursor.rules integration:** Absorbed `.claude/cursor.rules` agent philosophy into `CLAUDE.md`. Added: workflow init order (SUMMARY→SBOM→SCRATCHPAD→STYLE_GUIDE), agent behavior rules (read-before-edit, leaf→entry multi-file ordering, scope discipline), Kotlin async standards (viewModelScope only, no GlobalScope), error handling (sealed results, no silent failures), git Conventional Commits format, output checklist. Also documented the full `DockingGlitch` animation system in component library table and updated accurate skill inventory (16 skills, 4 pillars) from live `SkillId.kt`.
+**2026-03-31:** **CLAUDE.md overhaul + cursor.rules integration:** Absorbed `.claude/cursor.rules` agent philosophy into `CLAUDE.md`. Added: workflow init order (SUMMARY→SBOM→SCRATCHPAD→STYLE_GUIDE), agent behavior rules (read-before-edit, leaf→entry multi-file ordering, scope discipline), Kotlin async standards (viewModelScope only, no GlobalScope), error handling (sealed results, no silent failures), git Conventional Commits format, output checklist. Also documented the full `DockingGlitch` animation system in component library table and updated accurate skill inventory (16 skills, 4 pillars) from live `SkillId.kt`. **`[AMENDED 2026-03-31]:`** Superseded by **41 skills / 5 pillars** — see current `SkillId.kt`.
 
 **2026-03-31:** **Docking Station animation system shipped:** Created `DockingGlitch.kt` — full glitch materialization engine with 7 Canvas layers (phosphor veil, CRT scan sweep, RGB chromatic aberration, block displacement, noise grain, interference scanlines, stabilization flicker), `AmbientScanOverlay` for selected cards, `GlitchLayout` precomputed deterministically per seed, `EntryAnimations` orchestrator (staggered per `entryIndex × 160ms`), `AmbientAnimations` with `IDLE` sentinel. Upgraded `DockingAccountCard.kt` with timeline sidebar (node + ripple ring + energy flow particle on connector), hex ghost text overlay during glitch, skill pillar badges with spring pop-in, pulsing border + tint wash on selected cards. Updated `AccountSelectionScreen.kt` with timeline terminal node (pulsing `LuminarEnd` dot) and "Enter timeline" CTA.
 
