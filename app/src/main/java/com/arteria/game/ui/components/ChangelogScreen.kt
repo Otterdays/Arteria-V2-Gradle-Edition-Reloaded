@@ -1,7 +1,10 @@
 package com.arteria.game.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,18 +19,25 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import com.arteria.game.ui.theme.LocalReduceMotion
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.arteria.game.ui.theme.ArteriaPalette
 
@@ -40,6 +50,7 @@ data class ChangelogEntry(
     val version: String,
     val date: String,
     val tag: String,           // e.g. "UI", "ENGINE", "FIX"
+    val tagEmoji: String,      // e.g. "🎨", "⚙️", "🐛"
     val tagColor: Color,
     val changes: List<String>,
 )
@@ -49,6 +60,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.4.1",
         date = "2026-03-31",
         tag = "DOCS",
+        tagEmoji = "📚",
         tagColor = ArteriaPalette.Gold,
         changes = listOf(
             "v1.4.1 — Settings About and What's New match this build number",
@@ -61,6 +73,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.4.0",
         date = "2026-04-01",
         tag = "HUB",
+        tagEmoji = "🎯",
         tagColor = ArteriaPalette.AccentPrimary,
         changes = listOf(
             "Hub as your home tab — dismissible offline gains card keeps flow instead of a blocking dialog",
@@ -78,6 +91,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.3.0",
         date = "2026-04-01",
         tag = "SKILLS",
+        tagEmoji = "🎪",
         tagColor = ArteriaPalette.BalancedEnd,
         changes = listOf(
             "Six trainable skill lines in the registry: Mining, Logging, Fishing, Harvesting, Smithing, Cooking",
@@ -92,6 +106,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.2.0",
         date = "2026-03-31",
         tag = "UI",
+        tagEmoji = "🎨",
         tagColor = ArteriaPalette.AccentPrimary,
         changes = listOf(
             "Docking Station glitch materialization — CRT scan sweep + RGB aberration on account cards",
@@ -106,6 +121,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.1.0",
         date = "2026-03-31",
         tag = "UI",
+        tagEmoji = "🎨",
         tagColor = ArteriaPalette.AccentPrimary,
         changes = listOf(
             "Settings moved from bottom nav tab to full-screen overlay",
@@ -118,6 +134,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "1.0.0",
         date = "2026-03-30",
         tag = "LAUNCH",
+        tagEmoji = "🚀",
         tagColor = ArteriaPalette.Gold,
         changes = listOf(
             "Room-backed account profiles — create, select, persist across sessions",
@@ -133,6 +150,7 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
         version = "0.1.0",
         date = "2026-03-22",
         tag = "FOUNDATION",
+        tagEmoji = "🏗️",
         tagColor = ArteriaPalette.BalancedEnd,
         changes = listOf(
             "Initial Compose shell with Gradle 9.6 + AGP 9.1 + JDK 21",
@@ -168,43 +186,28 @@ fun ChangelogScreen(
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ArteriaPalette.TextSecondary,
-                )
-            }
-            Column {
-                Text(
-                    text = "WHAT'S NEW",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.Gold,
-                )
-                Text(
-                    text = "Version History",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = ArteriaPalette.TextPrimary,
-                )
-            }
-        }
+        PanelBackHeader(
+            title = "Version History",
+            overline = "WHAT'S NEW",
+            onBack = onBack,
+        )
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items(APP_CHANGELOG) { entry ->
-                ChangelogCard(entry)
+            items(APP_CHANGELOG, key = { it.version }) { entry ->
+                val entryIndex = APP_CHANGELOG.indexOf(entry)
+                val reduceMotion = LocalReduceMotion.current
+                val animations = rememberEntryAnimations(entryIndex, reduceMotion)
+
+                ChangelogCard(
+                    entry = entry,
+                    animation = animations,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
             item { Spacer(Modifier.height(16.dp)) }
         }
@@ -212,27 +215,72 @@ fun ChangelogScreen(
 }
 
 @Composable
-private fun ChangelogCard(entry: ChangelogEntry) {
+private fun ChangelogCard(
+    entry: ChangelogEntry,
+    animation: EntryAnimations,
+    modifier: Modifier = Modifier,
+) {
     val shape = RoundedCornerShape(12.dp)
+    var isPressed by remember { mutableStateOf(false) }
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isPressed) entry.tagColor else ArteriaPalette.Border,
+        animationSpec = tween(350),
+    )
+
     Surface(
         shape = shape,
         color = ArteriaPalette.BgCard.copy(alpha = 0.94f),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, ArteriaPalette.Border, shape),
+            .graphicsLayer(alpha = animation.materializeAlpha)
+            .border(1.dp, animatedBorderColor, shape)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    },
+                )
+            }
+            .drawBehind {
+                // Left accent stripe (3dp, gradient fade)
+                val stripeW = 3.dp.toPx()
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to entry.tagColor,
+                        0.7f to entry.tagColor.copy(alpha = 0.5f),
+                        1f to Color.Transparent,
+                    ),
+                    topLeft = Offset.Zero,
+                    size = Size(stripeW, size.height),
+                )
+
+                // Glass highlight at top (2dp, horizontal gradient)
+                val highlightH = 2.dp.toPx()
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to ArteriaPalette.GlassHighlight,
+                        1f to ArteriaPalette.GlassHighlight.copy(alpha = 0.3f),
+                    ),
+                    topLeft = Offset.Zero,
+                    size = Size(size.width, highlightH),
+                )
+            },
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             // Version + tag row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
                     text = "v${entry.version}",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = ArteriaPalette.TextPrimary,
                 )
-                TagBadge(label = entry.tag, color = entry.tagColor)
+                TagBadge(label = entry.tag, emoji = entry.tagEmoji, color = entry.tagColor)
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = entry.date,
@@ -241,10 +289,10 @@ private fun ChangelogCard(entry: ChangelogEntry) {
                 )
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Change list
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 entry.changes.forEach { change ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -268,10 +316,10 @@ private fun ChangelogCard(entry: ChangelogEntry) {
 }
 
 @Composable
-private fun TagBadge(label: String, color: Color) {
+private fun TagBadge(label: String, emoji: String, color: Color) {
     val shape = RoundedCornerShape(4.dp)
     Text(
-        text = label,
+        text = "$emoji $label",
         style = MaterialTheme.typography.labelSmall,
         color = color.copy(alpha = 0.9f),
         modifier = Modifier

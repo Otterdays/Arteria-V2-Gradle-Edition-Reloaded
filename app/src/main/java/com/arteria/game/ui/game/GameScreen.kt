@@ -159,7 +159,10 @@ fun GameScreen(
     if (showChronicle) {
         ChronicleScreen(
             achievements = achievements,
-            modifier = Modifier.background(bgBrush),
+            onBack = { showChronicle = false },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(bgBrush),
         )
         return
     }

@@ -17,15 +17,20 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -56,6 +61,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arteria.game.core.data.SkillDataRegistry
@@ -90,6 +96,22 @@ internal val skillCrossover: Map<SkillId, List<SkillId>> = mapOf(
     SkillId.HERBLORE   to listOf(SkillId.ALCHEMY),
     SkillId.FLETCHING  to listOf(SkillId.RANGED),
 )
+
+/** Short names for crossover chips — full [SkillId.displayName] overflows narrow grid cells. */
+private fun SkillId.crossoverChipLabel(): String = when (this) {
+    SkillId.WOODWORKING -> "Woodwork"
+    SkillId.FIREMAKING -> "Fire"
+    SkillId.FLETCHING -> "Fletch"
+    SkillId.SMITHING -> "Smith"
+    SkillId.FORGING -> "Forge"
+    SkillId.COOKING -> "Cook"
+    SkillId.HERBLORE -> "Herb"
+    SkillId.ALCHEMY -> "Alch"
+    SkillId.RUNECRAFTING -> "Runes"
+    SkillId.SORCERY -> "Sorc"
+    SkillId.RANGED -> "Range"
+    else -> displayName
+}
 
 // ─── 3f. Sort order ──────────────────────────────────────────────────────────
 
@@ -144,63 +166,77 @@ fun SkillsScreen(
                 SkillPillar.entries
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 160.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement   = Arrangement.spacedBy(10.dp),
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 12.dp),
             ) {
-                item(span = { GridItemSpan(2) }) {
-                    Text(
-                        text = "SKILLS",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ArteriaPalette.Gold,
-                        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 2.dp),
-                    )
+                val columns = when {
+                    maxWidth >= 1400.dp -> 5
+                    maxWidth >= 1000.dp -> 4
+                    maxWidth >= 700.dp -> 3
+                    else -> 2
                 }
 
-                pillarsToShow.forEach { pillar ->
-                    val pillarSkills = SkillId.byPillar(pillar)
-                    val color = pillarColor[pillar] ?: ArteriaPalette.AccentPrimary
-                    val pillarStates = pillarSkills.map { skills[it] ?: SkillState(skillId = it) }
-
-                    // 3e — pillar summary header
-                    item(span = { GridItemSpan(2) }) {
-                        PillarSectionHeader(
-                            pillar      = pillar,
-                            color       = color,
-                            pillarStates = pillarStates,
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columns),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .widthIn(max = 1280.dp)
+                        .align(Alignment.TopCenter),
+                ) {
+                    item(span = { GridItemSpan(columns) }) {
+                        Text(
+                            text = "SKILLS",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = ArteriaPalette.Gold,
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 2.dp),
                         )
                     }
 
-                    // 3f — apply sort within pillar
-                    val sorted = when (sortOrder) {
-                        SkillSortOrder.DEFAULT      -> pillarSkills
-                        SkillSortOrder.ACTIVE_FIRST -> pillarSkills
-                            .sortedByDescending { skills[it]?.isTraining == true }
-                        SkillSortOrder.LEVEL_DESC   -> pillarSkills
-                            .sortedByDescending { skills[it]?.xp ?: 0.0 }
-                    }
+                    pillarsToShow.forEach { pillar ->
+                        val pillarSkills = SkillId.byPillar(pillar)
+                        val color = pillarColor[pillar] ?: ArteriaPalette.AccentPrimary
+                        val pillarStates = pillarSkills.map { skills[it] ?: SkillState(skillId = it) }
 
-                    items(sorted, key = { it.name }) { skillId ->
-                        val state = skills[skillId] ?: SkillState(skillId = skillId)
-                        val implemented = remember(skillId) {
-                            SkillDataRegistry.isSkillImplemented(skillId)
+                        // 3e — pillar summary header
+                        item(span = { GridItemSpan(columns) }) {
+                            PillarSectionHeader(
+                                pillar      = pillar,
+                                color       = color,
+                                pillarStates = pillarStates,
+                            )
                         }
-                        SkillCard(
-                            skillId = skillId,
-                            state = state,
-                            accentColor = color,
-                            implemented = implemented,
-                            crossoverTargets = skillCrossover[skillId] ?: emptyList(),
-                            onClick = { onSkillClick(skillId) },
-                        )
-                    }
-                }
 
-                item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(12.dp)) }
+                        // 3f — apply sort within pillar
+                        val sorted = when (sortOrder) {
+                            SkillSortOrder.DEFAULT      -> pillarSkills
+                            SkillSortOrder.ACTIVE_FIRST -> pillarSkills
+                                .sortedByDescending { skills[it]?.isTraining == true }
+                            SkillSortOrder.LEVEL_DESC   -> pillarSkills
+                                .sortedByDescending { skills[it]?.xp ?: 0.0 }
+                        }
+
+                        items(sorted, key = { it.name }) { skillId ->
+                            val state = skills[skillId] ?: SkillState(skillId = skillId)
+                            val implemented = remember(skillId) {
+                                SkillDataRegistry.isSkillImplemented(skillId)
+                            }
+                            SkillCard(
+                                skillId = skillId,
+                                state = state,
+                                accentColor = color,
+                                implemented = implemented,
+                                crossoverTargets = skillCrossover[skillId] ?: emptyList(),
+                                onClick = { onSkillClick(skillId) },
+                            )
+                        }
+                    }
+
+                    item(span = { GridItemSpan(columns) }) { Spacer(Modifier.height(12.dp)) }
+                }
             }
         }
     }
@@ -360,6 +396,7 @@ private fun PillarSectionHeader(
 
 // ─── Skill Card ───────────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SkillCard(
     skillId: SkillId,
@@ -528,20 +565,26 @@ private fun SkillCard(
                     )
                 }
 
-                // 3c — crossover "feeds into" tags
+                // 3c — crossover "feeds into" tags (FlowRow: narrow cells break a single Row)
                 if (crossoverTargets.isNotEmpty()) {
                     Spacer(Modifier.height(5.dp))
-                    Row(
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 22.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         crossoverTargets.take(3).forEach { target ->
                             val tColor = pillarColor[target.pillar] ?: ArteriaPalette.AccentPrimary
                             Text(
-                                text  = "→ ${target.displayName}",
+                                text = "→ ${target.crossoverChipLabel()}",
                                 style = MaterialTheme.typography.labelSmall
                                     .copy(fontSize = 9.sp),
                                 color = tColor.copy(alpha = 0.65f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = false,
                                 modifier = Modifier
                                     .background(
                                         tColor.copy(alpha = 0.08f),

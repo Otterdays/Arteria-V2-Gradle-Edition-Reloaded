@@ -238,6 +238,8 @@ class GameViewModel(
             val currentProgress = when (val condition = achievement.condition) {
                 is AchievementCondition.SkillLevel ->
                     XPTable.levelForXp(skills[condition.skillId]?.xp ?: 0.0)
+                is AchievementCondition.AnySkillLevel ->
+                    skills.values.maxOfOrNull { XPTable.levelForXp(it.xp) } ?: 0
                 is AchievementCondition.TotalLevel -> totalLevel
                 is AchievementCondition.ItemCollected -> bank[condition.itemId] ?: 0
                 is AchievementCondition.BankItems -> bank.values.sum()

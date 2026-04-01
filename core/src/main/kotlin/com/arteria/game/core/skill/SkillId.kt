@@ -21,6 +21,8 @@ enum class SkillId(
     SCAVENGING("Scavenging", SkillPillar.GATHERING, "Salvage useful materials from the world"),
     FARMING("Farming", SkillPillar.GATHERING, "Plant seeds and harvest cultivated crops"),
     THIEVING("Thieving", SkillPillar.GATHERING, "Pickpocket NPCs and loot stalls for gold and goods"),
+    TRAPPING("Trapping", SkillPillar.GATHERING, "Set snares to catch wild game for pelts and meat"),
+    SIPHONING("Siphoning", SkillPillar.GATHERING, "Extract ambient magical leylines and planar residues"),
 
     // Crafting
     SMITHING("Smithing", SkillPillar.CRAFTING, "Smelt ores and forge metal equipment"),
@@ -34,6 +36,9 @@ enum class SkillId(
     FLETCHING("Fletching", SkillPillar.CRAFTING, "Fletch arrows, shafts, and ranged equipment"),
     CONSTRUCTION("Construction", SkillPillar.CRAFTING, "Blueprints and builds for housing and guild halls"),
     ALCHEMY("Alchemy", SkillPillar.CRAFTING, "Volatile transmutations and advanced battle concoctions"),
+    JEWELCRAFTING("Jewelcrafting", SkillPillar.CRAFTING, "Cut gems and combine with metals for magical accessories"),
+    TINKERING("Tinkering", SkillPillar.CRAFTING, "Build gadgets, clockwork automations, and explosives"),
+    ENCHANTING("Enchanting", SkillPillar.CRAFTING, "Imbue gear with runes and magical essences for stats"),
 
     // Combat
     ATTACK("Attack", SkillPillar.COMBAT, "Melee accuracy and damage"),
@@ -44,6 +49,7 @@ enum class SkillId(
     CONSTITUTION("Constitution", SkillPillar.COMBAT, "Health regeneration and status resilience"),
     SORCERY("Sorcery", SkillPillar.COMBAT, "Offensive spellcasting fueled by runes and focus"),
     SLAYER("Slayer", SkillPillar.COMBAT, "Bounty tasks against specific foes for unique rewards"),
+    MARTIAL_ARTS("Martial Arts", SkillPillar.COMBAT, "Unarmed combat techniques and chi-powered strikes"),
 
     // Support
     AGILITY("Agility", SkillPillar.SUPPORT, "Movement speed and action efficiency"),
@@ -56,6 +62,8 @@ enum class SkillId(
     RESEARCH("Research", SkillPillar.SUPPORT, "Passive knowledge tree unlocks across skills"),
     LEADERSHIP("Leadership", SkillPillar.SUPPORT, "Companions, morale, and group efficiency"),
     RESONANCE("Resonance", SkillPillar.SUPPORT, "Build momentum and global haste from focused action"),
+    DIVINATION("Divination", SkillPillar.SUPPORT, "Foresee random events, track rare spawns, and boost luck"),
+    BARDING("Barding", SkillPillar.SUPPORT, "Perform instrumental music for long-lasting offline party buffs"),
 
     // Cosmic
     CHAOS_THEORY("Chaos Theory", SkillPillar.COSMIC, "Embrace randomness and serendipitous outcomes"),

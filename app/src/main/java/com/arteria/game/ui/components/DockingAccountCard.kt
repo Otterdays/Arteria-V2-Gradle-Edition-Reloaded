@@ -141,6 +141,7 @@ fun DockingAccountCard(
     onClick: () -> Unit,
     entryIndex: Int = 0,
     showTimelineConnectorBelow: Boolean = true,
+    avatarIcon: String = "▶",
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -351,7 +352,7 @@ fun DockingAccountCard(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = "▶",
+                                        text = avatarIcon,
                                         color = gradient.accent,
                                         style = MaterialTheme.typography.titleMedium,
                                     )

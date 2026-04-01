@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,10 +11,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,23 +36,12 @@ fun OpenSourceNoticesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ArteriaContentColors.secondary(),
-                )
-            }
-            Text(
-                "OPEN SOURCE",
-                style = MaterialTheme.typography.labelSmall,
-                color = ArteriaPalette.Gold,
-            )
-        }
+        PanelBackHeader(
+            title = "Open Source",
+            overline = "LIBRARIES",
+            onBack = onBack,
+            backTint = ArteriaContentColors.secondary(),
+        )
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -101,23 +85,12 @@ fun CreditsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ArteriaContentColors.secondary(),
-                )
-            }
-            Text(
-                "CREDITS",
-                style = MaterialTheme.typography.labelSmall,
-                color = ArteriaPalette.Gold,
-            )
-        }
+        PanelBackHeader(
+            title = "Credits",
+            overline = "PROJECT",
+            onBack = onBack,
+            backTint = ArteriaContentColors.secondary(),
+        )
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())

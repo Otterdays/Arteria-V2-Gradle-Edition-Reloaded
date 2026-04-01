@@ -6,6 +6,7 @@
 |------|-------|-----------------|--------------|
 | 2026-04-01 | Cursor Agent | Composer | Initial **SKILLS_EXPANSION_NATIVE.md**: V1 design sources → V2 native playbook; roster vs implementation; vertical-slice steps; synergy/UI deferrals; cross-links to bundled V1 DOCU. |
 | 2026-04-01 | Cascade | SWE-1.5 | Added **Section 7**: Prioritized skill expansion recommendations; skill split proposals (Firemaking → Bonfire Craft, Runecrafting → Glyph Inscription); implementation phases; synergy opportunities. |
+| 2026-04-01 | opencode | qwen3.6-plus-free | **Section 9**: New skill recommendations (Gemcutting, Salvaging, Jewelcrafting); economy loop analysis; checklist status audit; game mode integration notes; v1.5.0 feature hooks. |
 
 *Future contributors: append a row when you materially change this doc.*
 
@@ -41,12 +42,42 @@ These exist in the `SkillId` enum but lack data, or are identified for **2-out-o
 | :--- | :--- | :--- |
 | **Gathering** | **Farming** | Split into **Agriculture** (Crops) and **Husbandry** (Animals). |
 | **Gathering** | **Thieving** | Expand into **Pickpocketing** (Fast) and **Infiltration** (High-stakes). |
+| **Gathering** | **Trapping** | Set snares. Standalone passive loops yielding game, pelts, and rare meats. |
+| **Gathering** | **Siphoning** | Extract magical essences and planar residue. Feeds Enchanting and Cosmic loops. |
+| **Crafting** | **Runecrafting** | Crafting runes from essence. Could split to **Essence Mining** (Gathering) + **Runecrafting**. |
+| **Crafting** | **Forging** | Capstone metalworking. Uses bars from **Smithing** to craft weapons/armor. |
+| **Crafting** | **Firemaking** | Utility loop. Enhances camping/offline buffs. Provides ashes for **Alchemy**. |
+| **Crafting** | **Woodworking** | Refines logs into staves, bows, and shields. Feeds **Fletching** and **Magic**. |
 | **Crafting** | **Tailoring** | Split into **Weaving** (Refining fibers) and **Leatherworking** (Gear). |
+| **Crafting** | **Fletching** | Ranged gear creation. Arrows, bolts, darts. Depends on **Woodworking** & **Smithing**. |
 | **Crafting** | **Construction** | Split into **Masonry** (Structures) and **Carpentry** (Furniture/Utility). |
-| **Crafting** | **Forging** | Extension of Smithing; focused on high-tier equipment crafting. |
+| **Crafting** | **Alchemy** | Extension of Herblore. Transmutations and volatile battle concoctions. |
+| **Crafting** | **Jewelcrafting**| Cuts gems (from Mining) & pairs with bars to make magical accessories. High value sink. |
+| **Crafting** | **Tinkering** | Uses salvage to build automated resource-collectors, bombs, and clockwork gadgets. |
+| **Crafting** | **Enchanting** | Imbues gear with magical stats. Consumes runes and siphoned essences. |
+| **Combat** | **Melee (Attack/Str/Def)** | Core combat loop. Requires gear from **Forging**. |
+| **Combat** | **Hitpoints / Constitution**| Vitality and health regen modifiers. |
+| **Combat** | **Ranged** | Ranged combat. Requires ammo from **Fletching**. |
+| **Combat** | **Sorcery** | Spellcasting loop. Requires runes from **Runecrafting**. |
+| **Combat** | **Slayer** | Bounty loop. Talk to NPC → get target → fight → earn unique drops & craft Slayer gear. |
+| **Combat** | **Martial Arts** | Unarmed combat. No-gear entry point; feeds `UNARMED` mastery. Chi Wraps from Tailoring. |
+| **Support** | **Agility** | Global action speed modifiers. Obstacle courses (mini-game slice). |
+| **Support** | **Wizardry** | Arcane research. Unlocks spells for **Sorcery** and recipes for **Alchemy**. |
 | **Support** | **Exploration** | Split into **Cartography** (Map nodes) and **Archaeology** (Rare relics). |
-| **Support** | **Barter** | Trade routes, NPC favors, and economy management. |
-| **Cosmic** | **All Cosmic** | Late-game "Prestige" layer; requires multi-skill mastery. |
+| **Support** | **Astrology** | Passive buffs via star sign studying. Slow, low-interaction background skill. |
+| **Support** | **Summoning** | Pet/Familiar loop. Requires charms (Combat drops) + items to make pouches. |
+| **Support** | **Cleansing** | Item purification. Removing curses from corrupted loot. |
+| **Support** | **Barter** | Trade routes, NPC favors, merchant contracts, and economy management. |
+| **Support** | **Research** | Talent tree points. Passive knowledge accumulation over time. |
+| **Support** | **Leadership** | Companion management. Sending idle NPCs on missions (Expedition slice). |
+| **Support** | **Resonance** | Global aura / tempo management. Haste buffs based on continuous interaction. |
+| **Support** | **Divination** | Predict random events, track rare spawns, and significantly boost luck-based drops. |
+| **Support** | **Barding** | Perform music using crafted instruments to provide extensive offline party-buffs. |
+| **Cosmic** | **Chaos Theory** | Endgame RNG manipulation and drop-rate boosters. |
+| **Cosmic** | **Aether Weaving** | Tier 8+ legendary gear creation, overriding normal crafting caps. |
+| **Cosmic** | **Void Walking** | Portal unlocking, instanced raid tier access. |
+| **Cosmic** | **Celestial Binding** | Spirit contracts for permanent offline automation. |
+| **Cosmic** | **Chronomancy** | Time skip economy, offline tick acceleration. |
 
 ---
 
@@ -94,7 +125,22 @@ Bundled under **`DOCS/ARTERIA-V1-DOCS/DOCU/`** (mirror of monorepo `DOCU/`; if t
 
 ---
 
-## 4) Checklist — ship a new trainable skill (implementation)
+## 4) Expansion Strategy: The "2-out-of-1" Split
+To maintain **KISS** codebases, we break complex "Mega-Skills" into focused loops. This allows each skill to stay under file-length limits and creates clear economy interlocks.
+
+### 🛡️ Example: Tailoring → Weaving + Leatherwork
+- **Level 1 (Direct Implementation):** Take fibers (from Harvesting) or wool (from Husbandry) and process them in **Weaving** (Refining-class).
+- **Level 2 (Economy Bridge):** Use the woven bolts in **Tailoring** (Crafting-class) to make bags or armor.
+- **Why:** Keeps refining logic (timers, materials) separate from crafting logic (blueprints, equipment tiers).
+
+### 🐄 Example: Farming → Agriculture + Husbandry
+- **Agriculture**: High-volume/fast cycles for food/herbs.
+- **Husbandry**: High-value/slow "App" slice. Raising animals on timers to harvest hides/wool.
+- **Why:** Husbandry acts as the cornerstone to the **Leather/Tailoring** loop, while Agriculture sustains **Cooking/Alchemy**.
+
+---
+
+## 5) Checklist — ship a new trainable skill (implementation)
 
 1. Confirm **`SkillId` exists** (add enum entry only if missing — order with pillar group).
 2. Add **`YourSkillData.kt`** in `core/src/main/kotlin/com/arteria/game/core/data/`: `items`, `actions`, `actionRegistry` (follow `MiningData` / `CookingData` patterns).
@@ -107,7 +153,7 @@ Bundled under **`DOCS/ARTERIA-V1-DOCS/DOCU/`** (mirror of monorepo `DOCU/`; if t
 
 ## 5) Recent product expansion context (handoff)
 
-**`[AMENDED 2026-04-01]:`** Scratchpad credits mention **v1.5.0 QoL** work (achievements, random events, equipment, companions, prestige, bank UX, haptics). Those systems extend **meta / gear / narrative** layers in `:app`. This doc stays focused on **skill trainables** in `:core` + registry; cross-feature hooks (e.g. achievements on level-up) should be documented in **`ARCHITECTURE.md`** / **`SCRATCHPAD.md`** as those modules stabilize.
+**`[AMENDED 2026-04-01]:`** v1.5.0 shipped: achievements, random events, equipment system (4 slots, 19 items), companions/familiars (11 companions, 5 rarities), prestige/ascension (6 perks), bank search/sort/withdraw, haptics. Game modes added to account creation (Standard, Ironclad 🔒, Void-Touched 🔒). Equipment and Companion systems create new economy edges — skills should now consider gear inputs and companion bonuses. Random events provide a hook for skill-specific event triggers.
 
 ---
 
@@ -226,3 +272,220 @@ From **`SYNERGIES.md`**, these synergies become available with recommended skill
 | Construction | Lumberjack chain (Logging + Woodworking + Construction) |
 
 **Recommendation:** Start with **Fletching** and **Firemaking** as they perfectly demonstrate the "reuse economy edges" principle and activate existing designed synergies.
+
+---
+
+## 8) Weapon & Tool Mastery — Sub-Progression System
+
+**`[ADDED 2026-04-01]:`** A parallel XP layer that ticks **alongside** main skills. Using a specific weapon or tool type repeatedly levels up your **mastery** for that category, granting passive bonuses. This is NOT a new `SkillId` per weapon — it's a separate, lightweight progression.
+
+### 8.1 Design Philosophy
+
+The main skill system answers **"what can you do?"** — Mastery answers **"how good are you with this specific thing?"**
+
+- **Attack** determines melee accuracy globally. **Sword Mastery** gives a bonus *on top* when wielding swords specifically.
+- **Mining** determines what ores you can mine. **Pickaxe Mastery** makes you mine them faster.
+- This creates a "depth over breadth" choice: a player who always mines with the same pickaxe tier becomes a specialist.
+
+### 8.2 Weapon Categories (Combat)
+
+| Category | Weapon Examples | Primary Skill Fed |
+|----------|-----------------|-------------------|
+| `SWORD` | Longsword, Shortsword, Scimitar, Rapier | Attack |
+| `DAGGER` | Bronze Dagger, Rune Dagger, Poisoned Stiletto | Attack (fast/crit) |
+| `AXE` | Battle Axe, War Axe, Great Axe | Strength |
+| `MACE` | Mace, Warhammer, Flail | Strength (armor crush) |
+| `SPEAR` | Spear, Halberd, Javelin | Attack + Defence |
+| `BOW` | Shortbow, Longbow, Composite Bow | Ranged |
+| `CROSSBOW` | Light Crossbow, Heavy Crossbow, Repeater | Ranged |
+| `STAFF` | Mystic Staff, Elemental Rod, Wand | Sorcery |
+| `UNARMED` | Fists, Knuckles, Chi Wraps | Martial Arts |
+| `SHIELD` | Buckler, Kite Shield, Tower Shield | Defence |
+| `THROWN` | Throwing Knife, Throwing Axe, Dart | Ranged (short range) |
+
+### 8.3 Tool Categories (Skilling)
+
+| Category | Tool Examples | Primary Skill Fed |
+|----------|---------------|-------------------|
+| `PICKAXE` | Bronze Pickaxe … Rune Pickaxe … Dragon Pickaxe | Mining |
+| `HATCHET` | Bronze Hatchet … Adamant Hatchet … Crystal Hatchet | Logging |
+| `FISHING_ROD` | Basic Rod, Fly Rod, Harpoon, Net | Fishing |
+| `HAMMER` | Smithing Hammer, Forging Hammer | Smithing / Forging |
+| `NEEDLE` | Bone Needle, Steel Needle | Tailoring |
+| `CHISEL` | Gem Chisel, Stone Chisel | Jewelcrafting / Construction |
+| `TINDERBOX` | Tinderbox, Flint & Steel, Ignition Kit | Firemaking |
+| `SICKLE` | Herb Sickle, Golden Sickle | Harvesting / Farming |
+
+### 8.4 Mastery Mechanics
+
+```
+MasteryCategory  (enum)   — SWORD, DAGGER, AXE, PICKAXE, HATCHET, etc.
+MasteryState     (data)   — category, xp: Double, unlockedPerks: Set<String>
+```
+
+**XP ticking:** Every time `TickEngine` completes a `SkillAction`, if the player has a tool/weapon equipped, a **fraction** of the main skill XP also goes to the mastery category. Suggested ratio: **~20% of base XP**.
+
+**Mastery levels:** Same `XPTable` curve but scaled (mastery 1–50, not 1–99). Milestones at:
+
+| Mastery Level | Passive Bonus |
+|---------------|---------------|
+| 5 | +2% action speed with this type |
+| 10 | +5% action speed, minor resource bonus |
+| 15 | Unlock "Specialization" perk slot |
+| 25 | +10% speed, chance at double resource |
+| 35 | Unlock "Expertise" perk slot |
+| 50 (cap) | Title + cosmetic + permanent 15% speed bonus |
+
+### 8.5 Backend Model (`:core` proposal)
+
+```kotlin
+// core/.../skill/MasteryCategory.kt
+enum class MasteryCategory(val displayName: String) {
+    // Weapons
+    SWORD("Sword"), DAGGER("Dagger"), AXE("Axe"),
+    MACE("Mace"), SPEAR("Spear"), BOW("Bow"),
+    CROSSBOW("Crossbow"), STAFF("Staff"),
+    UNARMED("Unarmed"), SHIELD("Shield"), THROWN("Thrown"),
+    // Tools
+    PICKAXE("Pickaxe"), HATCHET("Hatchet"),
+    FISHING_ROD("Fishing Rod"), HAMMER("Hammer"),
+    NEEDLE("Needle"), CHISEL("Chisel"),
+    TINDERBOX("Tinderbox"), SICKLE("Sickle"),
+}
+
+// core/.../model/GameModels.kt  (extend GameState)
+data class MasteryState(
+    val category: MasteryCategory,
+    val xp: Double = 0.0,
+)
+
+// In GameState — add:
+//   val masteries: Map<MasteryCategory, MasteryState>
+
+// SkillAction — add optional field:
+//   val masteryCategory: MasteryCategory? = null
+```
+
+**TickEngine change (minimal):** After awarding main skill XP, if `action.masteryCategory != null`, award `xpPerAction * 0.20` to that mastery. The mastery XP table can reuse `XPTable` with a different max level cap.
+
+**Persistence:** New Room entity `mastery_states` table (category string PK, xp double). Merged into `GameState` on load, same pattern as `skill_states`.
+
+### 8.6 Combat Skill Addition: Martial Arts
+
+Added `MARTIAL_ARTS` to the Combat pillar in `SkillId.kt`:
+
+- **Fantasy:** Unarmed combat, chi-powered strikes, discipline-based progression
+- **Why separate from Attack/Strength:** Unarmed doesn't use weapon mastery — it IS the mastery. No equipment dependency makes it a "pure skill" alternative
+- **Economy:** Requires no crafted gear to start (low barrier), but Tailoring can make Chi Wraps / Gi armor sets that boost it
+- **Mastery link:** Feeds `UNARMED` mastery category exclusively
+
+### 8.7 Implementation Priority
+
+The mastery system is **Phase 7+** — it layers on TOP of the existing skill loop and should NOT block any skill data additions. The design is documented here so that when `SkillAction` data files are written, they can optionally tag `masteryCategory` even before the mastery tracking code exists.
+
+**Step 0 (now):** Add `masteryCategory` field to `SkillAction` as `null` default — zero runtime impact.  
+**Step 1:** Add `MasteryCategory` enum to `:core`.  
+**Step 2:** Add `MasteryState` model + Room entity.  
+**Step 3:** `TickEngine` awards mastery XP alongside skill XP.  
+**Step 4:** UI — mastery level display on `SkillDetailScreen` tool/weapon section.
+
+---
+
+## 9) New Skill Recommendations — Post-v1.5.0 Economy Analysis
+
+**`[ADDED 2026-04-01]:`** After shipping Equipment, Companions, and Prestige systems, the economy has new sinks and sources. Here are skills that close the loops.
+
+### 9.1 Critical Economy Gaps (Post-v1.5.0)
+
+**The problem:** Players can mine, log, fish, harvest, scavenge, smelt, cook, and brew — but most outputs just sit in the bank. Equipment exists but has no crafting path. Companions exist but no recruitment mechanic. Prestige exists but no gear to keep.
+
+**What's missing:**
+1. **Gem processing** — Mining produces ores but gems are untapped
+2. **Equipment crafting** — Bars exist, gear exists, no bridge between them
+3. **Companion recruitment** — Companions exist as a system but no way to earn them
+4. **Gear dismantling** — Equipment can be equipped but not broken down for materials
+
+### 9.2 Recommended New Skills
+
+#### 9.2.1 Gemcutting (Crafting Pillar) — HIGH PRIORITY
+- **Fantasy:** Cut raw gems into faceted stones for jewelry, enchantments, and trade
+- **Inputs:** Raw gems from Mining (add `raw_sapphire`, `raw_ruby`, `raw_emerald`, `raw_diamond`, `raw_dragonstone` to MiningData)
+- **Outputs:** `cut_sapphire`, `cut_ruby`, `cut_emerald`, `cut_diamond`, `cut_dragonstone`
+- **Why now:** Mining already has gem-tier ore progression. Gemcutting creates a parallel track that feeds Jewelcrafting and Enchanting. Pure `inputItems` → `resourceId` flow — zero new mechanics.
+- **File count:** 1 new `GemcuttingData.kt` (~60 lines)
+- **Synergy:** Feeds Jewelcrafting → Equipment accessories → Prestige perks
+
+#### 9.2.2 Forging (Crafting Pillar) — HIGH PRIORITY
+- **Fantasy:** Hammer bars into weapons, armor, and tools
+- **Inputs:** Bars from Smithing (bronze_bar, iron_bar, steel_bar, etc.)
+- **Outputs:** Equipment items (`bronze_sword`, `iron_pickaxe`, `steel_armor`, etc.) — these are the same IDs used by `EquipmentRegistry`
+- **Why now:** Equipment system is live with 19 items but no way to craft them. Forging closes the biggest economy gap: ore → bar → gear. This is the single highest-impact skill addition.
+- **File count:** 1 new `ForgingData.kt` (~120 lines for 8 tiers × 3 item types)
+- **Synergy:** Smithing → Forging → Equipment → Combat. Full production chain.
+
+#### 9.2.3 Salvaging (Gathering Pillar) — MEDIUM PRIORITY
+- **Fantasy:** Dismantle broken gear, ruins, and artifacts for rare components
+- **Inputs:** None (pure gathering from world nodes)
+- **Outputs:** `scrap_metal`, `enchanted_dust`, `ancient_rune_fragment`, `void_shard`, `spirit_essence`
+- **Why now:** Scavenging covers surface oddments. Salvaging is the "deep" variant — dismantling high-value targets. Feeds Forging with rare materials and Enchanting with magical components.
+- **File count:** 1 new `SalvagingData.kt` (~80 lines)
+- **Note:** This is a rename/split of the existing `SCAVENGING` enum entry's scope. Keep Scavenging as "surface foraging," add Salvaging as "deep dismantling."
+
+#### 9.2.4 Jewelcrafting (Crafting Pillar) — MEDIUM PRIORITY
+- **Fantasy:** Combine cut gems with bars to create magical rings, amulets, and equipment accessories
+- **Inputs:** Cut gems (Gemcutting) + bars (Smithing)
+- **Outputs:** `sapphire_ring`, `ruby_amulet`, `diamond_bracelet`, `dragonstone_pendant` — these map to `EquipmentRegistry` accessory items
+- **Why now:** Equipment has an ACCESSORY slot with items like `amulet_of_accuracy` and `ring_of_fortune`. Jewelcrafting is the crafting path for these.
+- **File count:** 1 new `JewelcraftingData.kt` (~80 lines)
+- **Synergy:** Mining → Gemcutting → Jewelcrafting → Equipment. Full gem pipeline.
+
+#### 9.2.5 Firemaking (Crafting Pillar) — LOW PRIORITY (but easy)
+- **Fantasy:** Burn logs for light, heat, and utility buffs
+- **Inputs:** Logs from Logging (normal_logs, oak_logs, willow_logs, etc.)
+- **Outputs:** `ashes`, `warmth_buff` (temporary), `cooked_food_bonus` (when near fire)
+- **Why it's easy:** Pure `inputItems` consumption. No new outputs needed beyond ashes (feeds Alchemy).
+- **File count:** 1 new `FiremakingData.kt` (~50 lines)
+- **Synergy:** Logging → Firemaking → Alchemy (ashes). "Flame & Feast" synergy with Cooking.
+
+### 9.3 Skill Split Reflections
+
+**Firemaking → Firemaking + Bonfire Craft:** The split makes sense at scale but is premature. Ship base Firemaking first (logs → ashes/buffs), then add Bonfire Craft as a level-50+ sub-skill that combines multiple log types for area buffs. Don't split before the base exists.
+
+**Runecrafting → Essence Mining + Runecrafting:** Essence Mining as a Gathering skill that feeds Runecrafting (Crafting) is a clean split. Essence Mining produces `pure_essence`, `chaotic_essence`, `cosmic_essence`. Runecrafting turns them into `air_rune`, `water_rune`, `fire_rune`, `chaos_rune`, etc. These runes feed Sorcery (Combat) and Enchanting (Crafting). This is Phase 2+, after Forging closes the equipment gap.
+
+**Farming → Agriculture + Husbandry:** The V1 docs explicitly call this split. Agriculture = plant/harvest crops (fast cycle, food/herb output). Husbandry = raise animals (slow cycle, hide/wool/meat output). Both are valid, but Husbandry requires a timer/growth system that doesn't exist yet. Ship Agriculture first (instant-node harvesting like current skills), add Husbandry when growth timers are implemented.
+
+### 9.4 Implementation Priority Order
+
+| Priority | Skill | Lines of Code | New Mechanics | Economy Impact |
+|----------|-------|---------------|---------------|----------------|
+| **1** | Forging | ~120 | None (pure inputItems) | **Critical** — closes equipment gap |
+| **2** | Gemcutting | ~60 | None | **High** — unlocks gem pipeline |
+| **3** | Firemaking | ~50 | None | **Medium** — log sink, ash source |
+| **4** | Jewelcrafting | ~80 | None | **High** — accessory crafting |
+| **5** | Salvaging | ~80 | None | **Medium** — rare material source |
+| **6** | Fletching | ~80 | None | **Medium** — ranged ammo pipeline |
+| **7** | Agriculture | ~70 | Growth timers (deferred) | **Medium** — crop pipeline |
+| **8** | Essence Mining | ~60 | None | **Low** — rune pipeline prep |
+| **9** | Runecrafting | ~90 | None | **Low** — Sorcery dependency |
+
+**Total for Phase 1 (Forging + Gemcutting + Firemaking): ~230 lines across 3 files.** All pure `inputItems` → `resourceId` — zero new TickEngine mechanics.
+
+### 9.5 Checklist Status Audit
+
+Cross-referencing `claudes_checklist_by_ryan.md` against current state:
+
+| Section | Status | Notes |
+|---------|--------|-------|
+| 6. Bank Screen Upgrade | **6d ✅** (search/filter shipped) | 6a (categories), 6b (icons), 6c (craftable badge), 6e (detail sheet) remain |
+| 7. Skill Detail Polish | **7a ✅** (locked actions shown) | 7b (XP/hr), 7c (best action badge), 7d (input availability), 7e (lore blurb) remain |
+| 8. Combat Screen | ❌ Not started | All 5 items open |
+| 9. Playtime Tracking | ❌ Not started | All 5 items open |
+| 10. Visual Juice | ❌ Not started | All 5 items open |
+| 11. Cosmetics | ❌ Not started | All 5 items open |
+| 12. Daily Challenges | ❌ Not started | All 5 items open |
+| 13. Prestige | **13a ✅** (model + UI shipped) | 13b-13e (badge, milestones, confirm dialog, catch-up) remain |
+| 14. Mastery Trees | ❌ Not started | All 5 items open (Section 8 of this doc has the design) |
+| 15. Companion Pets | **15a ✅** (model + UI shipped) | 15b-15e (recruitment, passive bonuses, pet widget, cosmetics) remain |
+
+**Shipped: 4/75 items. Open: 71/75.** The biggest wins for effort are 7b (XP/hr — 1 line of math), 7d (input availability — bank lookup), and 6c (craftable badge — registry scan).
