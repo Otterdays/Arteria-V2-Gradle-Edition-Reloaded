@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,11 +81,14 @@ fun GameScreen(
     )
     val gameState by gameViewModel.gameState.collectAsStateWithLifecycle()
     val offlineReport by gameViewModel.offlineReport.collectAsStateWithLifecycle()
+    val activeRandomEvent by gameViewModel.activeRandomEvent.collectAsStateWithLifecycle()
+    val achievements by gameViewModel.achievements.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var expandedSkillId by remember { mutableStateOf<SkillId?>(null) }
     var comingSoonSkillId by remember { mutableStateOf<SkillId?>(null) }
     var showSettings by remember { mutableStateOf(false) }
+    var showChronicle by remember { mutableStateOf(false) }
 
     // Track recent level-ups for the Hub screen (1g)
     val recentLevelUps = remember { mutableStateListOf<Pair<SkillId, Int>>() }
@@ -112,8 +116,9 @@ fun GameScreen(
         }
     }
 
-    // Close settings, coming-soon dialog, or skill detail (settings takes priority)
+    // Close settings, coming-soon dialog, chronicle, or skill detail (settings takes priority)
     BackHandler(enabled = showSettings) { showSettings = false }
+    BackHandler(enabled = showChronicle && !showSettings) { showChronicle = false }
     BackHandler(enabled = comingSoonSkillId != null && !showSettings) {
         comingSoonSkillId = null
     }
@@ -132,9 +137,32 @@ fun GameScreen(
         }
     }
 
+    LaunchedEffect(gameViewModel) {
+        gameViewModel.newlyUnlockedAchievements.collect { progress ->
+            if (userPrefsRepository.userPreferences.first().hapticsEnabled) {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+            val achievement = com.arteria.game.core.data.AchievementRegistry.getById(progress.achievementId)
+            if (achievement != null) {
+                snackbarHostState.showSnackbar(
+                    "Achievement unlocked: ${achievement.title}",
+                )
+            }
+        }
+    }
+
     val darkSpace = LocalArteriaDarkSpace.current
     val bgBrush = rememberArteriaSpaceBackgroundBrush(darkSpace)
     val scaffoldBg = if (darkSpace) ArteriaPalette.BgDeepSpaceTop else ArteriaPalette.LightSpaceTop
+
+    // Chronicle overlay — full-screen, sits above game content
+    if (showChronicle) {
+        ChronicleScreen(
+            achievements = achievements,
+            modifier = Modifier.background(bgBrush),
+        )
+        return
+    }
 
     // Settings overlay — full-screen, sits above game content
     if (showSettings) {
@@ -174,6 +202,15 @@ fun GameScreen(
         SkillComingSoonDialog(
             skillId = pendingComingSoon,
             onDismiss = { comingSoonSkillId = null },
+        )
+    }
+
+    // Random event dialog
+    val pendingEvent = activeRandomEvent
+    if (pendingEvent != null) {
+        RandomEventDialog(
+            activeEvent = pendingEvent,
+            onDismiss = gameViewModel::dismissRandomEvent,
         )
     }
 
@@ -228,6 +265,12 @@ fun GameScreen(
                             )
                         },
                         actions = {
+                            IconButton(onClick = { showChronicle = true }) {
+                                Text(
+                                    text = "🏆",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                             IconButton(onClick = { showSettings = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Settings,

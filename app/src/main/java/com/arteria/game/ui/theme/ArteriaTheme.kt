@@ -50,6 +50,14 @@ object ArteriaPalette {
     /** Combat pillar accent (skills grid / detail headers). */
     val CombatAccent = Color(0xFFE74C3C)
 
+    /** Glassmorphism surface tokens — subtle translucency layer. */
+    val GlassOverlay = Color(0x0AFFFFFF)   // ~4% white
+    val GlassHighlight = Color(0x14FFFFFF) // ~8% white
+
+    /** Light-mode glass counterparts. */
+    val LightGlassOverlay = Color(0x08000000)   // ~3% black
+    val LightGlassHighlight = Color(0x0D000000) // ~5% black
+
     /** Day / follow-system light shell (game + settings + docking). */
     val LightSpaceTop = Color(0xFFE4E9F5)
     val LightSpaceMid = Color(0xFFD4DCEF)

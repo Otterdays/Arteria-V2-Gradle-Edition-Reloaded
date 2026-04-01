@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | Added **[SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md)** (V1 DOCU → V2 skill playbook); doc index + read-order row. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Amended hub: local checkout folder name `Arteria-V2-Gradle-Edition-Reloaded` vs doc `Arteria-Gradle-Edition-V2/` alias. |
 | 2026-03-30 | Cursor Agent | Composer | Initial `DOCS/SUMMARY.md` — V2 hub, canonical paths, AI workflow for features/QoL/UI. |
 
@@ -43,6 +44,7 @@
 | 3 | [ARCHITECTURE.md](ARCHITECTURE.md) | Stack decisions, RN vs native split, module layout. |
 | 4 | [MIGRATION_SPEC.md](MIGRATION_SPEC.md) | How to translate RN + TypeScript engine patterns → Kotlin / Compose. |
 | 5 | [SBOM.md](SBOM.md) | Toolchain and dependency versions — verify before changing Gradle or SDKs. |
+| 6 | [SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md) | **Skill roster vs trainables:** V1 `DOCU` references (workbench UI, skilling guides, synergies design-only) + native checklist to ship `*Data.kt` + registry. **`[AMENDED 2026-04-01]:`** |
 
 ---
 
@@ -79,7 +81,7 @@
 - [x] Add/refresh initial tests for `TickEngine` and `GameRepository`; fix `AccountViewModelTest`.
 - [ ] Run manual device smoke test (account create/select -> enter game -> switch account).
 - [ ] Add/refresh `GameViewModel` behavior tests (offline load, training start/stop, save cadence).
-- [ ] Decide whether domain code remains in `app/.../core` or is moved into `:core` module.
+- [x] **`[DONE 2026-04-01]:`** Domain engine moved into Gradle **`:core`** JVM module (`core/src/main/kotlin/com/arteria/game/core/`); `:app` uses `implementation(project(":core"))`.
 
 ---
 
@@ -87,6 +89,7 @@
 
 | Doc | Role |
 |-----|------|
+| **SKILLS_EXPANSION_NATIVE.md** | V1-informed playbook for expanding **trainable** skills on native V2 (`SkillId` vs `SkillDataRegistry`, `TickEngine`, checklist). **`[AMENDED 2026-04-01]:`** |
 | **SUMMARY.md** | This hub — paths, reading order, AI alignment. |
 | **SCRATCHPAD.md** | Live handoff. |
 | **ROADMAP.md** | Full phased plan. |

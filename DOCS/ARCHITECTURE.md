@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **`DOCS/SKILLS_EXPANSION_NATIVE.md`:** V1→V2 skill expansion playbook; verification snapshot amended (`:core` JVM path, Hub 4-tab, link to new doc). |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: DataStore `UserPreferencesRepository`, `MainActivity` `ArteriaRoot` (theme/system + reduce motion locals), light `ArteriaTheme` + space brush; `GameViewModel` + `UserPreferencesProvider`, offline cap/report prefs; `GameRepository` reset/delete; profile `deleteById`; OSS/Credits overlays; danger zone; verification snapshot amended. |
 | 2026-04-01 | Cursor Agent | Composer | Settings V1 parity slice: profile rename (`ProfileDao.updateDisplayName`, `AccountViewModel`), `AccountSessionInfo` + `GameScreen`/`ArteriaApp` wiring; `SettingsScreen` About (`BuildConfig`), tick/save cadence copy, test sound; verification snapshot line amended. |
 | 2026-04-01 | Cursor Agent | Composer | Content note: `HerbloreData` / `ScavengingData` + registry wiring; verification snapshot amended for harvest→herb craft chain. |
@@ -28,7 +29,8 @@
 
 - **Verified against live code:** `ui/ArteriaApp.kt`, `navigation/NavRoutes.kt`, `ui/game/GameScreen.kt`, `ui/game/SettingsScreen.kt`.
 - **Active nav routes:** `account_select`, `account_create`, `game/{profileId}` (encoded by `NavRoutes.gamePath()`).
-- **Game shell shape:** 3-tab content (`Skills`, `Bank`, `Combat`) + `TopAppBar` settings entry.
+- **Game shell shape:** **`[AMENDED 2026-04-01]:`** 4-tab hub (`Hub`, `Skills`, `Bank`, `Combat`) + `TopAppBar` settings entry (older “3-tab” lines in this file are superseded).
+- **Skill expansion playbook:** `DOCS/SKILLS_EXPANSION_NATIVE.md` — how `SkillId` roster relates to `SkillDataRegistry`, V1 `DOCU` references, and ship checklist. **`[AMENDED 2026-04-01]:`**
 - **`[AMENDED 2026-03-31]:`** **Skills tab:** taps on skills with no actions in `SkillDataRegistry` show `SkillComingSoonDialog` (Compose `Dialog`, back-dismissible); implemented skills still push `SkillDetailScreen` via `GameScreen` `AnimatedContent`. Same overlay family as `OfflineReportDialog` (offline gains).
 - **`[AMENDED 2026-04-01]:`** **Skill content:** `HerbloreData` brews potions using `HarvestingData` item ids in `SkillAction.inputItems` (consumed in `TickEngine` from bank); `ScavengingData` is pure gathering like `LoggingData`.
 - **Settings flow:** full-screen overlay, back-dismissible, with nested `ChangelogScreen` overlay from “What's New”.
@@ -48,9 +50,9 @@
 | Core package | `com.arteria.game.core` |
 | UI stack | Jetpack Compose + Navigation Compose |
 | Persistence | Room (`arteria_profiles.db`, `arteria_game.db`) |
-| Modules | `:app` (active), `:core` (present, minimal) |
+| Modules | `:app` (Android UI + Room), `:core` (JVM Kotlin engine + skill data) **`[AMENDED 2026-04-01]:`** |
 | Toolchain | Gradle 9.6 nightly, AGP 9.1, JDK 21 |
-| Current gameplay state | Account/profile flow live + in-app game hub (bottom nav: Skills/Bank/Combat; settings via `TopAppBar` overlay) |
+| Current gameplay state | Account/profile flow live + in-app game hub (bottom nav: Hub/Skills/Bank/Combat; settings via `TopAppBar` overlay) **`[AMENDED 2026-04-01]:`** |
 
 ---
 
@@ -85,7 +87,7 @@ Android OS
 | Navigation/UI composition | `app/src/main/java/com/arteria/game/ui/ArteriaApp.kt` | Builds `NavHost`, wires VM to screens, route transitions |
 | App entry / theme locals | `app/src/main/java/com/arteria/game/MainActivity.kt` | `ArteriaRoot`: collects DataStore prefs, resolves light/dark + reduce motion, provides `LocalUserPreferencesRepository` / `LocalArteriaDarkSpace` / `LocalReduceMotion`, wraps `ArteriaTheme` |
 | User preferences (DataStore) | `app/src/main/java/com/arteria/game/data/preferences/*` | `UserPreferences`, `UserPreferencesRepository` (`user_preferences` file), `UserPreferencesProvider` adapter for `GameViewModel` |
-| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (Skills/Bank/Combat tabs), `TopAppBar` (account name + settings gear), `SettingsScreen` overlay (full-screen, back-dismissible), `OfflineReportDialog` / `SkillComingSoonDialog` (modal dialogs over hub), `SkillDetailScreen` (in-tab push for implemented skills) |
+| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (**Hub** / Skills / Bank / Combat tabs) **`[AMENDED 2026-04-01]:`**, `TopAppBar` (account name + settings gear), `SettingsScreen` overlay (full-screen, back-dismissible), `OfflineReportDialog` / `SkillComingSoonDialog` (modal dialogs over hub), `SkillDetailScreen` (in-tab push for implemented skills) |
 | UI Components | `app/src/main/java/com/arteria/game/ui/components/*` | `DockingBackground` (animated space backdrop), `DockingAccountCard` (glitch materialization + timeline sidebar + ambient selected-state), `DockingGlitch` (7-layer Canvas animation system: `GlitchMaterializeOverlay`, `AmbientScanOverlay`, `EntryAnimations`, `AmbientAnimations`, `GlitchLayout`), `DockingChrome` (title block, lore footer, new account slot) |
 | State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations; **`[AMENDED 2026-04-01]:`** `resolveSession`, `updateDisplayName` for in-game settings rename |
 | Navigation contracts | `app/src/main/java/com/arteria/game/navigation/NavRoutes.kt` | Route constants and encoded route-builder API |
@@ -93,8 +95,8 @@ Android OS
 | Persistence implementation | `app/src/main/java/com/arteria/game/data/profile/RoomProfileRepository.kt` | Room-backed implementation of profile operations |
 | Database schema/access | `app/src/main/java/com/arteria/game/data/profile/ProfileEntity.kt`, `ProfileDao.kt`, `ProfileDatabase.kt` | Entity model, queries, and Room database definition |
 | Game data persistence | `app/src/main/java/com/arteria/game/data/game/*` | Room-backed game state persistence per profile |
-| Gameplay domain/tick | `app/src/main/java/com/arteria/game/core/*` | Skill model, XP table, action data, and tick/offline simulation engine |
-| Reusable module | `core/build.gradle.kts` | Reserved for extracted engine/domain code; currently minimal |
+| Gameplay domain/tick | `core/src/main/kotlin/com/arteria/game/core/*` | Skill model, XP table, action data, and tick/offline simulation engine **`[AMENDED 2026-04-01]:`** Gradle `:core` JVM module |
+| Reusable module | `core/build.gradle.kts` | JVM Kotlin library (`kotlin("jvm")`, toolchain 21); `:app` → `implementation(project(":core"))` **`[AMENDED 2026-04-01]:`** |
 
 ---
 

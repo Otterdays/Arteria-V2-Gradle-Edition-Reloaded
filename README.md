@@ -63,6 +63,8 @@
 
 - **Idle Mechanics** — Offline progression, skill ticks, and resource generation
 - **Skills UX** — Implemented skills open training (`SkillDetailScreen`); skills without registry actions show a **Coming Soon** dialog (`SkillComingSoonDialog`). **Herblore** uses herbs from **Harvesting** (bank `inputItems`); **Scavenging** adds salvage gathering tiers.
+- **Game hub** — Four bottom tabs: **Hub** (dashboard, offline summary hooks, skill star map entry), **Skills**, **Bank**, **Combat** (placeholder).
+- **Settings & prefs** — DataStore-backed `UserPreferences` (theme, motion, haptics, sound, offline report); About uses `BuildConfig`; OSS **Credits / Licenses** screens.
 - **Account & Profile Persistence** — Room-based save/load with session management
 - **🎬 Docking Station UI** — Beautiful character selection with **animated glitch effects**, timeline visualizations, and skill badge showcases
 - **Jetpack Compose** — Modern declarative UI with Material Design 3
@@ -129,30 +131,35 @@ For full technical details, use `DOCS/ARCHITECTURE.md` and `CLAUDE.md` instead o
 
 ## 🏗️ Architecture
 
-### Current State (Phases 0–1)
+### Current State (runtime stack)
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │         Android OS (API 26–36)                       │
 ├─────────────────────────────────────────────────────┤
-│  MainActivity.kt  (ComponentActivity)                │
-│    ↓ (Compose)                                      │
-│  ArteriaApp (NavHost)                               │
-│    ├── 🎪 AccountSelectionScreen + Animation        │
-│    ├── 📝 AccountCreationScreen                      │
-│    ├── 🎮 GameScreen (3-tab hub: Skills/Bank/Combat; Coming Soon modal for stub skills)│
-│    ├── ⚙️  SettingsScreen (overlay)                  │
-│    └── 📜 ChangelogScreen (version history)         │
+│  MainActivity.kt (ComponentActivity)                 │
+│    ↓ Compose                                         │
+│  ArteriaApp (NavHost)                                │
+│    ├── AccountSelectionScreen + Docking animations │
+│    ├── AccountCreationScreen                         │
+│    ├── GameScreen — Hub / Skills / Bank / Combat    │
+│    ├── SettingsScreen (overlay) + UserPreferences   │
+│    └── ChangelogScreen                               │
 ├─────────────────────────────────────────────────────┤
-│  Room Database (Profile & Game Persistence)         │
-│    ├── ProfileEntity, ProfileDao, ProfileDB         │
-│    └── GameEntity, GameDao, GameDB                  │
+│  Persistence                                         │
+│    ├── Room — profiles + game state (skills, bank)   │
+│    └── DataStore — user preferences (UI / audio)     │
 ├─────────────────────────────────────────────────────┤
-│  :core Module (Android library, currently minimal)  │
-│    ├── SkillId, XPTable, TickEngine                 │
-│    └── MiningData, GameModels (domain types)        │
+│  Gradle :core (JVM Kotlin) — com.arteria.game.core.*  │
+│    TickEngine, XPTable, SkillId, GameModels,          │
+│    SkillDataRegistry + skill data; unit tests in      │
+│    core/src/test/kotlin (TickEngineTest, XPTableTest)  │
 └─────────────────────────────────────────────────────┘
 ```
+
+#### Engine module (`:core`)
+
+**`[AMENDED 2026-04-01]:`** Idle math and skill data live in **`core/src/main/kotlin/com/arteria/game/core/`** (Gradle **`:core`** JVM module). `:app` depends on **`implementation(project(":core"))`**. Run engine tests with **`./gradlew :core:test`**. Optional follow-up: deeper parity with monorepo `packages/engine` TypeScript tests.
 
 ### Toolchain Snapshot
 
@@ -203,7 +210,7 @@ Arteria-V2-Gradle-Edition-Reloaded/
 ├── README.md (this file)
 ├── settings.gradle.kts           # Gradle module declaration
 ├── build.gradle.kts              # Root config (plugins, versions)
-├── gradle.properties             # Gradle daemon settings (optional org.gradle.java.home)
+├── gradle.properties             # JVM args, Android flags (do not commit machine-specific JDK paths)
 ├── build-with-jdk26.bat          # Windows: run Gradle with JDK 26
 │
 ├── gradle/
@@ -225,14 +232,14 @@ Arteria-V2-Gradle-Edition-Reloaded/
 │       │   └── NavRoutes.kt                # Type-safe route encoding
 │       ├── data/
 │       │   ├── profile/                    # Room profile persistence
-│       │   └── game/                       # Room game state persistence
-│       └── core/                           # Domain logic (no Android imports)
-│           ├── skill/                      # SkillId, XPTable
-│           ├── engine/                     # TickEngine, offline simulation
-│           └── model/                      # GameModels, MiningData
+│       │   ├── game/                       # Room game state persistence
+│       │   └── preferences/                # DataStore UserPreferences
 │
-├── core/                          # Empty library module (:core)
-│   └── build.gradle.kts           # Reserved for extracted engine code
+├── core/                          # JVM Kotlin engine module (:core)
+│   ├── build.gradle.kts           # kotlin("jvm"), toolchain 21
+│   └── src/main/kotlin/com/arteria/game/core/
+│       ├── skill/ , engine/ , model/ , data/   # TickEngine, XP, registries
+│   └── src/test/kotlin/                     # TickEngineTest, XPTableTest
 │
 ├── DOCS/                          # Documentation hub
 │   ├── SUMMARY.md                 # AI read order + design doc paths
@@ -255,14 +262,14 @@ Arteria-V2-Gradle-Edition-Reloaded/
 1. **Respect boundaries**: UI composables don't call Room DAOs; they use ViewModels and StateFlow
 2. **Kotlin async**: Use `viewModelScope` only; never `GlobalScope`
 3. **Error handling**: Sealed `Result<T>` types; fail fast instead of silent failures
-4. **Testing**: Write unit tests for domain logic (`:core`), instrumented tests for Room
+4. **Testing**: Unit-test domain logic in `:core` (`./gradlew :core:test`); instrumented tests for Room in `:app`
 5. **Git commits**: Conventional Commits format (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`)
 
 ### Build Verification
 
 ```bash
-# Compile all modules
-./gradlew clean :app:compileDebugKotlin :core:compileDebugKotlin
+# Compile app + JVM :core
+./gradlew clean :core:compileKotlin :app:compileDebugKotlin
 
 # Assemble & verify
 ./gradlew :app:assembleDebug
@@ -282,7 +289,7 @@ Arteria-V2-Gradle-Edition-Reloaded/
 |-------|--------|---------|
 | **Phase 0** | ✅ DONE | Gradle 9.6 snapshot scaffold, AGP 9.1, JVM 21 target |
 | **Phase 1** | ✅ DONE | Compose shell, navigation, account persistence, animation system |
-| **Phase 2** | 🚧 IN PROGRESS | Engine port (TickEngine, XPTable, SkillId), unit tests |
+| **Phase 2** | ✅ DONE | Engine + tests in JVM `:core` (`core/src/main|test/kotlin`); `:app` depends on `project(":core")` — see [ROADMAP](DOCS/ROADMAP.md) **`[AMENDED 2026-04-01]`** |
 | **Phase 3** | ✅ DONE | UI screens (Skills, Bank, Combat) wired in game shell |
 | **Phase 4** | ✅ DONE | Room v2 migration + offline audit field; save/load + `OfflineReportDialog`; JVM + instrumented persistence tests — see [ROADMAP](DOCS/ROADMAP.md) |
 | **Phase 5** | 🚧 IN PROGRESS | Mining + bank vertical slice playable, polish/testing pending |
@@ -321,10 +328,11 @@ Arteria-V2-Gradle-Edition-Reloaded/
 ## 🐛 Troubleshooting
 
 ### Build fails with `JAVA_COMPILER missing`
-Your machine is using a **JRE** instead of a **JDK**. Point Gradle at a full JDK — **21** matches the daemon pin; **26** is fine if you run builds with `build-with-jdk26.bat` or set `org.gradle.java.home` yourself:
+Your machine is using a **JRE** instead of a **JDK**. Point Gradle at a full JDK — **21** matches the daemon pin; **26** is fine if you run builds with `build-with-jdk26.bat`. Prefer **`%USERPROFILE%\.gradle\gradle.properties`** for `org.gradle.java.home` so clones stay portable; avoid committing JDK paths in the project `gradle.properties`.
 
 ```properties
-org.gradle.java.home=C:/Program Files/Java/jdk-26
+# Example: user-level only (~/.gradle/gradle.properties on Unix)
+org.gradle.java.home=C:/Program Files/Java/jdk-21
 ```
 
 ### Gradle wrapper stuck on nightly snapshot

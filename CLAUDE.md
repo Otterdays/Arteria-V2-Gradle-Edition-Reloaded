@@ -101,8 +101,8 @@ MainActivity (ComponentActivity)
 
 | Module | Rule | Key paths |
 |--------|------|-----------|
-| `:app` | Android UI + persistence | `ui/`, `data/`, `navigation/`, `core/` (temporary home) |
-| `:core` | **Zero Android imports** — pure Kotlin engine | future home of `TickEngine`, `XPTable`, `GameModels` |
+| `:app` | Android UI + persistence | `ui/`, `data/`, `navigation/` |
+| `:core` | **Zero Android imports** — JVM Kotlin engine | `core/src/main/kotlin/com/arteria/game/core/` — `TickEngine`, `XPTable`, `SkillId`, `GameModels`, skill data registries **`[AMENDED 2026-04-01]:`** |
 
 ### Persistence — two Room databases
 
@@ -279,7 +279,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 
 ## Game State & Offline Processing
 
-- **TickEngine** (`core/engine/TickEngine.kt`): Simulates accumulated offline ticks from `lastSaveTimestamp` to now.
+- **TickEngine** (`core/src/main/kotlin/com/arteria/game/core/engine/TickEngine.kt`): Simulates accumulated offline ticks from `lastSaveTimestamp` to now. **`[AMENDED 2026-04-01]:`** Lives in Gradle `:core` module.
 - **GameViewModel** calls tick simulation on startup, emits `offlineReport`, fires `levelUpEvents` as `SharedFlow`.
 - **Offline report dialog** (`OfflineReportDialog.kt`): Shows only when `xpGained` or `resourcesGained` is non-empty.
 - **Coming Soon dialog** (`SkillComingSoonDialog.kt`): Shown when the user taps a skill with no registry actions (`SkillDataRegistry.isSkillImplemented` is false).
@@ -315,7 +315,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 
 ### Adding a new skill to the game
 1. Add entry to `SkillId` enum with `displayName`, `pillar`, `description`
-2. Add action data in `core/data/` (gathering: `MiningData.kt` / `HarvestingData.kt` / `ScavengingData.kt`; bank inputs → output: `CookingData.kt` / `HerbloreData.kt` with `inputItems`)
+2. Add action data in `:core` `com/arteria/game/core/data/` (gathering: `MiningData.kt` / `HarvestingData.kt` / `ScavengingData.kt`; bank inputs → output: `CookingData.kt` / `HerbloreData.kt` with `inputItems`) **`[AMENDED 2026-04-01]:`**
 3. Add `SkillState` initialization in `GameRepository` load path
 4. Add `SkillStateEntity` rows will be created automatically on first save
 
@@ -366,12 +366,12 @@ Before considering any task complete:
 | `ui/components/DockingGlitch.kt` | Glitch/materialization animation system |
 | `navigation/NavRoutes.kt` | Route constants + `gamePath()` helper |
 | `ui/theme/ArteriaTheme.kt` | Material 3 theme, `ArteriaPalette`, Cinzel typography |
-| `core/model/GameModels.kt` | Domain data classes (SkillState, GameState, TickResult…) |
-| `core/skill/SkillId.kt` | All 41 skills + 5 pillars enum (`SkillPillar` includes `COSMIC`) |
-| `core/engine/TickEngine.kt` | Offline tick simulation |
-| `core/data/SkillDataRegistry.kt` | Skill actions/items; `isSkillImplemented`, `actionsForSkill` |
-| `core/data/HerbloreData.kt` | Potions from `HarvestingData` inputs (`inputItems`) |
-| `core/data/ScavengingData.kt` | Salvage gathering tiers |
+| `core/src/main/kotlin/com/arteria/game/core/model/GameModels.kt` | Domain data classes (SkillState, GameState, TickResult…) **`[AMENDED 2026-04-01]:`** Gradle `:core` |
+| `core/src/main/kotlin/com/arteria/game/core/skill/SkillId.kt` | All 41 skills + 5 pillars enum (`SkillPillar` includes `COSMIC`) |
+| `core/src/main/kotlin/com/arteria/game/core/engine/TickEngine.kt` | Offline tick simulation |
+| `core/src/main/kotlin/com/arteria/game/core/data/SkillDataRegistry.kt` | Skill actions/items; `isSkillImplemented`, `actionsForSkill` |
+| `core/src/main/kotlin/com/arteria/game/core/data/HerbloreData.kt` | Potions from `HarvestingData` inputs (`inputItems`) |
+| `core/src/main/kotlin/com/arteria/game/core/data/ScavengingData.kt` | Salvage gathering tiers |
 | `ui/game/SkillComingSoonDialog.kt` | Modal when a skill has no registry actions yet |
 | `ui/components/ChangelogScreen.kt` | What's New — `APP_CHANGELOG` (prepend on release); keep in sync with `versionName` |
 | `data/game/GameRepository.kt` | Safe game state load/save (transactional) |

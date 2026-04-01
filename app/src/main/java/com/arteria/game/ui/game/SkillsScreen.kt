@@ -1,12 +1,19 @@
 package com.arteria.game.ui.game
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +32,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,10 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -52,6 +64,7 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.SkillPillar
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalReduceMotion
 import java.text.NumberFormat
 
 // ─── Pillar colour palette (shared with SkillDetailScreen & HubScreen) ───────
@@ -132,7 +145,7 @@ fun SkillsScreen(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(minSize = 160.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement   = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
@@ -304,33 +317,43 @@ private fun PillarSectionHeader(
     } else 1
     val activeCount = pillarStates.count { it.isTraining }
 
-    // Build summary string: "3/7 live · avg Lv 8" or "+ 1 active" suffix
     val summary = buildString {
         append("$liveCount/$totalCount live")
         if (withXp.isNotEmpty()) append(" · avg Lv $avgLevel")
         if (activeCount > 0) append(" · $activeCount active")
     }
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 2.dp)
-            .drawBehind {
-                drawRect(color = color, size = Size(3.dp.toPx(), size.height))
-            }
-            .padding(start = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(top = 14.dp, bottom = 4.dp),
     ) {
-        Text(
-            text  = pillar.displayName.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-        )
-        Text(
-            text  = summary,
-            style = MaterialTheme.typography.bodySmall,
-            color = ArteriaPalette.TextMuted,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 4.dp),
+        ) {
+            // Diamond glyph
+            Text(
+                text = "◆",
+                color = color.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(end = 6.dp),
+            )
+            Text(
+                text = pillar.displayName.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = color,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaPalette.TextMuted,
+            )
+        }
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = color.copy(alpha = 0.18f),
         )
     }
 }
@@ -347,6 +370,7 @@ private fun SkillCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val reduceMotion = LocalReduceMotion.current
     val cardColor = accentColor
     val level    = XPTable.levelForXp(state.xp)
     val progress = XPTable.progressToNextLevel(state.xp)
@@ -363,11 +387,46 @@ private fun SkillCard(
     )
     val cardAlpha = if (!implemented) 0.5f else 1f
 
+    // Press-scale spring
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 800f),
+        label = "card_press",
+    )
+
+    // Training shimmer (4s sweep)
+    val shimmerOffset = if (state.isTraining && !reduceMotion) {
+        val inf = rememberInfiniteTransition(label = "shimmer_${skillId.name}")
+        inf.animateFloat(
+            initialValue = -0.3f,
+            targetValue = 1.3f,
+            animationSpec = infiniteRepeatable(
+                tween(4000, easing = LinearEasing),
+                RepeatMode.Restart,
+            ),
+            label = "shimmer_f",
+        ).value
+    } else -1f
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(cardShape)
-            .clickable(onClick = onClick)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        pressed = true
+                        tryAwaitRelease()
+                        pressed = false
+                    },
+                    onTap = { onClick() },
+                )
+            }
             .border(1.dp, borderColor, cardShape),
         shape = cardShape,
         color = when {
@@ -376,89 +435,121 @@ private fun SkillCard(
             else             -> ArteriaPalette.BgCard
         },
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                verticalAlignment   = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text  = skillId.displayName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = ArteriaPalette.TextPrimary.copy(alpha = cardAlpha),
-                        maxLines = 1,
-                    )
-                    when {
-                        state.isTraining -> Text(
-                            text  = "TRAINING",
-                            style = MaterialTheme.typography.labelSmall
-                                .copy(fontWeight = FontWeight.Bold),
-                            color = cardColor,
-                        )
-                        !implemented -> Text(
-                            text  = "SOON",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ArteriaPalette.TextMuted,
-                        )
-                        else -> Text(
-                            text  = skillId.pillar.displayName,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = cardColor.copy(alpha = 0.7f),
-                        )
-                    }
-                }
-
-                LevelBadge(
-                    level       = level,
-                    progress    = progress,
-                    color       = cardColor.copy(alpha = cardAlpha),
-                    implemented = implemented,
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress   = { progress },
-                modifier   = Modifier
+        Box {
+            // Glassmorphism top highlight
+            Box(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(1.5.dp)),
-                color      = cardColor.copy(alpha = cardAlpha),
-                trackColor = ArteriaPalette.Border.copy(alpha = 0.4f),
+                    .height(2.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.3f to cardColor.copy(alpha = 0.10f),
+                            0.7f to cardColor.copy(alpha = 0.10f),
+                            1f to Color.Transparent,
+                        ),
+                    ),
             )
 
-            if (state.xp > 0.0) {
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text  = "${NumberFormat.getIntegerInstance().format(state.xp.toLong())} XP",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ArteriaPalette.TextMuted.copy(alpha = cardAlpha),
+            // Shimmer sweep overlay for training cards
+            if (shimmerOffset > -0.5f) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                (shimmerOffset - 0.15f).coerceIn(0f, 1f) to Color.Transparent,
+                                shimmerOffset.coerceIn(0f, 1f) to ArteriaPalette.GlassHighlight,
+                                (shimmerOffset + 0.15f).coerceIn(0f, 1f) to Color.Transparent,
+                            ),
+                        ),
                 )
             }
 
-            // 3c — crossover "feeds into" tags
-            if (crossoverTargets.isNotEmpty()) {
-                Spacer(Modifier.height(5.dp))
+            Column(modifier = Modifier.padding(12.dp)) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment   = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    crossoverTargets.take(3).forEach { target ->
-                        val tColor = pillarColor[target.pillar] ?: ArteriaPalette.AccentPrimary
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text  = "→ ${target.displayName}",
-                            style = MaterialTheme.typography.labelSmall
-                                .copy(fontSize = 9.sp),
-                            color = tColor.copy(alpha = 0.65f),
-                            modifier = Modifier
-                                .background(
-                                    tColor.copy(alpha = 0.08f),
-                                    RoundedCornerShape(4.dp),
-                                )
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            text  = skillId.displayName,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = ArteriaPalette.TextPrimary.copy(alpha = cardAlpha),
+                            maxLines = 1,
                         )
+                        when {
+                            state.isTraining -> Text(
+                                text  = "TRAINING",
+                                style = MaterialTheme.typography.labelSmall
+                                    .copy(fontWeight = FontWeight.Bold),
+                                color = cardColor,
+                            )
+                            !implemented -> Text(
+                                text  = "SOON",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = ArteriaPalette.TextMuted,
+                            )
+                            else -> Text(
+                                text  = skillId.pillar.displayName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = cardColor.copy(alpha = 0.7f),
+                            )
+                        }
+                    }
+
+                    LevelBadge(
+                        level       = level,
+                        progress    = progress,
+                        color       = cardColor.copy(alpha = cardAlpha),
+                        implemented = implemented,
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                LinearProgressIndicator(
+                    progress   = { progress },
+                    modifier   = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(1.5.dp)),
+                    color      = cardColor.copy(alpha = cardAlpha),
+                    trackColor = ArteriaPalette.Border.copy(alpha = 0.4f),
+                )
+
+                if (state.xp > 0.0) {
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text  = "${NumberFormat.getIntegerInstance().format(state.xp.toLong())} XP",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ArteriaPalette.TextMuted.copy(alpha = cardAlpha),
+                    )
+                }
+
+                // 3c — crossover "feeds into" tags
+                if (crossoverTargets.isNotEmpty()) {
+                    Spacer(Modifier.height(5.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        crossoverTargets.take(3).forEach { target ->
+                            val tColor = pillarColor[target.pillar] ?: ArteriaPalette.AccentPrimary
+                            Text(
+                                text  = "→ ${target.displayName}",
+                                style = MaterialTheme.typography.labelSmall
+                                    .copy(fontSize = 9.sp),
+                                color = tColor.copy(alpha = 0.65f),
+                                modifier = Modifier
+                                    .background(
+                                        tColor.copy(alpha = 0.08f),
+                                        RoundedCornerShape(4.dp),
+                                    )
+                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -484,7 +575,23 @@ private fun LevelBadge(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.size(44.dp),
+        modifier = modifier
+            .size(44.dp)
+            // Glow halo behind the arc when progress > 0
+            .drawBehind {
+                if (animatedProgress > 0.05f && implemented) {
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                color.copy(alpha = 0.12f * animatedProgress),
+                                Color.Transparent,
+                            ),
+                            center = center,
+                            radius = size.minDimension * 0.7f,
+                        ),
+                    )
+                }
+            },
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val stroke = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)

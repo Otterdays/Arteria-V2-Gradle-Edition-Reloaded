@@ -153,4 +153,3 @@ object TickEngine {
         return TickResult(current, totalXpGained, totalResourcesGained, allLevelUps)
     }
 }
-

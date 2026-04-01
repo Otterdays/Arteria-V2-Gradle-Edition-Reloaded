@@ -1,5 +1,6 @@
 package com.arteria.game.ui.game
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -42,6 +43,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arteria.game.core.data.SkillDataRegistry
@@ -66,6 +69,7 @@ fun SkillDetailScreen(
     onStopTraining: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = LocalHapticFeedback.current
     val level = XPTable.levelForXp(skillState.xp)
     val progress = XPTable.progressToNextLevel(skillState.xp)
     val accent = pillarColorFor(skillId.pillar)
@@ -77,6 +81,16 @@ fun SkillDetailScreen(
     val trainingProgress = activeAction?.let {
         (skillState.actionProgressMs.toFloat() / it.actionTimeMs).coerceIn(0f, 1f)
     } ?: 0f
+
+    val onStartWithHaptic: (String) -> Unit = { actionId ->
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        onStartTraining(actionId)
+    }
+
+    val onStopWithHaptic: () -> Unit = {
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        onStopTraining()
+    }
 
     Column(
         modifier = modifier
@@ -128,7 +142,7 @@ fun SkillDetailScreen(
         // ── Stop training button ──────────────────────────────────────────────
         if (skillState.isTraining) {
             OutlinedButton(
-                onClick = onStopTraining,
+                onClick = onStopWithHaptic,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -161,7 +175,7 @@ fun SkillDetailScreen(
                         isCurrentAction = isCurrent,
                         actionProgress = if (isCurrent) trainingProgress else null,
                         pillarColor = accent,
-                        onTrain = { onStartTraining(action.id) },
+                        onTrain = { onStartWithHaptic(action.id) },
                     )
                 }
             }

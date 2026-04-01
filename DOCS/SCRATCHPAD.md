@@ -4,6 +4,9 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **`SKILLS_EXPANSION_NATIVE.md`:** V1 `SKILLS_ARCHITECTURE` / `skilling_guides` / `SYNERGIES` → native V2 playbook; `SUMMARY` read-order + index; `ARCHITECTURE` snapshot fixes (`:core` path, Hub 4-tab); SCRATCHPAD next-action pointer. |
+| 2026-04-01 | opencode | qwen3.6-plus-free | **v1.5.0 QoL features (7/7):** Haptics on train start/stop + achievement unlocks; Bank search + 4-mode sort + withdraw presets; Achievements/Chronicle (18 achievements, 6 categories, tracking in GameViewModel, 🏆 icon in TopAppBar); Random Events (6 weighted events, dialog UI, tick-triggered); Equipment/Gear system (4 slots, 19 items, EquipmentScreen with equip/unequip); Companions/Familiars (11 companions, 5 rarities, passive bonuses, CompanionsScreen); Prestige/Ascension (6 perks, point system, PrestigeScreen with ascend flow). All core models + basic UI shipped. `:app:compileDebugKotlin` green. |
+| 2026-04-01 | Cursor Agent | Composer | **Phase 2 complete:** `:core` JVM Kotlin (`kotlin("jvm")` 2.3.20, toolchain 21); engine at `core/src/main/kotlin/com/arteria/game/core/`; `TickEngineTest` + `XPTableTest`; `app` → `implementation(project(":core"))`; root `org.jetbrains.kotlin.jvm` apply false; ROADMAP/SBOM/README/CLAUDE/SUMMARY updated; `:core:test` + `:app:testDebugUnitTest` green. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.1 docs + version modal sync:** `APP_CHANGELOG` top card (DOCS tag, release hygiene copy); `versionName` **1.4.1** / `versionCode` **4**; README release shield; `CLAUDE.md` Doc Update Rules + Output Checklist + Key Files (`ChangelogScreen`). Policy: SCRATCHPAD handoffs for shipped work should pair with What's New + version bump. |
 | 2026-04-01 | Cursor Agent | Composer | **Settings plan (10+ options):** DataStore `UserPreferencesRepository`; `MainActivity` `ArteriaRoot` + `CompositionLocal`s; light/dark `ArteriaTheme`, `arteriaSpaceBackgroundBrush`, `DockingBackground`/`DockingGlitch` reduce-motion; `SettingsScreen` toggles + OSS/Credits + danger zone + DEBUG cap bypass; `GameRepository` reset/delete; `ProfileDao.deleteById`; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `UserPreferencesProvider` + `GameViewModel` wiring; `:app:testDebugUnitTest` green; `SBOM`/`ARCHITECTURE`/`master_settings` updated. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.0 release notes:** `APP_CHANGELOG` top entry (Hub, 4-tab bar, Herblore/Scavenging, settings parity, expanded skill roster note); `versionName` **1.4.0** / `versionCode` **3** in `app/build.gradle.kts`; README release badge **1.4.0**. |
@@ -79,6 +82,7 @@ Use this section as the live handoff source. Older repeated status/next-action b
 - **`[AMENDED 2026-04-01]:`** **Herblore** (crafting, `inputItems` from harvest) and **Scavenging** (gathering) registered; same tick/bank rules as Cooking/Smithing.
 - **`[AMENDED 2026-03-31]:`** **`SkillId` roster = 41 skills, 5 pillars** (`COSMIC` added). New entries are **Coming Soon** until `SkillDataRegistry` lists actions; `GameRepository` still merges all enum keys on load/save.
 - **`[AMENDED 2026-03-31]:`** **Release hygiene:** When documenting shipped work here (`SCRATCHPAD`), also prepend `ChangelogScreen.kt` `APP_CHANGELOG`, bump `app/build.gradle.kts` `versionCode`/`versionName`, and README badge so **What's New** and **About** stay accurate (`CLAUDE.md` lists the checklist).
+- **`[AMENDED 2026-04-01]:`** **Phase 2 (engine port) DONE** — idle math + skill data live in Gradle **`:core`** (JVM); run **`./gradlew :core:test`** for engine unit tests; `:app` has no duplicate `com.arteria.game.core` sources.
 - Toolchain snapshot remains Gradle nightly `9.6.0-20260331012943+0000`, AGP `9.1.0`, JDK `21`.
 - **`[AMENDED 2026-03-31]:`** Maintainer builds often run the **Gradle JVM on JDK 26** (`build-with-jdk26.bat` or `org.gradle.java.home`); Foojay daemon pin in-repo stays **JDK 21**; `:app`/`:core` bytecode target stays **Java 21** (see `README.md` + `DOCS/SBOM.md`).
 - `[AMENDED 2026-03-31]:` Any older mention of `play/{profileId}` is superseded by `game/{profileId}`.
@@ -97,6 +101,7 @@ Use this section as the live handoff source. Older repeated status/next-action b
 4. Add/refresh `GameViewModel` tests for periodic save cadence + one-at-a-time training enforcement.
 5. Advance **Phase 5** to **DONE** in `DOCS/ROADMAP.md` once smoke is clean — content expansion (6 new skills + cross-economy) ships with this pass.
 6. Keep `DOCS/SBOM.md` and `DOCS/ARCHITECTURE.md` in sync for any dependency or route changes.
+7. **`[AMENDED 2026-04-01]:`** For **skill expansion** (roster vs trainables, V1 `DOCU` mapping, ship checklist), use **`DOCS/SKILLS_EXPANSION_NATIVE.md`**; indexed from `SUMMARY.md`.
 
 ### Supersession Note
 

@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **Phase 2 close:** `:core` converted to JVM Kotlin (`kotlin("jvm")` 2.3.20); engine moved from `app/.../core` to `core/src/main/kotlin`; `TickEngineTest` + `XPTableTest`; `app` → `implementation(project(":core"))`; root `org.jetbrains.kotlin.jvm` apply false; `:core:test` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: `androidx.datastore:datastore-preferences:1.2.0`; app prefs + theme/motion/audio/haptics/offline-report; OSS/Credits screens; reset/delete profile + `GameDao` deletes; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `:app:compileDebugKotlin` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | `:app` `buildFeatures.buildConfig = true` for `BuildConfig.VERSION_NAME` / `VERSION_CODE` in Settings About row (no new Maven coordinates). |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Dependency sweep (no-bump pass): verified live Gradle declarations and held current pins; only newer options are alpha/nightly channels for core AndroidX/AGP lines. |
@@ -19,7 +20,7 @@
 
 # SBOM (Software Bill of Materials) — Arteria V2 Gradle Edition Reloaded
 
-> Last updated: 2026-04-01
+> Last updated: 2026-04-01 (Phase 2 `:core` JVM extraction)
 > Source of truth: `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, `core/build.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties`, `gradle/gradle-daemon-jvm.properties`
 > Scope: Declared build/runtime/test dependencies and bundled non-Maven assets.
 
@@ -59,10 +60,11 @@
 | Gradle wrapper | `9.6.0-20260331012943+0000` | `nightly` (rolling) | `gradle/wrapper/gradle-wrapper.properties` |
 | Android Gradle Plugin | `9.1.0` | `9.2.0-alpha` | root `build.gradle.kts` |
 | Compose plugin | `org.jetbrains.kotlin.plugin.compose:2.3.20` | `2.3.20` (current stable) | root `build.gradle.kts` |
+| Kotlin JVM plugin | `org.jetbrains.kotlin.jvm:2.3.20` (`apply false`) | `2.3.20` (current stable) | root `build.gradle.kts` — used by `:core` |
 | KSP plugin | `com.google.devtools.ksp:2.3.6` | `2.3.6` (current stable) | root `build.gradle.kts` |
 | Foojay toolchain resolver | `org.gradle.toolchains.foojay-resolver-convention:1.0.0` | `verify before bump` | `settings.gradle.kts` |
 | Daemon JVM toolchain | `JDK 21` / vendor `ADOPTIUM` | `JDK 26` (local experimental path) | `gradle/gradle-daemon-jvm.properties` |
-| Java bytecode target | `JavaVersion.VERSION_21` | `VERSION_26` (only when AGP/Kotlin matrix supports) | `app/build.gradle.kts`, `core/build.gradle.kts` |
+| Java bytecode target | `JavaVersion.VERSION_21` (`:app`); JVM **21** toolchain (`:core`) | `VERSION_26` (only when AGP/Kotlin matrix supports) | `app/build.gradle.kts`; `core/build.gradle.kts` (`kotlin { jvmToolchain(21) }`) |
 
 **`[AMENDED 2026-03-31]:`** The SBOM previously listed Gradle `9.6.0-nightly-20260322000231+0000`. A screenshot referenced `9.6.0-202603311012943+0000`; that snapshot is **not** published on `services.gradle.org` (404). The wrapper was updated to **`9.6.0-20260331012943+0000`** (2026-03-31 snapshot).
 
@@ -74,10 +76,10 @@
 |----------|-------|--------|
 | `applicationId` | `com.arteria.game` | `app/build.gradle.kts` |
 | `namespace` (`:app`) | `com.arteria.game` | `app/build.gradle.kts` |
-| `namespace` (`:core`) | `com.arteria.game.core` | `core/build.gradle.kts` |
-| `compileSdk` | `36.1` | `app/build.gradle.kts`, `core/build.gradle.kts` |
+| `namespace` (`:core`) | *(not applicable — `:core` is JVM Kotlin, not Android)* | **`[AMENDED 2026-04-01]:`** prior Android-library `namespace` row superseded by JVM module. |
+| `compileSdk` | `36.1` | `app/build.gradle.kts` only **`[AMENDED 2026-04-01]:`** `:core` no longer uses `compileSdk`. |
 | `targetSdk` | `36` | `app/build.gradle.kts` |
-| `minSdk` | `26` | `app/build.gradle.kts`, `core/build.gradle.kts` |
+| `minSdk` | `26` | `app/build.gradle.kts` only **`[AMENDED 2026-04-01]:`** `:core` is not an Android module. |
 | `GameDatabase` (Room) | `version = 2`; `MIGRATION_1_2` adds `lastOfflineTickAppliedAt` on `game_meta` | `app/.../data/game/GameDatabase.kt` |
 | `ProfileDatabase` (Room) | `version = 1` | `app/.../data/profile/ProfileDatabase.kt` |
 
@@ -93,6 +95,7 @@
 
 | Scope | Coordinates | Installed | Next available |
 |-------|-------------|-----------|----------------|
+| `implementation` | `project(":core")` | workspace module | n/a |
 | `implementation` | `androidx.core:core-ktx` | `1.18.0` | `1.18.0` (current stable) |
 | `implementation` | `androidx.lifecycle:lifecycle-runtime-ktx` | `2.10.0` | `2.11.0-alpha` |
 | `implementation` | `androidx.lifecycle:lifecycle-runtime-compose` | `2.10.0` | `2.11.0-alpha` |
@@ -119,12 +122,14 @@
 | `debugImplementation` | `androidx.compose.ui:ui-tooling` | `via BOM` | `via next BOM` |
 | `debugImplementation` | `androidx.compose.ui:ui-test-manifest` | `via BOM` | `via next BOM` |
 
-### `:core` module
+### `:core` module (JVM Kotlin)
 
 | Scope | Coordinates | Installed | Next available |
 |-------|-------------|-----------|----------------|
-| `implementation` | `androidx.core:core-ktx` | `1.18.0` | `1.18.0` (current stable) |
+| `plugins` | `org.jetbrains.kotlin.jvm` | `2.3.20` | `2.3.20` (current stable) |
 | `testImplementation` | `junit:junit` | `4.13.2` | `4.13.2` |
+
+**`[AMENDED 2026-04-01]:`** Replaced prior Android-library `:core` stub (`com.android.library`, `androidx.core:core-ktx`) with headless JVM library — engine sources under `core/src/main/kotlin/com/arteria/game/core/`, tests under `core/src/test/kotlin/`.
 
 ---
 

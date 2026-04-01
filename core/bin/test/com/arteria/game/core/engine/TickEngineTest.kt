@@ -67,4 +67,3 @@ class TickEngineTest {
         assertTrue(result.state.skills.getValue(SkillId.MINING).xp >= 0.0)
     }
 }
-

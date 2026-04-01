@@ -88,6 +88,8 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 **Exit criteria:** JVM unit tests in V2 `:core` cover XP + tick invariants comparable to engine tests.
 
+**`[AMENDED 2026-04-01]:`** Phase 2 **exit criteria met** for the native repo: `:core` is a **JVM Kotlin** module (`org.jetbrains.kotlin.jvm`, toolchain **21**) with `TickEngineTest` + `XPTableTest` under `core/src/test/kotlin/`. Engine sources live under `core/src/main/kotlin/com/arteria/game/core/`; `:app` depends via `implementation(project(":core"))`. **Deferred (optional):** full parity with monorepo `packages/engine` TypeScript tests; `narrative.ts` gating helpers not ported.
+
 ---
 
 ## Phase 3 — UI shell (Compose)

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,9 +43,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.model.GameState
@@ -54,6 +57,7 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.SkillPillar
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.theme.LocalReduceMotion
 import java.text.NumberFormat
 
 /**
@@ -506,6 +510,40 @@ private fun StatChip(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Tiny Canvas icon above the value
+            Canvas(modifier = Modifier.size(14.dp).padding(bottom = 2.dp)) {
+                val w = size.width
+                val h = size.height
+                val stroke = Stroke(width = w * 0.12f, cap = StrokeCap.Round)
+                when (label) {
+                    "Total Level" -> {
+                        // Stacked bars icon
+                        drawLine(color, Offset(w * 0.15f, h * 0.85f), Offset(w * 0.35f, h * 0.85f), w * 0.12f, cap = StrokeCap.Round)
+                        drawLine(color, Offset(w * 0.15f, h * 0.55f), Offset(w * 0.55f, h * 0.55f), w * 0.12f, cap = StrokeCap.Round)
+                        drawLine(color, Offset(w * 0.15f, h * 0.25f), Offset(w * 0.85f, h * 0.25f), w * 0.12f, cap = StrokeCap.Round)
+                    }
+                    "Bank Items" -> {
+                        // Small vault circle
+                        drawCircle(color, radius = w * 0.35f, center = Offset(w * 0.5f, h * 0.5f), style = stroke)
+                        drawCircle(color, radius = w * 0.10f, center = Offset(w * 0.5f, h * 0.5f))
+                    }
+                    else -> {
+                        // Star icon
+                        val path = Path()
+                        val cx = w * 0.5f; val cy = h * 0.5f
+                        for (i in 0 until 5) {
+                            val outerAngle = Math.toRadians(-90.0 + i * 72.0)
+                            val innerAngle = Math.toRadians(-90.0 + i * 72.0 + 36.0)
+                            val outerR = w * 0.45f; val innerR = w * 0.18f
+                            if (i == 0) path.moveTo(cx + (outerR * kotlin.math.cos(outerAngle)).toFloat(), cy + (outerR * kotlin.math.sin(outerAngle)).toFloat())
+                            else path.lineTo(cx + (outerR * kotlin.math.cos(outerAngle)).toFloat(), cy + (outerR * kotlin.math.sin(outerAngle)).toFloat())
+                            path.lineTo(cx + (innerR * kotlin.math.cos(innerAngle)).toFloat(), cy + (innerR * kotlin.math.sin(innerAngle)).toFloat())
+                        }
+                        path.close()
+                        drawPath(path, color)
+                    }
+                }
+            }
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleMedium
@@ -718,19 +756,37 @@ private fun HubCard(
         modifier = modifier
             .fillMaxWidth()
             .drawBehind {
-                // Left accent stripe
+                // Gradient accent stripe (fades at bottom)
+                val stripeW = 3.dp.toPx()
                 drawRect(
-                    color = accent,
-                    topLeft = Offset.Zero,
-                    size = androidx.compose.ui.geometry.Size(
-                        3.dp.toPx(),
-                        size.height,
+                    brush = Brush.verticalGradient(
+                        0f to accent,
+                        0.7f to accent.copy(alpha = 0.5f),
+                        1f to Color.Transparent,
                     ),
+                    topLeft = Offset.Zero,
+                    size = androidx.compose.ui.geometry.Size(stripeW, size.height),
                 )
             },
     ) {
-        Column(modifier = Modifier.padding(start = 14.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)) {
-            content()
+        Box {
+            // Glassmorphism top highlight
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.2f to ArteriaPalette.GlassHighlight,
+                            0.8f to ArteriaPalette.GlassHighlight,
+                            1f to Color.Transparent,
+                        ),
+                    ),
+            )
+            Column(modifier = Modifier.padding(start = 14.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)) {
+                content()
+            }
         }
     }
 }
