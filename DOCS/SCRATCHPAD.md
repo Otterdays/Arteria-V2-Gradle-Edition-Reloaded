@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Claude Opus 4.6 | Anthropic Claude | **Playability expansion + UI overhaul:** Added Logging, Fishing, Smithing, Cooking skill data with cross-economy `inputItems`; TickEngine bank consumption + auto-stop on material shortage; one-skill-at-a-time enforcement in `GameViewModel.startTraining`; custom `ArteriaBottomBar` (Canvas icons, XP ring, bank badge, glow effects); pillar-grouped `SkillsScreen` redesign with animated borders/arcs; `SkillDetailScreen` hero header with live training row + `LevelCircle`; `ActionCard` sweep fill progress. |
 | 2026-03-31 | Cursor Agent | Composer | **README polish:** multi-row shields (KSP, Navigation, Lifecycle, Coroutines, compileSdk 36.1, JVM 21 vs JDK 26 build story), quick start + tree for `build-with-jdk26.bat`, prerequisites/toolchain/troubleshooting aligned with `DOCS/SBOM.md`. |
 | 2026-04-01 | Cursor Agent | Composer | **Settings V1 parity slice:** `updateDisplayName` on profiles; `AccountSessionInfo`; `SettingsScreen` rename dialog, last played, `BuildConfig` version, tick/save cadence, test sound; `GameScreen`/`ArteriaApp` wiring; `FakeProfileRepository` updated; `ARCHITECTURE`/`SBOM`/`master_settings_suggestions_doc.md`; `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Cursor Agent | Composer | **Herblore + Scavenging:** `HerbloreData.kt` (8 potions, 1× `HarvestingData` herb each via `inputItems`), `ScavengingData.kt` (8 salvage tiers); `SkillDataRegistry`; docs `CLAUDE` / `ARCHITECTURE` / `README`. |
@@ -81,10 +82,12 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 ### Active Next Actions (single list)
 
-1. Run manual device smoke pass (account create/select -> game -> mining -> bank -> switch account); add **Settings** checks: rename display name (top bar + account list refresh), test sound, version string.
-2. Add/refresh `GameViewModel` tests for periodic save cadence (offline report path already covered by existing test).
-3. Advance **Phase 5** vertical slice (mining + bank) to polish + **DONE** in `DOCS/ROADMAP.md` when smoke is clean.
-4. Keep `DOCS/SBOM.md` and `DOCS/ARCHITECTURE.md` in sync for any dependency or route changes.
+1. Run device smoke: train each implemented skill (Mining, Logging, Fishing, Smithing, Cooking, Harvesting, Herblore, Scavenging) → verify XP gain, bank items, crafting consumption, auto-stop on empty bank.
+2. Verify alive bottom bar: XP ring animates during training, gold badge appears on Bank when crafting is affordable, glow/tint on selected tab.
+3. Verify skill nav: pillar grouping, animated transitions push/pop, hero header live training row, level circle arc.
+4. Add/refresh `GameViewModel` tests for periodic save cadence + one-at-a-time training enforcement.
+5. Advance **Phase 5** to **DONE** in `DOCS/ROADMAP.md` once smoke is clean — content expansion (6 new skills + cross-economy) ships with this pass.
+6. Keep `DOCS/SBOM.md` and `DOCS/ARCHITECTURE.md` in sync for any dependency or route changes.
 
 ### Supersession Note
 
@@ -103,6 +106,17 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-03-31:** **Playability expansion + alive UI overhaul (Claude Opus 4.6):**
+- **4 new skill data files:** `LoggingData.kt` (8 actions), `FishingData.kt` (8), `SmithingData.kt` (7, ore→bar via `inputItems`), `CookingData.kt` (8, raw fish→cooked via `inputItems`).
+- **`SkillDataRegistry.kt`:** Central registry merging all skill data; `actionsForSkill()`, `isSkillImplemented()`, `itemName()`.
+- **`SkillAction.inputItems`:** New `Map<String, Int>` field on `GameModels.kt` — crafting actions declare bank item costs.
+- **`TickEngine.kt`:** Bank consumption before action completion; `ranOutOfMaterials` auto-stop when bank insufficient.
+- **`GameViewModel.kt`:** One-at-a-time training enforcement — `startTraining()` stops all other active skills first.
+- **`ArteriaBottomBar.kt`:** Custom 3-tab nav with Canvas-drawn icons (pickaxe, vault, crossed swords), XP progress ring on Skills tab when training, gold badge on Bank when crafting affordable, radial glow on selected tab, gradient background blending into space backdrop.
+- **`SkillsScreen.kt`:** Pillar-grouped `LazyVerticalGrid` with colored section headers, animated border colors (training/unimplemented/default), `LevelBadge` with Canvas XP arc, dimmed unimplemented cards with "SOON" label.
+- **`SkillDetailScreen.kt`:** `SkillHeroHeader` replacing TopAppBar (horizontal gradient, live training row with dot+name+progress bar, `LevelCircle` with animated XP arc), `ActionCard` with sweep fill progress and pillar-colored Train button, input items display.
+- **`GameScreen.kt`:** `AnimatedContent` push/pop transitions for skill detail, `derivedStateOf` for training progress/bank opportunity, wired `ArteriaBottomBar` + `SkillComingSoonDialog`.
 
 **2026-03-31:** **build-apk-for-transfer + jlink:** `gradlew.bat` no longer falls back to `java` on PATH when no JDK found (PATH was still Red Hat JRE). Added Eclipse Adoptium + Microsoft `jdk-*` scan; strip `JAVA_HOME` if path contains `.cursor` or `redhat.java`. `build-apk-for-transfer.ps1` resolves JDK the same way, sets `JAVA_HOME`/`Path`, runs `gradlew --stop` before assemble.
 
