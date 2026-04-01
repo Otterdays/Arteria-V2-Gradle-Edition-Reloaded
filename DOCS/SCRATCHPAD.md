@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc + UX sync:** `SKILLS_EXPANSION_NATIVE.md` glossary §0 (4 skills), §5→§5b, §7.1/7.4 callouts; `ROADMAP` v1.5.0 row; `SkillsScreen` crossovers for Farming/Thieving/Woodworking/Tailoring + chip labels. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 — 4 new skills + Equipment/Companions integration:** `FarmingData`, `ThievingData`, `WoodworkingData`, `TailoringData` added to `:core`; all 4 registered in `SkillDataRegistry`; `GameState` + `TickEngine` wired with gear/companion XP multipliers; `GameDatabase` migration v2→v3 (5 new `game_meta` columns); `GameRepository` load/save maps equippedGear + activeCompanionId; `GameViewModel` gains `equip`, `unequip`, `equipCompanion`, `dismissCompanion` + `companions` StateFlow; `GameScreen` routes ⚔️/🐾 TopAppBar buttons to `EquipmentScreen`/`CompanionsScreen` overlays with full BackHandler; `versionCode` 7→8, `versionName` 1.4.5→1.5.0; README badge + `APP_CHANGELOG` top card updated. `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.4.5 release hygiene:** `versionName` **1.4.5** / `versionCode` **7**; prepended `APP_CHANGELOG` (tablet Skills, PanelBackHeader, crossover chips, Chronicle note, doc parity); README shield; `ROADMAP` + `SKILLS_EXPANSION_NATIVE.md` amended with canonical app version line. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.4.3 Release:** ChangelogScreen polish (Tier 1+2+3): staggered entry animations, left accent stripe, glass highlight, improved spacing, tag emoji badges, interactive border animation, upgraded typography, accessibility. Added v1.4.2 QoL entry (Achievements, Bank search/sort, Haptics, Random Events, Equipment/Gear, Companions/Familiars, Prestige/Ascension from prior agents). Bumped `versionCode` 4→6, `versionName` 1.4.1→1.4.3. Updated README badge + `APP_CHANGELOG`. `:app:assembleDebug` green. |
@@ -126,6 +127,12 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-01:** **What's New / version UI (Cursor):** `ChangelogScreen` opens on **current build only** (matches `BuildConfig.VERSION_NAME`); header `vX.Y.Z (build N)` + **Earlier releases** / **Current release only**; **1.5.0** changelog bullets expanded. Docking Station badge uses `BuildConfig` (removed hardcoded version). `:app:compileDebugKotlin` green.
+
+**2026-04-01:** **v1.5.0 — ROADMAP + SCRATCHPAD + SUMMARY doc pass (Haiku):** ROADMAP Phase 5 amended (12 trainable skills, equipment/companions note); Phase 7 items checked off (haptics ✓, reduce-motion ✓, bank search/sort/presets ✓, WYWA ✓); Phase 9 items checked off (companions ✓, equipment ✓, chronicle/achievements ✓, random events ✓, prestige partial); "Immediate Next Point" rewritten for v1.5.0 standing; SUMMARY + SCRATCHPAD Last Actions + Next Action aligned.
+
+**2026-04-01:** **v1.5.0 — docs + layout pass (Cursor):** `SKILLS_EXPANSION_NATIVE.md` — §0 adds four trainable skills; duplicate **§5** renamed **§5b**; §7 intro/§7.1 counts and Thieving/Farming roadmap callouts amended for **12** trainable + Room v3; dual intro version lines (1.4.5 historical + **1.5.0** canonical). `ROADMAP` Agent Credits row for **1.5.0**. `SkillsScreen` `skillCrossover` extended for Farming / Thieving / Woodworking / Tailoring.
 
 **2026-04-01:** **v1.4.5 — version modalities:** `app/build.gradle.kts` `versionName` **1.4.5** / `versionCode` **7**; `ChangelogScreen` `APP_CHANGELOG` new top card; README release badge **1.4.5**; `ROADMAP` Agent Credits row; `SKILLS_EXPANSION_NATIVE.md` amended with shipped-app version cross-reference.
 
@@ -287,6 +294,12 @@ Also fixed reviewer findings:
 ---
 
 ## Next Action (for the next agent)
+
+**`[AMENDED 2026-04-01]:`** **v1.5.0 standing** — 12 skills live, equipment + companions integrated, docs aligned. Next priorities:
+1. **Manual smoke — new skills:** Train Farming/Thieving (verify XP + bank item gain), train Woodworking/Tailoring (verify log/flax consumed from bank), equip a tool and confirm XP boost, summon companion and confirm passive applies during tick.
+2. **Prestige multipliers:** `PrestigeScreen` UI is complete but perk boosts are not wired into `TickEngine` — hook `PrestigePerks` into XP/resource multiplier path (same pattern as `gearXpMultiplier`).
+3. **Combat baseline:** Wire the first idle combat loop — `Attack`/`Strength` XP per enemy, `Hitpoints` XP, drops to bank. Use existing `TickEngine` action pattern; add `CombatData.kt` in `:core`.
+4. **Companion DB persistence:** `activeCompanionId` persists via `game_meta`, but `ownedCompanions` (unlocked roster) is currently derived from the full registry (all companions available). If gated unlocking is desired, add a `companion_states` Room table (migration v4).
 
 **`[AMENDED 2026-03-31]:`** Animation polish is shipped. Immediate priorities:
 1. **Device smoke test:** Install APK, navigate account select → create → continue → game screen. Verify account name + gear icon visible in TopAppBar, settings overlay opens/closes cleanly, back gesture/button work.

@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arteria.game.BuildConfig
 import com.arteria.game.ui.components.ChangelogScreen
 import com.arteria.game.ui.components.DockingAccountCard
 import com.arteria.game.ui.components.DockingBackground
@@ -105,8 +106,6 @@ enum class GameMode(
     ),
 }
 
-private const val APP_VERSION = "1.5.0"
-
 @Composable
 fun AccountSelectionScreen(
     accounts: List<AccountSlot>,
@@ -147,7 +146,7 @@ fun AccountSelectionScreen(
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = "v$APP_VERSION",
+                    text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                     style = MaterialTheme.typography.labelSmall,
                     color = ArteriaPalette.TextMuted,
                     modifier = Modifier.padding(start = 8.dp),

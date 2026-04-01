@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.arteria.game.BuildConfig
 import com.arteria.game.ui.theme.ArteriaPalette
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -59,19 +62,23 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
         version = "1.5.0",
         date = "2026-04-01",
-        tag = "SKILLS",
-        tagEmoji = "🎪",
+        tag = "CONTENT",
+        tagEmoji = "🌱",
         tagColor = ArteriaPalette.BalancedEnd,
         changes = listOf(
-            "4 new playable skills — Farming (8 crop tiers), Thieving (8 pickpocket tiers), " +
-                "Woodworking (crafts from Logging materials), Tailoring (crafts from Harvesting materials)",
-            "Equipment system live — ⚔️ button in TopAppBar opens gear slots; " +
-                "equip weapons, tools, armor, and accessories that boost XP and skill performance",
-            "Companions system live — 🐾 button opens companion roster; " +
-                "summon from 11 familiars across 5 rarities for passive XP and resource bonuses",
-            "XP multipliers apply in real-time — equipped gear and active companion bonuses " +
-                "calculated per tick in TickEngine for all skills",
-            "Gear persisted — equipped slots saved to Room `game_meta` table (DB migration v3)",
+            "4 new trainable skills — Farming (harvest 8 crop tiers from carrot to starfruit), " +
+                "Thieving (8 tiers from market stalls to void nodes), " +
+                "Woodworking (craft furniture and carvings from logged timber), " +
+                "Tailoring (weave cloth and garments from harvested flax)",
+            "Equipment is now live — tap ⚔️ in the top bar to open your gear panel. " +
+                "Equip a weapon, tool, armor piece, and accessory — each item boosts XP gain " +
+                "or improves specific skills while it's equipped",
+            "Companions are now live — tap 🐾 to summon a familiar from your roster of 11. " +
+                "Each companion provides a passive bonus (XP boost, extra resource drops, or " +
+                "offline efficiency) while active. Only one companion can be summoned at a time",
+            "Gear and companions affect every training tick — bonuses stack and apply in real time, " +
+                "so swapping loadouts immediately changes how fast you progress",
+            "Your equipped gear is saved — loadout persists across sessions and survives app restarts",
         ),
     ),
     ChangelogEntry(
@@ -242,6 +249,12 @@ val APP_CHANGELOG: List<ChangelogEntry> = listOf(
 fun ChangelogScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * When false (default), lists only [APP_CHANGELOG] entries whose [ChangelogEntry.version]
+     * matches [BuildConfig.VERSION_NAME] so players see the current update first; full history
+     * is one tap away.
+     */
+    startWithFullHistory: Boolean = false,
 ) {
     val bgBrush = Brush.verticalGradient(
         colors = listOf(
@@ -251,6 +264,20 @@ fun ChangelogScreen(
         ),
     )
 
+    var showFullHistory by remember(startWithFullHistory) {
+        mutableStateOf(startWithFullHistory)
+    }
+
+    val currentBuildEntries = remember {
+        APP_CHANGELOG.filter { it.version == BuildConfig.VERSION_NAME }
+    }
+    val visibleEntries = if (showFullHistory) {
+        APP_CHANGELOG
+    } else {
+        currentBuildEntries.ifEmpty { listOf(APP_CHANGELOG.first()) }
+    }
+    val canShowEarlier = !showFullHistory && APP_CHANGELOG.size > visibleEntries.size
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -259,8 +286,9 @@ fun ChangelogScreen(
             .navigationBarsPadding(),
     ) {
         PanelBackHeader(
-            title = "Version History",
-            overline = "WHAT'S NEW",
+            title = if (showFullHistory) "Version history" else "What's new",
+            overline = if (showFullHistory) "CHANGELOG" else "CURRENT RELEASE",
+            subtitle = "v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
             onBack = onBack,
         )
 
@@ -270,16 +298,50 @@ fun ChangelogScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items(APP_CHANGELOG, key = { it.version }) { entry ->
-                val entryIndex = APP_CHANGELOG.indexOf(entry)
+            itemsIndexed(
+                items = visibleEntries,
+                key = { _, entry -> entry.version },
+            ) { index, entry ->
                 val reduceMotion = LocalReduceMotion.current
-                val animations = rememberEntryAnimations(entryIndex, reduceMotion)
+                val animations = rememberEntryAnimations(index, reduceMotion)
 
                 ChangelogCard(
                     entry = entry,
                     animation = animations,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+            if (canShowEarlier) {
+                item {
+                    TextButton(
+                        onClick = { showFullHistory = true },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = ArteriaPalette.AccentWeb,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = "Earlier releases",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+            if (showFullHistory && currentBuildEntries.isNotEmpty()) {
+                item {
+                    TextButton(
+                        onClick = { showFullHistory = false },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = ArteriaPalette.TextMuted,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = "Current release only",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
             }
             item { Spacer(Modifier.height(16.dp)) }
         }

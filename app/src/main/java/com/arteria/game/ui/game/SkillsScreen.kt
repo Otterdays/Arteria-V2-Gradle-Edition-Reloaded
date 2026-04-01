@@ -89,8 +89,12 @@ internal val skillCrossover: Map<SkillId, List<SkillId>> = mapOf(
     SkillId.MINING     to listOf(SkillId.SMITHING, SkillId.FORGING),
     SkillId.LOGGING    to listOf(SkillId.WOODWORKING, SkillId.FIREMAKING, SkillId.FLETCHING),
     SkillId.FISHING    to listOf(SkillId.COOKING),
-    SkillId.HARVESTING to listOf(SkillId.HERBLORE, SkillId.COOKING),
+    SkillId.HARVESTING to listOf(SkillId.HERBLORE, SkillId.COOKING, SkillId.TAILORING),
     SkillId.SCAVENGING to listOf(SkillId.SMITHING, SkillId.ALCHEMY),
+    SkillId.FARMING    to listOf(SkillId.COOKING, SkillId.HERBLORE),
+    SkillId.THIEVING   to listOf(SkillId.BARTER),
+    SkillId.WOODWORKING to listOf(SkillId.FLETCHING, SkillId.FIREMAKING),
+    SkillId.TAILORING  to listOf(SkillId.CONSTRUCTION, SkillId.FORGING),
     SkillId.SMITHING   to listOf(SkillId.FORGING),
     SkillId.RUNECRAFTING to listOf(SkillId.SORCERY),
     SkillId.HERBLORE   to listOf(SkillId.ALCHEMY),
@@ -110,6 +114,8 @@ private fun SkillId.crossoverChipLabel(): String = when (this) {
     SkillId.RUNECRAFTING -> "Runes"
     SkillId.SORCERY -> "Sorc"
     SkillId.RANGED -> "Range"
+    SkillId.BARTER -> "Barter"
+    SkillId.CONSTRUCTION -> "Build"
     else -> displayName
 }
 

@@ -4,7 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). |
+| 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc sync:** Glossary §0 — Farming, Thieving, Woodworking, Tailoring marked trainable; duplicate §5 → **§5b**; §7.1 counts + Phase 2 callouts amended; intro version parity **1.5.0** / `versionCode` **8**. |
+| 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). **`[AMENDED 2026-04-01]:`** Superseded by **1.5.0** row above for canonical version. |
 | 2026-04-01 | Cursor Agent | Composer | Initial **SKILLS_EXPANSION_NATIVE.md**: V1 design sources → V2 native playbook; roster vs implementation; vertical-slice steps; synergy/UI deferrals; cross-links to bundled V1 DOCU. |
 | 2026-04-01 | Cascade | SWE-1.5 | Added **Section 7**: Prioritized skill expansion recommendations; skill split proposals (Firemaking → Bonfire Craft, Runecrafting → Glyph Inscription); implementation phases; synergy opportunities. |
 | 2026-04-01 | opencode | qwen3.6-plus-free | **Section 9**: New skill recommendations (Gemcutting, Salvaging, Jewelcrafting); economy loop analysis; checklist status audit; game mode integration notes; v1.5.0 feature hooks. |
@@ -23,6 +24,8 @@
 
 **`[AMENDED 2026-04-01]:`** **Shipped app version** for player-facing parity is **1.4.5** — keep in sync with `app/build.gradle.kts` (`versionName` / `versionCode`), the top entry in `ChangelogScreen.kt` → `APP_CHANGELOG`, and the README release badge.
 
+**`[AMENDED 2026-04-01]:`** **Current canonical release:** **1.5.0** (`versionCode` **8**) — same three surfaces (`app/build.gradle.kts`, first `APP_CHANGELOG` card, README shield). Settings **About** reads `BuildConfig`.
+
 ---
 
 ## 0) Skill Glossary — Current Status
@@ -37,9 +40,15 @@ These skills have active data in `:core` and are fully playable in the current b
 - **Smithing** (Crafting): Smelting ores into bars.
 - **Cooking** (Crafting): Preparing food from fish/crops.
 - **Herblore** (Crafting): Brewing potions from harvested reagents.
+- **Farming** (Gathering): Crop tiers and growth loops (`FarmingData` in `:core`).
+- **Thieving** (Gathering): Pickpocket / stall-style tiers (`ThievingData` in `:core`).
+- **Woodworking** (Crafting): Crafts from logging materials (`WoodworkingData` in `:core`).
+- **Tailoring** (Crafting): Crafts from harvesting materials (`TailoringData` in `:core`).
 
 ### ⏳ To-Add (In Roster / Planned Splits)
 These exist in the `SkillId` enum but lack data, or are identified for **2-out-of-1 splits** to create deep feature loops.
+
+**`[AMENDED 2026-04-01]:`** **Farming**, **Thieving**, **Woodworking**, and **Tailoring** now have baseline `SkillAction` data and are **trainable** in app **v1.5.0** — table rows for those names below describe **future splits / deeper slices**, not “no data yet.”
 
 | Pillar | Skill | Expansion Path / "App" Slice |
 | :--- | :--- | :--- |
@@ -154,7 +163,7 @@ To maintain **KISS** codebases, we break complex "Mega-Skills" into focused loop
 
 ---
 
-## 5) Recent product expansion context (handoff)
+## 5b) Recent product expansion context (handoff)
 
 **`[AMENDED 2026-04-01]:`** v1.5.0 shipped: achievements, random events, equipment system (4 slots, 19 items), companions/familiars (11 companions, 5 rarities), prestige/ascension (6 perks), bank search/sort/withdraw, haptics. Game modes added to account creation (Standard, Ironclad 🔒, Void-Touched 🔒). Equipment and Companion systems create new economy edges — skills should now consider gear inputs and companion bonuses. Random events provide a hook for skill-specific event triggers.
 
@@ -174,13 +183,15 @@ To maintain **KISS** codebases, we break complex "Mega-Skills" into focused loop
 
 ## 7) Prioritized Skill Expansion Recommendations
 
-**`[AMENDED 2026-04-01]:`** Based on current implementation gap (8/41 skills) and existing economy edges, here are prioritized expansions that maximize cross-skill synergy and reuse existing resources.
+**`[AMENDED 2026-04-01]:`** Original draft assumed **8** trainable skills; **§7.1** below lists **12** as of **v1.5.0**. Remaining subsections stay a **priority roadmap** (not a literal “missing” checklist for every row).
+
+**`[AMENDED 2026-04-01]:`** Roster size in enum is **48+** `SkillId` entries; **trainable** count is **12** in **v1.5.0** (adds Farming, Thieving, Woodworking, Tailoring). **Equipment** (four slots) and **active companion** persist on `game_meta` (Room **v3**); `TickEngine` applies gear/companion XP multipliers. Sections **7.3–7.5** below remain a **roadmap** — some named skills are already baselined in `:core`.
 
 ### 7.1 Current State Analysis
 
-**Implemented Skills (8):** Mining, Logging, Fishing, Harvesting, Scavenging, Smithing, Cooking, Herblore  
-**Available Resource Outputs:** Ores, Logs, Fish, Herbs, Crops, Scrap, Bars, Cooked Food  
-**Critical Gap:** No consumer skills for Logging output, limited utility skills, no risk/reward gathering
+**Implemented Skills (12):** Mining, Logging, Fishing, Harvesting, Scavenging, Smithing, Cooking, Herblore, Farming, Thieving, Woodworking, Tailoring  
+**Available Resource Outputs:** Ores, Logs, Fish, Herbs, Crops, Scrap, Bars, Cooked Food, crafted wood/cloth outputs (per data files)  
+**Critical Gap (narrowing):** Logging and Harvesting now feed Woodworking and Tailoring; **Fletching**, **Firemaking**, and deeper **Thieving/Farming** mechanics remain high-value next steps
 
 ### 7.2 Skill Split Proposals (2-for-1)
 
@@ -221,6 +232,8 @@ Consider splitting complex skills into focused specializations:
 **Skills that add new mechanics but reuse existing frameworks:**
 
 #### 7.4.1 Thieving (Gathering Pillar)
+**`[AMENDED 2026-04-01]:`** **Baselined in v1.5.0** (`ThievingData`); bullets below = **stretch goals** (stun, richer loot tables), not “not implemented.”
+
 - **Why:** Alternative gold source, adds risk/reward excitement
 - **Economy Flow:** NPC/Stall targets → Gold + item drops
 - **Cross-skill inputs:** None (creates new gold flow)
@@ -228,6 +241,8 @@ Consider splitting complex skills into focused specializations:
 - **Synergy potential:** Risk reduction combos with Support skills
 
 #### 7.4.2 Farming (Gathering Pillar)
+**`[AMENDED 2026-04-01]:`** **Baselined in v1.5.0** (`FarmingData`); bullets below = **stretch goals** (patches, long growth), not “not implemented.”
+
 - **Why:** Alternative to Harvesting, introduces time-based progression
 - **Economy Flow:** Seeds → Growth timers → Harvested crops
 - **Cross-skill inputs:** Seeds (purchased/thieved), tools (Smithing)

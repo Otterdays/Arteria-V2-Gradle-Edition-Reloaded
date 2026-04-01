@@ -4,6 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 ROADMAP doc pass:** Phase 5 amended for 12 trainable skills; Phase 7 items checked off (haptics, reduce-motion, bank search/sort/presets); Phase 9 items checked off (companions, chronicle/achievements, random events, equipment/gear); "Immediate Next Point" updated; SUMMARY + SCRATCHPAD Last Actions + Next Action refreshed. |
+| 2026-04-01 | Cursor Agent | Composer | **v1.5.0 ship pointer:** `versionName` **1.5.0** / `versionCode` **8**; four new trainable skills in `:core` + `SkillDataRegistry`; `GameDatabase` v3 (`game_meta` gear + companion); README + `APP_CHANGELOG` aligned. See `SCRATCHPAD` Agent Credits (Haiku row) for file list. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.4.5 release hygiene:** `versionName` **1.4.5** / `versionCode` **7** in `app/build.gradle.kts`; README release shield; `ChangelogScreen` `APP_CHANGELOG` top card; Settings About matches build. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.1 docs hygiene:** What's New + `versionName` **1.4.1** / `versionCode` **4**; policy in `SCRATCHPAD` + `CLAUDE.md` — handoffs pair with `ChangelogScreen` `APP_CHANGELOG` prepend. |
 | 2026-03-31 | Cursor Agent | Composer | **v1.4.0 pointer:** Phase 5 / UX slice shipped as app **1.4.0** — Hub tab, Herblore + Scavenging, settings parity, expanded `SkillId` roster; see `ChangelogScreen` `APP_CHANGELOG`. |
@@ -153,12 +155,21 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 **`[AMENDED 2026-03-31]:`** **App v1.4.0** bundles additional Phase 5–adjacent delivery: **Hub** command-center tab (inline offline summary, training panel, nudges), **Herblore** + **Scavenging** skill data in `SkillDataRegistry`, **settings parity** (rename, last played, About version, cadence copy, test sound), and **41-skill / 5-pillar** enum expansion with Coming Soon for unwired skills. Player-facing summary: `ChangelogScreen.kt` → `APP_CHANGELOG` entry **1.4.0**; `versionName` / `versionCode` in `app/build.gradle.kts`.
 
+**`[AMENDED 2026-04-01]:`** **App v1.5.0** — **12 trainable skills** total. Added in this release: `FarmingData`, `ThievingData`, `WoodworkingData`, `TailoringData` in `:core`. Equipment and Companions systems fully wired (TickEngine bonuses, `GameDatabase` v3 migration, `EquipmentScreen` + `CompanionsScreen` overlays accessible from TopAppBar). `versionName` **1.5.0** / `versionCode` **8**.
+
 ---
 
-## [AMENDED 2026-03-31] Immediate Next Point (single focus)
+## [AMENDED 2026-04-01] Immediate Next Point (single focus)
 
-- [ ] Run **manual smoke pass** (no automated tests required): account create/select -> enter game -> start Mining action -> confirm XP/resource gain -> bank reflects resources -> return to accounts.
-- [ ] If smoke is clean, mark Phase 5 vertical slice **DONE** and open the next slice candidate (Logging or Combat baseline).
+**`[AMENDED 2026-03-31]:`** ~~Run manual smoke pass and mark Phase 5 done~~ — superseded.
+
+**`[AMENDED 2026-04-01]:`** Current standing as of **v1.5.0**:
+- [x] 12 trainable skills live (Gathering: Mining, Logging, Fishing, Harvesting, Scavenging, Farming, Thieving; Crafting: Smithing, Cooking, Herblore, Woodworking, Tailoring)
+- [x] Equipment + Companions frameworks live (XP multipliers, DB persistence, UI overlays)
+- [x] Achievements, Random Events, Bank search/sort, Haptics, Prestige screen all shipped
+- [ ] **Next:** Manual smoke pass on new skills — train Farming/Thieving (gathering), train Woodworking/Tailoring (confirm material deduction from bank), equip gear and verify XP boost applies, summon companion and verify bonus shows in training.
+- [ ] **Next combat candidate:** Wire the first Combat skill (`Attack` or `Strength`) as a simple idle loop — enemies, damage calc, `Hitpoints` XP, drops to bank.
+- [ ] **Nice to have:** `PrestigeScreen` wiring — currently a UI stub; hook perk multipliers into `TickEngine`.
 
 ---
 
@@ -185,12 +196,12 @@ Phased plan for the **native** Android line. Game content and tone remain define
 **Goal:** Player-facing polish comparable to RN app conventions — without blocking engine completeness.
 
 - [ ] **A11y:** TalkBack labels on all primary actions; focus order matches visual order; color contrast checks against `THEMING.md` tokens.
-- [ ] **Motion:** User-toggleable reduced motion (respect `android.settings.ACCESSIBILITY` / Compose `ReduceMotion`); document behavior in `SCRATCHPAD.md` when implemented.
-- [ ] **Feedback:** Haptic mapping table (RN `expo-haptics` → Android `HapticFeedback` / `Vibrator`) for level-up, rare drop, errors.
+- [x] **Motion:** `LocalReduceMotion` implemented in `DockingGlitch.kt` and `ChangelogScreen.kt` — skips animations when system reduce-motion is enabled. **`[DONE 2026-04-01]`**
+- [x] **Feedback:** Haptic feedback on level-up, training start/stop, and achievement unlocks (`LocalHapticFeedback`, toggle in Settings). **`[DONE 2026-04-01]`**
 - [ ] **Navigation:** Loading / empty / error states on every major route; deep link stubs for Settings and Bank where applicable.
-- [ ] **Bank (when data exists):** Search, sort modes, withdraw presets (X / All), stack tooltips — parity with `apps/mobile` bank UX intent.
+- [x] **Bank:** Search, 4-mode sort (type/name/quantity/rarity), withdraw presets — `BankScreen` updated. **`[DONE 2026-04-01]`**
 - [ ] **Combat (when wired):** Readable enemy state, fight speed indicator, equipment strip mirroring RN combat screen intent.
-- [ ] **WYWA / offline report:** Field parity with `WhileYouWereAway` contract (time away, XP gained, resources, combat summary when engine supports).
+- [x] **WYWA / offline report:** `OfflineReportDialog` shows time away, XP gained, resources gained. **`[DONE 2026-03-31]`**
 - [ ] **Profile hub:** Account / progress snapshot / entitlements surface aligned with RN Profile (v0.6.x) when persistence exists.
 - [ ] **Exploration:** Expedition cards — level lock clarity, discovery item tooltips, mastery hooks per `WORLD_EXPLORATION.md`.
 - [ ] **Crafting queue:** When engine supports queued actions, multi-step progress UI and cancel/skip affordances.
@@ -218,12 +229,14 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 **Goal:** Ship playable slices that mirror high-value RN features from `MASTER_DESIGN_DOC.md` and `DOCU/ROADMAP.md`.
 
-- [ ] **Skills:** Vertical slices in dependency order (e.g. Mining + Bank first, then Logging, Fishing…) per Phase 5 — plus training hints and mastery UI.
+- [x] **Skills:** 12 trainable skills across Gathering + Crafting pillars live in v1.5.0. Next: Combat baseline. **`[PARTIAL 2026-04-01]`**
 - [ ] **Dungeons / instances:** UI shells for Delves vs Expeditions timers and rewards (logic can stub) per GDD combat sections.
-- [ ] **Companions:** Roster and role labels per `DOCU/COMPANIONS.md`.
+- [x] **Companions:** 11 companions, 5 rarities, passive XP/resource bonuses; `CompanionsScreen` with summon/dismiss flow; bonuses applied in `TickEngine`. **`[DONE 2026-04-01]`**
+- [x] **Equipment / Gear:** 4 slots (weapon/tool/armor/accessory), 19 items with `skillBoosts` + `globalXpMultiplier`; `EquipmentScreen` with slot browsing and equip/unequip; persisted in `game_meta` (DB v3); multipliers applied per-skill per tick. **`[DONE 2026-04-01]`**
 - [ ] **Economy surfaces:** Lumina shop, patron / entitlements placeholders tied to future persistence keys.
-- [ ] **Chronicle / achievements:** Read-only milestone list when state exists.
-- [ ] **Random events:** Lightweight modal or banner pattern for absurdity events when engine hooks land.
+- [x] **Chronicle / achievements:** 40 achievements across 6 categories, rarity tiers, animated `ChronicleScreen` with category filter chips and progress bars; notifications via `SharedFlow`. **`[DONE 2026-04-01]`**
+- [x] **Random events:** 6 weighted events, tick-triggered `RandomEventDialog` with modal UI. **`[DONE 2026-04-01]`**
+- [x] **Prestige / Ascension:** `PrestigeScreen` with 6 perk types and ascend confirmation flow (UI complete; perk multipliers in TickEngine pending). **`[PARTIAL 2026-04-01]`**
 - [ ] **Skill pets:** Collection / bestiary stub tied to drop tables when ported.
 
 ---
