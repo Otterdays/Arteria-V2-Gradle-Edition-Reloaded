@@ -3,502 +3,879 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arteria V2 — Docking Station</title>
+    <meta name="description" content="Arteria V2 — native Android idle RPG. Roadmap, changelog, toolchain, and design canon. Kotlin · Compose · Room · :core JVM engine.">
+    <meta name="theme-color" content="#060d16">
+    <title>Arteria V2 — Docking Station &amp; Project Chronicle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <!--
+      Static dev hub — sync player-facing versions with app/build.gradle.kts + ChangelogScreen.kt APP_CHANGELOG.
+      Doc facts sourced: README, ROADMAP, SCRATCHPAD, SBOM, SUMMARY, SKILLS_EXPANSION_NATIVE, bundled V1 DOCU.
+    -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --bg-deep-top: #020408;
-            --bg-deep-mid: #060D16;
-            --bg-deep-bottom: #080B1A;
-            --text-primary: #E8E9ED;
-            --text-secondary: #8B8FA3;
-            --accent-primary: #4A90E2;
-            --accent-hover: #6AA3F5;
-            --border: #2B2F3D;
-            --luminar: #5B8CFF;
-            --void: #9B59B6;
-            --balanced: #2ECC71;
+            --bg-deep-mid: #060d16;
+            --bg-deep-bottom: #080b1a;
+            --bg-card: rgba(18, 22, 34, 0.78);
+            --text-primary: #e8e9ed;
+            --text-secondary: #8b8fa3;
+            --text-muted: #5c6175;
+            --accent-primary: #4a90e2;
+            --accent-hover: #6aa3f5;
+            --gold: #e8a54b;
+            --gold-dim: #b8822f;
+            --border: #2b2f3d;
+            --luminar: #5b8cff;
+            --void: #9b59b6;
+            --balanced: #2ecc71;
+            --danger: #e85d5d;
+            --nav-h: 52px;
         }
 
-        html {
-            scroll-behavior: smooth;
+        html { scroll-behavior: smooth; }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .bg-drift, .orbit-slow, h1 { animation: none !important; }
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, var(--bg-deep-top) 0%, var(--bg-deep-mid) 50%, var(--bg-deep-bottom) 100%);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            font-optical-sizing: auto;
+            background: var(--bg-deep-top);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
+            line-height: 1.55;
         }
 
-        /* Animated background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .bg-layers {
+            position: fixed; inset: 0; z-index: -2;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% -20%, rgba(91, 140, 255, 0.12), transparent 55%),
+                radial-gradient(ellipse 80% 50% at 100% 40%, rgba(155, 89, 182, 0.1), transparent 50%),
+                radial-gradient(ellipse 60% 40% at 0% 80%, rgba(46, 204, 113, 0.08), transparent 45%),
+                linear-gradient(165deg, var(--bg-deep-top) 0%, var(--bg-deep-mid) 45%, var(--bg-deep-bottom) 100%);
+        }
+        .bg-drift {
+            position: fixed; inset: -10%; z-index: -1;
             background-image:
-                radial-gradient(circle at 20% 30%, rgba(90, 140, 255, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 80% 60%, rgba(155, 89, 182, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 40% 80%, rgba(46, 204, 113, 0.08) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: -1;
-            animation: nebulaDrift 20s ease-in-out infinite;
+                radial-gradient(1.5px 1.5px at 8% 12%, rgba(255,255,255,0.85), transparent),
+                radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.2px 1.2px at 88% 70%, rgba(255,255,255,0.75), transparent);
+            opacity: 0.5;
+            animation: drift 28s ease-in-out infinite;
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0,0); }
+            50% { transform: translate(1%, -1%); }
+        }
+        .scanlines {
+            position: fixed; inset: 0; z-index: 40; pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+            opacity: 0.3; mix-blend-mode: overlay;
         }
 
-        @keyframes nebulaDrift {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        /* Stars */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                radial-gradient(1px 1px at 5% 10%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(1px 1px at 8% 25%, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1px 1px at 12% 50%, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(1px 1px at 15% 70%, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(1px 1px at 20% 15%, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(1px 1px at 25% 40%, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1px 1px at 30% 60%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(1px 1px at 40% 20%, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(1px 1px at 50% 35%, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(1px 1px at 60% 70%, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1px 1px at 70% 25%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(1px 1px at 80% 45%, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(1px 1px at 90% 10%, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(1px 1px at 95% 65%, rgba(255, 255, 255, 0.6), transparent);
-            background-size: 200% 200%;
-            pointer-events: none;
-            z-index: -1;
-            animation: twinkle 5s ease-in-out infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.9; }
-        }
-
-        header {
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            background: rgba(6, 13, 22, 0.5);
+        /* ——— Nav ——— */
+        .shell-nav {
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            min-height: var(--nav-h);
+            padding: 10px 20px;
+            background: rgba(4, 8, 16, 0.88);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
-
-        .pretag {
-            font-size: 12px;
-            letter-spacing: 3px;
-            color: #F59E0B;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
+        .shell-nav__brand {
             font-family: 'Cinzel', serif;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--luminar), var(--accent-primary));
+            font-size: 0.72rem;
+            letter-spacing: 0.28em;
+            color: var(--gold);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .shell-nav__links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            justify-content: flex-end;
+            max-width: min(920px, 100%);
+        }
+        .shell-nav__links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .shell-nav__links a:hover { color: var(--accent-hover); }
+
+        /* ——— Hero ——— */
+        .hero {
+            text-align: center;
+            padding: clamp(32px, 6vw, 64px) 20px 48px;
+            border-bottom: 1px solid rgba(43, 47, 61, 0.8);
+            background: linear-gradient(180deg, rgba(6, 13, 22, 0.5), transparent);
+        }
+        .pretag {
+            font-size: 11px;
+            letter-spacing: 0.38em;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: clamp(1.85rem, 5.5vw, 3.2rem);
+            letter-spacing: 0.06em;
+            margin-bottom: 14px;
+            background: linear-gradient(120deg, #c8d8ff, var(--luminar), #a78bfa, var(--balanced));
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: titleShine 10s ease-in-out infinite;
         }
-
+        @keyframes titleShine {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
         .tagline {
             color: var(--text-secondary);
-            font-size: 16px;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 38rem;
+            margin: 0 auto 8px;
+            font-size: clamp(0.95rem, 2vw, 1.08rem);
+        }
+        .build-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(91, 140, 255, 0.35);
+            background: rgba(91, 140, 255, 0.08);
+            font-size: 0.82rem;
+        }
+        .build-pill strong { color: var(--luminar); }
+        .build-pill code { color: var(--gold); font-size: 0.85em; }
+
+        .hero-orbit {
+            position: relative;
+            width: min(440px, 88vw);
+            height: min(440px, 88vw);
+            margin: 8px auto 0;
+            pointer-events: none;
+        }
+        .orbit-ring {
+            position: absolute;
+            inset: 14%;
+            border: 1px solid rgba(91, 140, 255, 0.22);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(91, 140, 255, 0.06);
+            animation: orbitPulse 7s ease-in-out infinite;
+        }
+        .orbit-ring--2 { inset: 26%; border-color: rgba(155, 89, 182, 0.2); animation-delay: -2.5s; }
+        @keyframes orbitPulse {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.025); opacity: 1; }
+        }
+        .hero-center {
+            position: absolute;
+            inset: 34%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 28%, rgba(255,255,255,0.1), transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(91, 140, 255, 0.12), rgba(6, 8, 18, 0.92));
+            border: 1px solid rgba(91, 140, 255, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.35rem, 4vw, 2rem);
+            letter-spacing: 0.22em;
+            text-indent: 0.22em;
+            box-shadow: 0 0 60px rgba(91, 140, 255, 0.1);
         }
 
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 20px;
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 26px;
         }
+        .cta {
+            display: inline-flex;
+            padding: 13px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cta--primary {
+            background: linear-gradient(135deg, var(--accent-primary), #3d7bc9);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 4px 22px rgba(74, 144, 226, 0.35);
+        }
+        .cta--ghost {
+            background: transparent;
+            color: var(--accent-hover);
+            border: 1px solid rgba(91, 140, 255, 0.45);
+        }
+        .cta:hover { transform: translateY(-2px); }
 
+        /* ——— Layout ——— */
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: clamp(36px, 5vw, 72px) 20px;
+        }
         section {
-            margin-bottom: 80px;
+            margin-bottom: clamp(48px, 8vw, 88px);
+            scroll-margin-top: calc(var(--nav-h) + 12px);
         }
-
         h2 {
             font-family: 'Cinzel', serif;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            color: var(--accent-hover);
+            font-size: clamp(1.2rem, 2.8vw, 1.65rem);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
-        h2::before {
-            content: '◆';
-            color: var(--luminar);
+        h2 .dia { color: var(--luminar); font-size: 0.65em; }
+        h3 {
+            font-size: 1.02rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.6rem;
+            color: var(--text-primary);
         }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+        .lead {
+            color: var(--text-secondary);
+            max-width: 48rem;
+            margin-bottom: 1.25rem;
+            font-size: 1.01rem;
         }
 
         .card {
-            background: rgba(27, 30, 41, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid rgba(43, 47, 61, 0.95);
+            border-radius: 14px;
+            padding: 22px 22px 24px;
+            backdrop-filter: blur(12px);
         }
-
         .card::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-primary), transparent);
+            display: block;
+            height: 2px;
+            margin: -22px -22px 18px;
+            border-radius: 14px 14px 0 0;
+            background: linear-gradient(90deg, var(--luminar), var(--void), transparent);
         }
 
-        .card:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.1);
-        }
-
-        .card h3 {
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            font-size: 1.2rem;
-        }
-
-        .card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
-
-        .badge {
-            display: inline-block;
-            background: rgba(74, 144, 226, 0.15);
-            border: 0.5px solid rgba(74, 144, 226, 0.45);
-            color: var(--accent-hover);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            margin-top: 12px;
-        }
-
-        .features-grid {
+        .grid2 {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
         }
 
-        .feature {
-            padding: 20px;
-            background: rgba(26, 58, 158, 0.08);
-            border-left: 3px solid var(--luminar);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .feature:nth-child(2) {
-            border-left-color: var(--void);
-            background: rgba(155, 89, 182, 0.08);
-        }
-
-        .feature:nth-child(3) {
-            border-left-color: var(--balanced);
-            background: rgba(46, 204, 113, 0.08);
-        }
-
-        .feature:hover {
-            transform: translateX(4px);
-        }
-
-        .feature h3 {
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-
-        .feature p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .cta-button {
+        .pill {
             display: inline-block;
-            background: var(--accent-primary);
-            color: white;
-            padding: 12px 28px;
+            padding: 4px 10px;
             border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .cta-button:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(74, 144, 226, 0.3);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 24px;
-            background: rgba(90, 140, 255, 0.05);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
+            font-size: 0.68rem;
             font-weight: 700;
-            color: var(--luminar);
-            margin-bottom: 8px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-right: 6px;
+            margin-top: 6px;
         }
+        .pill--done { background: rgba(46, 204, 113, 0.15); border: 1px solid rgba(46, 204, 113, 0.4); color: #7dffc0; }
+        .pill--wip { background: rgba(232, 165, 75, 0.12); border: 1px solid rgba(232, 165, 75, 0.45); color: var(--gold); }
+        .pill--backlog { background: rgba(91, 140, 255, 0.1); border: 1px solid rgba(91, 140, 255, 0.35); color: var(--accent-hover); }
 
-        .stat-label {
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(43, 47, 61, 0.85);
+        }
+        th {
+            background: rgba(255,255,255,0.03);
+            color: var(--gold-dim);
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 0.68rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        td { color: var(--text-secondary); }
+        td strong { color: var(--text-primary); }
+
+        ul.tight, ol.tight {
+            margin: 0.5rem 0 0 1.1rem;
             color: var(--text-secondary);
             font-size: 0.9rem;
+        }
+        ul.tight li, ol.tight li { margin: 0.35rem 0; }
+
+        /* Timeline changelog */
+        .timeline {
+            position: relative;
+            padding-left: 22px;
+            border-left: 2px solid rgba(91, 140, 255, 0.25);
+            margin: 1.25rem 0;
+        }
+        .tl-item {
+            position: relative;
+            padding-bottom: 28px;
+            padding-left: 8px;
+        }
+        .tl-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--luminar);
+            box-shadow: 0 0 12px var(--luminar);
+        }
+        .tl-item:last-child { padding-bottom: 0; }
+        .tl-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .tl-ver { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--text-primary); }
+        .tl-date { font-size: 0.78rem; color: var(--text-muted); }
+        .tl-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid;
+        }
+        .tl-tag--docs { color: var(--gold); border-color: rgba(232, 165, 75, 0.5); background: rgba(232, 165, 75, 0.08); }
+        .tl-tag--hub { color: var(--accent-hover); border-color: rgba(91, 140, 255, 0.45); }
+        .tl-tag--skills { color: var(--balanced); border-color: rgba(46, 204, 113, 0.45); }
+        .tl-tag--ui { color: #9ec5ff; border-color: rgba(158, 197, 255, 0.4); }
+        .tl-tag--launch { color: var(--gold); border-color: rgba(232, 165, 75, 0.55); }
+        .tl-tag--found { color: var(--balanced); border-color: rgba(46, 204, 113, 0.5); }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+        .doc-tile {
+            display: block;
+            padding: 16px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(8, 12, 22, 0.55);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .doc-tile:hover {
+            border-color: rgba(91, 140, 255, 0.45);
+            background: rgba(20, 28, 48, 0.65);
+        }
+        .doc-tile span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .code-panel {
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(3, 5, 12, 0.85);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .code-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .dot { width: 9px; height: 9px; border-radius: 50%; }
+        .dot:nth-child(1) { background: #e85d5d; }
+        .dot:nth-child(2) { background: var(--gold); }
+        .dot:nth-child(3) { background: var(--balanced); }
+        pre {
+            padding: 18px 20px;
+            overflow-x: auto;
+            font-family: ui-monospace, Consolas, monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #a8d4ff;
+        }
+        .c { color: var(--text-muted); }
+        .k { color: #c4b5fd; }
+
+        blockquote.quote {
+            margin: 1rem 0;
+            padding: 16px 20px;
+            border-left: 3px solid var(--void);
+            background: rgba(155, 89, 182, 0.06);
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.95rem;
         }
 
         footer {
             border-top: 1px solid var(--border);
             padding: 40px 20px;
             text-align: center;
-            background: rgba(6, 13, 22, 0.7);
-            color: var(--text-secondary);
-            margin-top: 60px;
+            background: rgba(4, 6, 12, 0.92);
+            color: var(--text-muted);
+            font-size: 0.82rem;
         }
+        footer a { color: var(--accent-primary); }
+        .foot-links { display: flex; flex-wrap: wrap; gap: 10px 20px; justify-content: center; margin-bottom: 16px; }
+        .foot-links a { text-decoration: none; font-weight: 500; }
+        .foot-links a:hover { color: var(--accent-hover); }
 
-        .links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        a {
-            color: var(--accent-primary);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            color: var(--accent-hover);
-        }
-
-        @media (max-width: 768px) {
-            header {
-                padding: 24px 16px;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            h2 {
-                font-size: 1.4rem;
-            }
-
-            main {
-                padding: 40px 16px;
-            }
-
-            .hero-grid {
-                grid-template-columns: 1fr;
-            }
+        .note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(232, 93, 93, 0.06);
+            border: 1px solid rgba(232, 93, 93, 0.2);
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="pretag">✦ ARTERIA ✦</div>
-        <h1>The Docking Station</h1>
-        <p class="tagline">Native Android RPG · Kotlin + Jetpack Compose · Timeline-driven gameplay with deep skill progression</p>
+    <div class="bg-layers" aria-hidden="true"></div>
+    <div class="bg-drift" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <nav class="shell-nav" aria-label="Section navigation">
+        <a class="shell-nav__brand" href="#top">ARTERIA</a>
+        <div class="shell-nav__links">
+            <a href="#pulse">Pulse</a>
+            <a href="#releases">Releases</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="#skills">Skills</a>
+            <a href="#runtime">Runtime</a>
+            <a href="#toolchain">Toolchain</a>
+            <a href="#horizon">Horizon</a>
+            <a href="#v1canon">V1 canon</a>
+            <a href="#docs">Docs hub</a>
+            <a href="#build">Build</a>
+        </div>
+    </nav>
+
+    <header class="hero" id="top">
+        <div class="pretag">Native track</div>
+        <h1>Docking Station Chronicle</h1>
+        <p class="tagline">Gradle Edition V2 — Kotlin, Jetpack Compose, Room, and a JVM <code style="color:var(--gold);">:core</code> engine. Idle ticks, cross-skill economy, Docking UI.</p>
+        <div class="build-pill" role="status">
+            <span>Shipped app <strong>v1.4.1</strong> <code>(versionCode 4)</code></span>
+            <span>·</span>
+            <span>Synced with <code>ChangelogScreen.kt</code> + <code>DOCS/</code> as of <strong>2026-04-01</strong></span>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+            <div class="orbit-ring orbit-slow"></div>
+            <div class="orbit-ring orbit-ring--2"></div>
+            <div class="hero-center">A</div>
+        </div>
+        <div class="cta-row">
+            <a class="cta cta--primary" href="https://github.com/Otterdays/Arteria-V2-Gradle-Edition-Reloaded" rel="noopener noreferrer" target="_blank">GitHub repository</a>
+            <a class="cta cta--ghost" href="../README.md">README.md</a>
+            <a class="cta cta--ghost" href="../DOCS/SUMMARY.md">DOCS / SUMMARY</a>
+        </div>
     </header>
 
-    <main>
-        <!-- Hero Section -->
-        <section>
-            <h2>What is Arteria?</h2>
-            <div class="hero-grid">
+    <div class="wrap">
+        <!-- PULSE -->
+        <section id="pulse">
+            <h2><span class="dia" aria-hidden="true">◆</span> Project pulse</h2>
+            <p class="lead">Condensed from <code>DOCS/SCRATCHPAD.md</code> — live handoff for contributors and agents. For blockers and next actions, always read the file in-repo.</p>
+            <div class="grid2">
                 <div class="card">
-                    <h3>Sci-Fi RPG</h3>
-                    <p>An immersive idle/incremental RPG set in a richly detailed universe with procedural progression and lore-driven gameplay.</p>
-                    <span class="badge">GAMEPLAY</span>
+                    <h3>Active stack</h3>
+                    <ul class="tight">
+                        <li>Routes: <code>account_select</code> → <code>account_create</code> → <code>game/{profileId}</code></li>
+                        <li>Game shell: <strong>Hub</strong> (default), Skills, Bank, Combat + settings / What’s New overlays</li>
+                        <li>Trainable skills: Mining, Logging, Fishing, Harvesting, Scavenging, Smithing, Herblore, Cooking</li>
+                        <li>Roster: <strong>41</strong> <code>SkillId</code> entries, <strong>5</strong> pillars (incl. Cosmic); unwired = Coming Soon dialog</li>
+                        <li>Engine: Gradle <code>:core</code> JVM — <code>TickEngine</code>, <code>XPTable</code>, <code>SkillDataRegistry</code></li>
+                    </ul>
                 </div>
                 <div class="card">
-                    <h3>Pure Native</h3>
-                    <p>Built from the ground up for Android using Kotlin and Jetpack Compose. No cross-platform overhead — full device power.</p>
-                    <span class="badge">KOTLIN</span>
+                    <h3>Settings &amp; prefs (DataStore)</h3>
+                    <ul class="tight">
+                        <li>Theme dark / follow system, reduce motion, haptics, sound master</li>
+                        <li>Offline report toggle, offline cap copy, DEBUG cap bypass</li>
+                        <li>Profile display name edit, last played, About via <code>BuildConfig</code></li>
+                        <li>OSS notices, credits, reset progress, delete profile</li>
+                    </ul>
                 </div>
                 <div class="card">
-                    <h3>Docking Station UI</h3>
-                    <p>A beautiful account selection flow with animated glitch effects, timeline visualizations, and skill badge badges showcasing your character's strengths.</p>
-                    <span class="badge">ANIMATION</span>
+                    <h3>Next actions (QA / engineering)</h3>
+                    <ol class="tight">
+                        <li>Device smoke across all eight trainable skills (XP, bank, crafting consumption, auto-stop)</li>
+                        <li>Alive bottom bar: XP ring, bank opportunity badge, tab glow</li>
+                        <li><code>GameViewModel</code> tests: save cadence, one-skill training rule</li>
+                        <li>Mark Phase 5 slice DONE in <code>ROADMAP.md</code> when smoke is clean</li>
+                        <li>Skill expansion playbook: <code>DOCS/SKILLS_EXPANSION_NATIVE.md</code></li>
+                    </ol>
+                </div>
+                <div class="card">
+                    <h3>Persistence</h3>
+                    <ul class="tight">
+                        <li><code>arteria_profiles.db</code> — profiles</li>
+                        <li><code>arteria_game.db</code> — skills, bank, <code>game_meta</code></li>
+                        <li>Room <strong>v2</strong> + <code>lastOfflineTickAppliedAt</code> offline audit</li>
+                        <li><code>GameRepository.saveGameState()</code> transactional write path</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="note">Scratchpad may mention experimental or in-flight ideas before they ship. <strong>Player-facing truth</strong> = <code>app/build.gradle.kts</code> version + in-app changelog.</p>
+        </section>
+
+        <!-- RELEASES -->
+        <section id="releases">
+            <h2><span class="dia" aria-hidden="true">◆</span> Release timeline</h2>
+            <p class="lead">Mirrors <code>APP_CHANGELOG</code> in <code>ChangelogScreen.kt</code> — same order and bullets as the in-app What’s New board.</p>
+            <div class="timeline">
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.4.1</span>
+                        <span class="tl-date">2026-03-31</span>
+                        <span class="tl-tag tl-tag--docs">DOCS</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Settings About and What’s New aligned with this build number</li>
+                        <li>Release hygiene: new ships prepend this list + bump <code>versionName</code> / <code>versionCode</code></li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.4.0</span>
+                        <span class="tl-date">2026-04-01</span>
+                        <span class="tl-tag tl-tag--hub">HUB</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Hub home tab — inline offline gains, training panel, stats, nudges, level-up cards</li>
+                        <li>Fourth tab with Anchor icon; Herblore + Scavenging trainable lines</li>
+                        <li>Settings parity: rename, last played, About, cadence copy, test sound</li>
+                        <li>41-skill roster / 5 pillars; Coming Soon for unwired skills</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.3.0</span>
+                        <span class="tl-date">2026-04-01</span>
+                        <span class="tl-tag tl-tag--skills">SKILLS</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Six skill lines: Mining, Logging, Fishing, Harvesting, Smithing, Cooking</li>
+                        <li>Coming Soon dialog for unimplemented skills</li>
+                        <li>Game DB v2, offline audit field, atomic saves, tick sim off UI thread</li>
+                        <li>Custom bottom bar (Skills · Bank · Combat)</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.2.0</span>
+                        <span class="tl-date">2026-03-31</span>
+                        <span class="tl-tag tl-tag--ui">UI</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Docking glitch materialization — CRT sweep, RGB aberration, timeline, energy flow</li>
+                        <li>Pillar badges, hex ghost text, ambient selected-card FX</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.1.0</span>
+                        <span class="tl-date">2026-03-31</span>
+                        <span class="tl-tag tl-tag--ui">UI</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Settings overlay + TopAppBar gear; back dismisses</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.0.0</span>
+                        <span class="tl-date">2026-03-30</span>
+                        <span class="tl-tag tl-tag--launch">LAUNCH</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Room profiles, tick engine, skills, bank, offline report, level-up feedback</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">0.1.0</span>
+                        <span class="tl-date">2026-03-22</span>
+                        <span class="tl-tag tl-tag--found">FOUNDATION</span>
+                    </div>
+                    <ul class="tight">
+                        <li>Gradle 9.6 + AGP 9.1, Cinzel, Docking backdrop, NavHost + profile routing</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <!-- ROADMAP -->
+        <section id="roadmap">
+            <h2><span class="dia" aria-hidden="true">◆</span> Roadmap spine (Phases 0–6)</h2>
+            <p class="lead">From <code>DOCS/ROADMAP.md</code> — platform spine. Phases 7–10 are parallel feature / polish / ship tracks.</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Focus</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>0</strong></td><td>Scaffold, Gradle 9.6 nightly, AGP 9.1, API 36</td><td><span class="pill pill--done">Done</span></td></tr>
+                        <tr><td><strong>1</strong></td><td>Compose shell, package <code>com.arteria.game</code>, navigation</td><td><span class="pill pill--done">Done</span></td></tr>
+                        <tr><td><strong>2</strong></td><td>Engine in JVM <code>:core</code>, tick + XP tests</td><td><span class="pill pill--done">Done</span> <small style="color:var(--text-muted)">2026-04-01</small></td></tr>
+                        <tr><td><strong>3</strong></td><td>UI shell, ViewModels, tabs</td><td><span class="pill pill--done">Done</span></td></tr>
+                        <tr><td><strong>4</strong></td><td>Room persistence, offline, migrations</td><td><span class="pill pill--done">Done</span></td></tr>
+                        <tr><td><strong>5</strong></td><td>Content port, vertical slices, skill data</td><td><span class="pill pill--wip">In progress</span> — smoke + balance</td></tr>
+                        <tr><td><strong>6</strong></td><td>R8, a11y, audio/haptics, Play hygiene</td><td><span class="pill pill--backlog">Backlog</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section id="skills">
+            <h2><span class="dia" aria-hidden="true">◆</span> Skills system</h2>
+            <p class="lead">How expansion works on native V2 — see <code>DOCS/SKILLS_EXPANSION_NATIVE.md</code> for the full playbook and V1 doc mapping.</p>
+            <div class="grid2">
+                <div class="card">
+                    <h3>Roster vs trainable</h3>
+                    <p style="color:var(--text-secondary);font-size:0.92rem;margin-bottom:10px;">Enum defines identity; <code>SkillDataRegistry.actionsForSkill</code> defines whether the skill trains.</p>
+                    <ul class="tight">
+                        <li><strong>Implemented (8):</strong> Mining, Logging, Fishing, Harvesting, Scavenging, Smithing, Herblore, Cooking</li>
+                        <li><strong>Chains:</strong> Harvest → Herblore potions; Ore → Smithing bars; Fish → cooked food</li>
+                        <li><strong>V1 references:</strong> <code>SKILLS_ARCHITECTURE.md</code>, <code>skilling_guides/*</code>, <code>UI_REVISION_CRAFTING_v2.md</code></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Synergies (design-only)</h3>
+                    <p style="color:var(--text-secondary);font-size:0.92rem;">V1 <code>SYNERGIES.md</code> describes pair/chain/meta bonuses — not wired in V2 ticks yet. Ship skills first; add modifiers as a later systems layer.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Tech Stack -->
-        <section>
-            <h2>Tech Stack</h2>
-            <div class="features-grid">
-                <div class="feature">
-                    <h3>🔧 Build</h3>
-                    <p><strong>Gradle 9.6</strong> (nightly) with <strong>AGP 9.1</strong>, targeting Android 16 (API 36)</p>
-                </div>
-                <div class="feature">
-                    <h3>💜 UI</h3>
-                    <p><strong>Jetpack Compose</strong> with Material 3. Custom animation system for glitch effects and timeline interactions.</p>
-                </div>
-                <div class="feature">
-                    <h3>💾 Persistence</h3>
-                    <p><strong>Room Database</strong> with reactive StateFlow for profile management and game state. Zero-setup SQLite.</p>
-                </div>
-                <div class="feature">
-                    <h3>⚙️ Engine</h3>
-                    <p><strong>Pure Kotlin</strong> tick system in headless `:core` module. No Android framework in domain logic.</p>
-                </div>
-                <div class="feature">
-                    <h3>🗺️ Navigation</h3>
-                    <p><strong>Navigation Compose</strong> with type-safe route encoding. Account → Game → Skill/Bank/Combat flows.</p>
-                </div>
-                <div class="feature">
-                    <h3>🚀 Future</h3>
-                    <p>C++ OpenGL island for high-performance rendering. Architecture is additive — no breaking changes planned.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Animation System -->
-        <section>
-            <h2>Docking Station Animation System</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;">Every account card features a multi-layered glitch materialization effect with staggered entry timing, ambient ripple rings, energy flow particles, and spring-pop skill badges.</p>
-            <div class="stats-grid">
-                <div class="stat">
-                    <div class="stat-number">7</div>
-                    <div class="stat-label">Canvas Layers</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">5</div>
-                    <div class="stat-label">Animation Phases</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">∞</div>
-                    <div class="stat-label">Ambient FX</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">160ms</div>
-                    <div class="stat-label">Entry Stagger</div>
-                </div>
-            </div>
-            <p style="color: var(--text-secondary); margin-top: 20px; font-style: italic;">CRT scan-line sweep · RGB chromatic aberration · Block displacement · Noise grain · Interference scanlines · Stabilization flicker · Ambient selected-state glow</p>
-        </section>
-
-        <!-- Skills -->
-        <section>
-            <h2>16 Skills · 4 Pillars</h2>
-            <div class="features-grid">
-                <div class="feature">
-                    <h3>🌿 Gathering</h3>
-                    <p>Mining, Logging, Fishing, Harvesting, Scavenging</p>
-                </div>
-                <div class="feature">
-                    <h3>⚒️ Crafting</h3>
-                    <p>Smithing, Cooking, Runecrafting, Herblore, Forging</p>
-                </div>
-                <div class="feature">
-                    <h3>⚔️ Combat</h3>
-                    <p>Attack, Strength, Defence, Hitpoints</p>
-                </div>
-                <div class="feature">
-                    <h3>✨ Support</h3>
-                    <p>Agility, Wizardry</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Getting Started -->
-        <section>
-            <h2>Getting Started</h2>
-            <div style="background: rgba(26, 58, 158, 0.05); border: 1px solid var(--border); padding: 30px; border-radius: 12px;">
-                <h3 style="color: var(--text-primary); margin-bottom: 16px;">Clone & Build</h3>
-                <pre style="background: rgba(0, 0, 0, 0.3); padding: 16px; border-radius: 6px; overflow-x: auto; color: var(--accent-hover); font-family: 'Courier New', monospace; font-size: 0.9rem;">git clone https://github.com/arteria/arteria-v2-gradle.git
-cd Arteria-V2-Gradle-Edition-Reloaded
-./gradlew :app:assembleDebug
-</pre>
-                <p style="color: var(--text-secondary); margin-top: 16px;">Requires: JDK 21, Android SDK 36, Android Studio 2024+</p>
-                <a href="#" class="cta-button" style="margin-top: 16px;">View Full Documentation →</a>
-            </div>
-        </section>
-
-        <!-- Philosophy -->
-        <section>
-            <h2>Design Philosophy</h2>
+        <!-- RUNTIME -->
+        <section id="runtime">
+            <h2><span class="dia" aria-hidden="true">◆</span> Runtime architecture</h2>
+            <p class="lead">Abbreviated from <code>DOCS/ARCHITECTURE.md</code>.</p>
             <div class="card">
-                <p style="font-size: 1.05rem; line-height: 1.8;">
-                    <strong>Keep It Simple.</strong> No premature abstractions. <strong>You Aren't Gonna Need It.</strong> No speculative features.
-                    <strong>Don't Repeat Yourself.</strong> One source of truth for rules and state. <strong>Fail Fast.</strong> Errors surface immediately; no silent failures.
-                </p>
-                <p style="color: var(--text-secondary); margin-top: 16px; font-size: 0.9rem;">
-                    Every line of code earns its place. Animations are performant Canvas operations, not layout thrashing. Domain logic is pure and testable. UI is a thin reactive layer over immutable state.
-                </p>
+                <pre style="margin:0;padding:0;background:transparent;color:var(--text-secondary);font-size:0.82rem;line-height:1.65;">
+MainActivity → ArteriaTheme → ArteriaApp (NavHost)
+  account_select | account_create | game/{profileId}
+  AccountViewModel → ProfileRepository → Room (profiles)
+  GameViewModel → GameRepository → Room (game) + TickEngine (:core)
+                </pre>
             </div>
         </section>
-    </main>
+
+        <!-- TOOLCHAIN -->
+        <section id="toolchain">
+            <h2><span class="dia" aria-hidden="true">◆</span> Toolchain snapshot</h2>
+            <p class="lead">From <code>DOCS/SBOM.md</code> — verify live Gradle files before bumping.</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Component</th><th>Pinned</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Gradle wrapper</td><td><code>9.6.0-20260331012943+0000</code></td></tr>
+                        <tr><td>AGP</td><td><code>9.1.0</code></td></tr>
+                        <tr><td>Kotlin Compose plugin</td><td><code>2.3.20</code></td></tr>
+                        <tr><td>Kotlin JVM (<code>:core</code>)</td><td><code>2.3.20</code></td></tr>
+                        <tr><td>KSP</td><td><code>2.3.6</code></td></tr>
+                        <tr><td>Compose BOM</td><td><code>2026.03.01</code></td></tr>
+                        <tr><td>Room</td><td><code>2.8.4</code></td></tr>
+                        <tr><td>Navigation Compose</td><td><code>2.9.7</code></td></tr>
+                        <tr><td>Lifecycle</td><td><code>2.10.0</code></td></tr>
+                        <tr><td>DataStore Preferences</td><td><code>1.2.0</code></td></tr>
+                        <tr><td>compileSdk / target</td><td><strong>36.1</strong> / <strong>36</strong> · minSdk <strong>26</strong></td></tr>
+                        <tr><td>Bytecode / daemon</td><td>Java <strong>21</strong> · Foojay daemon JDK 21 (Adoptium)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- HORIZON -->
+        <section id="horizon">
+            <h2><span class="dia" aria-hidden="true">◆</span> Horizon — Phases 7–10</h2>
+            <p class="lead">Parallel tracks from <code>ROADMAP.md</code> (QoL, visual parity, feature verticals, store readiness). Not exhaustive — read the doc for checklists.</p>
+            <div class="grid2">
+                <div class="card">
+                    <h3>Phase 7 — QoL &amp; a11y</h3>
+                    <ul class="tight">
+                        <li>TalkBack, contrast, reduced motion parity</li>
+                        <li>Haptics mapping, bank search/sort/presets when UX lands</li>
+                        <li>Offline report field parity with WYWA intent</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Phase 8 — Visual system</h3>
+                    <ul class="tight">
+                        <li>Token alignment with <code>THEMING.md</code> / RN reference</li>
+                        <li>Crafting “radial mastery” per <code>UI_REVISION_CRAFTING_v2.md</code></li>
+                        <li>Docking parity with character-select intent</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Phase 9 — Feature verticals</h3>
+                    <ul class="tight">
+                        <li>Skill slices in dependency order; combat/dungeons shells</li>
+                        <li>Companions per <code>COMPANIONS.md</code>; chronicle / random events</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Phase 10 — Ship quality</h3>
+                    <ul class="tight">
+                        <li>Cold start benchmarks, R8 rules, Play Console checklist</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- V1 CANON -->
+        <section id="v1canon">
+            <h2><span class="dia" aria-hidden="true">◆</span> V1 design canon (bundled)</h2>
+            <p class="lead">Mirror under <code>DOCS/ARTERIA-V1-DOCS/DOCU/</code>. If monorepo <code>../DOCU/</code> disagrees, <strong>root wins</strong> per <code>SUMMARY.md</code>.</p>
+            <blockquote class="quote">
+                “A cosmic fantasy, math-heavy incremental idle RPG — Luminar wonder, Voidmire dread, and the Great Joke underneath. You are an <strong>Anchor</strong>: heavily souled, coincidence-prone, not a chosen one.”
+                <br><br>
+                — paraphrased from <code>TRUTH_DOCTRINE.md</code> (pillar philosophy; V2 roster count may exceed early “25 skills” wording)
+            </blockquote>
+            <div class="doc-grid">
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/MASTER_DESIGN_DOC.md">
+                    MASTER_DESIGN_DOC
+                    <span>World tone, systems intent, shipping north star</span>
+                </a>
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/TRUTH_DOCTRINE.md">
+                    TRUTH_DOCTRINE
+                    <span>Non-negotiables: KISS, YAGNI, append-only chronicle</span>
+                </a>
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/SKILLS_ARCHITECTURE.md">
+                    SKILLS_ARCHITECTURE
+                    <span>Workbench UI pattern, farming vs wild harvest splits</span>
+                </a>
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/SYNERGIES.md">
+                    SYNERGIES
+                    <span>Cross-skill bonus design — future mechanics layer</span>
+                </a>
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/skilling_guides/mining_reference.md">
+                    skilling_guides / mining
+                    <span>Content density for Kotlin data ports</span>
+                </a>
+                <a class="doc-tile" href="../DOCS/ARTERIA-V1-DOCS/DOCU/UI_REVISION_CRAFTING_v2.md">
+                    UI_REVISION_CRAFTING_v2
+                    <span>Crafting screen paradigm</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- DOCS HUB -->
+        <section id="docs">
+            <h2><span class="dia" aria-hidden="true">◆</span> Native V2 docs hub</h2>
+            <p class="lead">Suggested read order from <code>DOCS/SUMMARY.md</code>.</p>
+            <div class="doc-grid">
+                <a class="doc-tile" href="../DOCS/SCRATCHPAD.md"><strong>1 · SCRATCHPAD</strong><span>Blockers, last actions, next step</span></a>
+                <a class="doc-tile" href="../DOCS/ROADMAP.md"><strong>2 · ROADMAP</strong><span>Phases 0–10 delivery plan</span></a>
+                <a class="doc-tile" href="../DOCS/ARCHITECTURE.md"><strong>3 · ARCHITECTURE</strong><span>Runtime shape, modules</span></a>
+                <a class="doc-tile" href="../DOCS/MIGRATION_SPEC.md"><strong>4 · MIGRATION_SPEC</strong><span>TS/RN → Kotlin mapping</span></a>
+                <a class="doc-tile" href="../DOCS/SBOM.md"><strong>5 · SBOM</strong><span>Dependency bill of materials</span></a>
+                <a class="doc-tile" href="../DOCS/SKILLS_EXPANSION_NATIVE.md"><strong>Skills expansion</strong><span>Native playbook + V1 bridges</span></a>
+            </div>
+        </section>
+
+        <!-- BUILD -->
+        <section id="build">
+            <h2><span class="dia" aria-hidden="true">◆</span> Clone &amp; build</h2>
+            <p class="lead">Windows-friendly paths. Use a full <strong>JDK 21</strong> — see README for IDE / <code>org.gradle.java.home</code> notes.</p>
+            <div class="code-panel">
+                <div class="code-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span> terminal</div>
+                <pre><span class="c"># Engine unit tests</span>
+<span class="k">./gradlew</span> :core:test
+
+<span class="c"># Debug APK</span>
+<span class="k">git clone</span> https://github.com/Otterdays/Arteria-V2-Gradle-Edition-Reloaded.git
+<span class="k">cd</span> Arteria-V2-Gradle-Edition-Reloaded
+<span class="k">./gradlew</span> :app:assembleDebug</pre>
+            </div>
+            <div class="card" style="margin-top:18px;">
+                <h3>Philosophy</h3>
+                <p style="color:var(--text-secondary);">KISS · YAGNI · DRY · Fail fast — domain logic stays pure in <code>:core</code>; UI is a thin reactive layer; one transactional save path for game state.</p>
+            </div>
+        </section>
+    </div>
 
     <footer>
-        <div class="links">
-            <a href="https://github.com/arteria">GitHub</a>
-            <a href="./DOCS/">Documentation</a>
-            <a href="./README.md">README</a>
-            <a href="#top">Back to Top</a>
+        <div class="foot-links">
+            <a href="https://github.com/Otterdays/Arteria-V2-Gradle-Edition-Reloaded" rel="noopener noreferrer" target="_blank">GitHub</a>
+            <a href="../DOCS/SUMMARY.md">SUMMARY.md</a>
+            <a href="../DOCS/REFERENCES.md">REFERENCES.md</a>
+            <a href="#top">Top</a>
         </div>
-        <p style="margin-bottom: 8px;">© 2026 Arteria · Native Android Track</p>
-        <p style="font-size: 0.85rem; color: var(--text-secondary);">Built with Kotlin, Jetpack Compose, and a passion for elegant code.</p>
+        <p>Arteria V2 · Native Android · Gradle Edition Reloaded</p>
+        <p style="margin-top:8px;">Static chronicle page — regenerate or edit <code>www/index.html</code> when major docs or changelog entries ship.</p>
     </footer>
 </body>
 </html>

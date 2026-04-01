@@ -124,7 +124,7 @@ fun AccountSelectionScreen(
                         val selected = account.id == selectedId
                         DockingAccountCard(
                             displayName = account.displayName,
-                            metaLine = "Game mode · Standard",
+                            metaLine = account.gameModeLabel,
                             selected = selected,
                             gradient = dockingGradientForIndex(index),
                             onClick = { onSelectAccount(account.id) },
