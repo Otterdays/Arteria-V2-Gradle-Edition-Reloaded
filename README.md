@@ -1,13 +1,15 @@
-# Arteria V2 Gradle Edition Reloaded
+# Arteria V2 · Gradle Edition Reloaded
 
-> **Native Android Idle RPG** — Kotlin + Jetpack Compose on cutting-edge Gradle/AGP tooling.
+<p align="center">
+  <strong>Native Android idle RPG</strong> — offline ticks, Room persistence, and a Compose UI that does not apologize for looking good.
+</p>
 
 ## Project Canon
 
 - **Canonical local root:** `Arteria-V2-Gradle-Edition-Reloaded/`
 - **Legacy alias:** `Arteria-Gradle-Edition-V2/` (same project identity in older docs)
 - **Stack truth:** Native Android only (`Kotlin + Compose + Room + Gradle/AGP`)
-- **Source-of-truth docs:** `DOCS/SUMMARY.md` -> `DOCS/SBOM.md` -> `DOCS/SCRATCHPAD.md` -> `DOCS/ARCHITECTURE.md` -> `DOCS/ROADMAP.md`
+- **Source-of-truth docs:** `DOCS/SUMMARY.md` → `DOCS/SBOM.md` → `DOCS/SCRATCHPAD.md` → `DOCS/ARCHITECTURE.md` → `DOCS/ROADMAP.md`
 
 <div align="center">
 
@@ -17,18 +19,37 @@
  / __ | / /_/ // /  / / / /_/ / /| |
 / ___ |/ _, _// /  / / / _, _/ ___ |
 /_/  |_/_/ |_/___/ /_/ /_/ |_/_/  |_|
-
-      Gradle Edition V2 — Native Track
 ```
 
-![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-7F52FF?style=for-the-badge&logo=kotlin)
-![Gradle](https://img.shields.io/badge/Gradle-9.6.0--nightly-02303A?style=for-the-badge&logo=gradle)
-![AGP](https://img.shields.io/badge/AGP-9.1.0-3DDC84?style=for-the-badge&logo=android)
-![Compose](https://img.shields.io/badge/Compose-2026.03.01-4285F4?style=for-the-badge&logo=jetpackcompose)
-![Room](https://img.shields.io/badge/Room-2.8.4-0EA5E9?style=for-the-badge&logo=sqlite)
-![JDK](https://img.shields.io/badge/JDK-21%20ADOPTIUM-FF6B00?style=for-the-badge&logo=openjdk)
-![API](https://img.shields.io/badge/API-26%2B-3DDC84?style=for-the-badge&logo=android)
-![Status](https://img.shields.io/badge/Status-Phase%201%20%2B%20Animation%20System-FF6B35?style=for-the-badge)
+*Gradle Edition V2 — native track · bleeding-edge toolchain, ship-shaped defaults*
+
+<br/>
+
+**Build & language**
+
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.6.0--snapshot-02303A?style=for-the-badge&logo=gradle&logoColor=white)](https://gradle.org/)
+[![AGP](https://img.shields.io/badge/AGP-9.1.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/build/releases/gradle-plugin)
+[![Compose BOM](https://img.shields.io/badge/Compose_BOM-2026.03.01-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose/bom)
+[![KSP](https://img.shields.io/badge/KSP-2.3.6-7F52FF?style=for-the-badge)](https://github.com/google/ksp)
+[![Room](https://img.shields.io/badge/Room-2.8.4-0EA5E9?style=for-the-badge&logo=sqlite&logoColor=white)](https://developer.android.com/training/data-storage/room)
+
+**JDK · Android targets · libraries**
+
+[![Build JDK](https://img.shields.io/badge/Build-JDK_26-FF6B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-quick-start)
+[![JVM target](https://img.shields.io/badge/JVM_target-21-437291?style=for-the-badge&logo=openjdk&logoColor=white)](app/build.gradle.kts)
+[![Compile SDK](https://img.shields.io/badge/compileSdk-36.1-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
+[![minSdk](https://img.shields.io/badge/minSdk-26-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
+[![Navigation](https://img.shields.io/badge/Navigation-2.9.7-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/navigation)
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-2.10.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+[![Coroutines](https://img.shields.io/badge/Coroutines-1.10.2-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://github.com/Kotlin/kotlinx.coroutines)
+
+**Product · status**
+
+[![App version](https://img.shields.io/badge/release-1.3.0-FF6B35?style=for-the-badge)](app/build.gradle.kts)
+[![Platform](https://img.shields.io/badge/Android-16_%28API_36%29-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
+[![Material 3](https://img.shields.io/badge/UI-Material_3-6750A4?style=for-the-badge)](https://m3.material.io/)
+[![Status](https://img.shields.io/badge/Status-Phase_5_slice-FF6B35?style=for-the-badge)](DOCS/ROADMAP.md)
 
 </div>
 
@@ -41,10 +62,11 @@
 ### 🎮 Key Features
 
 - **Idle Mechanics** — Offline progression, skill ticks, and resource generation
+- **Skills UX** — Implemented skills open training (`SkillDetailScreen`); skills without registry actions show a **Coming Soon** dialog (`SkillComingSoonDialog`). **Herblore** uses herbs from **Harvesting** (bank `inputItems`); **Scavenging** adds salvage gathering tiers.
 - **Account & Profile Persistence** — Room-based save/load with session management
 - **🎬 Docking Station UI** — Beautiful character selection with **animated glitch effects**, timeline visualizations, and skill badge showcases
 - **Jetpack Compose** — Modern declarative UI with Material Design 3
-- **JDK 21 & Gradle 9.6 Nightly** — Bleeding-edge tooling for maximum platform adoption
+- **JDK 26 builds + Gradle 9.6 snapshot** — Maintainer workflow runs Gradle on **JDK 26**; bytecode stays **Java 21** until the matrix moves
 - **Future GPU Island** — C++ / OpenGL ES 3 planned for advanced rendering (Phase 5+)
 
 ---
@@ -56,9 +78,11 @@
 | Tool | Version | Notes |
 |------|---------|-------|
 | **Android Studio** | 2024.1+ | Bundled Gradle toolchain support required |
-| **JDK** | **21** (ADOPTIUM) | Auto-provisioned via Gradle Foojay resolver |
-| **Android SDK** | 36.1 (API 36 Baklava) | Automatically installed by Android Studio |
-| **Gradle** | **9.6.0-nightly** | Pinned in `gradle/wrapper/gradle-wrapper.properties` |
+| **JDK (build)** | **26** (recommended) | Primary maintainer path; Windows helper: `build-with-jdk26.bat` |
+| **JDK (daemon pin)** | **21** (ADOPTIUM) | Checked into `gradle/gradle-daemon-jvm.properties` + Foojay resolver for clean clones |
+| **JVM bytecode** | **21** | `sourceCompatibility` / `targetCompatibility` in `:app` and `:core` |
+| **Android SDK** | 36.1 (API 36 · Android 16) | Installed via Android Studio / `sdkmanager` |
+| **Gradle** | **9.6.0** snapshot | Pinned in `gradle/wrapper/gradle-wrapper.properties` |
 
 ### Build & Run
 
@@ -67,8 +91,14 @@
 git clone https://github.com/Otterdays/Arteria-V2-Gradle-Edition-Reloaded.git
 cd Arteria-V2-Gradle-Edition-Reloaded
 
-# Build APK
+# Build APK (uses daemon JVM from gradle-daemon-jvm.properties, typically JDK 21)
 ./gradlew :app:assembleDebug
+
+# Windows: same tasks but force JDK 26 for the Gradle JVM (edit JDK path inside the script if needed)
+build-with-jdk26.bat :app:assembleDebug
+
+# macOS / Linux: pass the same flag explicitly
+# ./gradlew -Dorg.gradle.java.home=/path/to/jdk-26 :app:assembleDebug
 
 # Install to device/emulator
 ./gradlew :app:installDebug
@@ -110,7 +140,7 @@ For full technical details, use `DOCS/ARCHITECTURE.md` and `CLAUDE.md` instead o
 │  ArteriaApp (NavHost)                               │
 │    ├── 🎪 AccountSelectionScreen + Animation        │
 │    ├── 📝 AccountCreationScreen                      │
-│    ├── 🎮 GameScreen (3-tab hub: Skills/Bank/Combat)│
+│    ├── 🎮 GameScreen (3-tab hub: Skills/Bank/Combat; Coming Soon modal for stub skills)│
 │    ├── ⚙️  SettingsScreen (overlay)                  │
 │    └── 📜 ChangelogScreen (version history)         │
 ├─────────────────────────────────────────────────────┤
@@ -128,14 +158,24 @@ For full technical details, use `DOCS/ARCHITECTURE.md` and `CLAUDE.md` instead o
 
 | Component | Version | Scope |
 |-----------|---------|-------|
-| **Gradle** | `9.6.0-20260331012943+0000` | Build orchestration (nightly) |
+| **Gradle** | `9.6.0-20260331012943+0000` | Build orchestration (snapshot) |
 | **AGP** | `9.1.0` | Android Gradle Plugin (stable) |
 | **Kotlin Compose plugin** | `2.3.20` | Compose compiler plugin pin |
+| **KSP** | `2.3.6` | Room and codegen hook |
 | **Compose BOM** | `2026.03.01` | Material 3, icons, layout, animation |
 | **Navigation** | `2.9.7` | Type-safe route encoding |
 | **Room** | `2.8.4` | Reactive persistence with KSP codegen |
 | **Lifecycle** | `2.10.0` | StateFlow, ViewModel lifecycle |
-| **JDK** | **21** (ADOPTIUM) | Daemon + bytecode target |
+| **kotlinx-coroutines** | `1.10.2` | Test + structured concurrency helpers |
+| **JDK (Gradle JVM)** | **26** (local) / **21** (pinned daemon) | Run Gradle on 26 when you want; repo still documents Foojay **21** for reproducible daemons |
+| **JVM bytecode** | **21** | `compileOptions` / Kotlin jvmTarget alignment |
+
+### Dependency Sweep (2026-03-31)
+
+- No dependency bumps were applied in this sweep.
+- Current pins remain intentionally stable for active feature work (`AGP 9.1.0`, Compose plugin `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`).
+- Newer options observed in the ecosystem are primarily alpha/nightly lines; we keep those out until there is a concrete feature or compatibility need.
+- Full decision log and next-review cadence live in `DOCS/SBOM.md`.
 
 **📄 Full SBOM:** See [DOCS/SBOM.md](DOCS/SBOM.md) for complete dependency inventory, upgrade roadmap, and next-available versions.
 
@@ -163,12 +203,13 @@ Arteria-V2-Gradle-Edition-Reloaded/
 ├── README.md (this file)
 ├── settings.gradle.kts           # Gradle module declaration
 ├── build.gradle.kts              # Root config (plugins, versions)
-├── gradle.properties             # Gradle daemon settings
+├── gradle.properties             # Gradle daemon settings (optional org.gradle.java.home)
+├── build-with-jdk26.bat          # Windows: run Gradle with JDK 26
 │
 ├── gradle/
 │   ├── wrapper/
 │   │   └── gradle-wrapper.properties       # Pinned Gradle 9.6 nightly
-│   └── gradle-daemon-jvm.properties        # JDK 21 + ADOPTIUM
+│   └── gradle-daemon-jvm.properties        # Foojay-pinned daemon JDK 21 + ADOPTIUM
 │
 ├── app/                           # Main application module (:app)
 │   ├── build.gradle.kts
@@ -239,7 +280,7 @@ Arteria-V2-Gradle-Edition-Reloaded/
 
 | Phase | Status | Details |
 |-------|--------|---------|
-| **Phase 0** | ✅ DONE | Gradle 9.6 nightly scaffold, AGP 9.1, JDK 21 |
+| **Phase 0** | ✅ DONE | Gradle 9.6 snapshot scaffold, AGP 9.1, JVM 21 target |
 | **Phase 1** | ✅ DONE | Compose shell, navigation, account persistence, animation system |
 | **Phase 2** | 🚧 IN PROGRESS | Engine port (TickEngine, XPTable, SkillId), unit tests |
 | **Phase 3** | ✅ DONE | UI screens (Skills, Bank, Combat) wired in game shell |
@@ -280,9 +321,10 @@ Arteria-V2-Gradle-Edition-Reloaded/
 ## 🐛 Troubleshooting
 
 ### Build fails with `JAVA_COMPILER missing`
-Your machine is using a **JRE** instead of **JDK 21**. Set `org.gradle.java.home` in `gradle.properties`:
+Your machine is using a **JRE** instead of a **JDK**. Point Gradle at a full JDK — **21** matches the daemon pin; **26** is fine if you run builds with `build-with-jdk26.bat` or set `org.gradle.java.home` yourself:
+
 ```properties
-org.gradle.java.home=/path/to/jdk-21
+org.gradle.java.home=C:/Program Files/Java/jdk-26
 ```
 
 ### Gradle wrapper stuck on nightly snapshot
@@ -314,7 +356,7 @@ This project is part of the Arteria ecosystem. A repository license file is not 
 **Arteria V2** is maintained by the native Android team. Built with:
 - **Kotlin** for safety and expressiveness
 - **Jetpack Compose** for modern UI
-- **Gradle 9.6 nightly** for future-proofing
+- **Gradle 9.6 snapshot** line for early platform fixes
 - **Room** for reliable persistence
 - **Custom animation system** for delightful user experience
 

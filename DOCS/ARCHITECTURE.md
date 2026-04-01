@@ -4,6 +4,9 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | Settings V1 parity slice: profile rename (`ProfileDao.updateDisplayName`, `AccountViewModel`), `AccountSessionInfo` + `GameScreen`/`ArteriaApp` wiring; `SettingsScreen` About (`BuildConfig`), tick/save cadence copy, test sound; verification snapshot line amended. |
+| 2026-04-01 | Cursor Agent | Composer | Content note: `HerbloreData` / `ScavengingData` + registry wiring; verification snapshot amended for harvest→herb craft chain. |
+| 2026-03-31 | Cursor Agent | Composer | Doc sync: verification snapshot + Screen UI row for `SkillComingSoonDialog`, `SkillDataRegistry.isSkillImplemented`, `OfflineReportDialog` overlay pattern. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 persistence: `GameDatabase` v2 + `MIGRATION_1_2`; `game_meta.lastOfflineTickAppliedAt`; verification note appended below. |
 | 2026-03-31 | Claude Haiku 4.5 | Anthropic Claude | Updated Agent Credits + `Last updated` date. Animation system entry: `DockingGlitch.kt` (`GlitchMaterializeOverlay` 7-layer Canvas, `AmbientScanOverlay`, `EntryAnimations` orchestrator, `AmbientAnimations` infinite loops, `GlitchLayout` precomputed deterministic per seed); staggered per-card entry (index × 160ms), materialize/scan/glitch/jitter phases, badge spring pop-in; ambient system (infinite ripple/pulse/flow on selected). |
 | 2026-03-31 | Claude Sonnet 4.6 | Anthropic Claude | Added UI Components layer to Responsibilities table documenting `DockingGlitch`, `DockingAccountCard`, `DockingBackground`, `DockingChrome` with their roles and animation capabilities. |
@@ -16,7 +19,7 @@
 
 # Arteria V2 Gradle Edition Reloaded — Architecture
 
-> Last updated: 2026-03-31
+> Last updated: 2026-04-01
 > Status: Active native Android implementation (Kotlin + Compose + Room) with full Docking Station animation system
 > Scope: This file documents the architecture that exists today and the planned next architecture.
 
@@ -25,7 +28,10 @@
 - **Verified against live code:** `ui/ArteriaApp.kt`, `navigation/NavRoutes.kt`, `ui/game/GameScreen.kt`, `ui/game/SettingsScreen.kt`.
 - **Active nav routes:** `account_select`, `account_create`, `game/{profileId}` (encoded by `NavRoutes.gamePath()`).
 - **Game shell shape:** 3-tab content (`Skills`, `Bank`, `Combat`) + `TopAppBar` settings entry.
+- **`[AMENDED 2026-03-31]:`** **Skills tab:** taps on skills with no actions in `SkillDataRegistry` show `SkillComingSoonDialog` (Compose `Dialog`, back-dismissible); implemented skills still push `SkillDetailScreen` via `GameScreen` `AnimatedContent`. Same overlay family as `OfflineReportDialog` (offline gains).
+- **`[AMENDED 2026-04-01]:`** **Skill content:** `HerbloreData` brews potions using `HarvestingData` item ids in `SkillAction.inputItems` (consumed in `TickEngine` from bank); `ScavengingData` is pure gathering like `LoggingData`.
 - **Settings flow:** full-screen overlay, back-dismissible, with nested `ChangelogScreen` overlay from “What's New”.
+- **`[AMENDED 2026-04-01]:`** **Settings parity slice:** profile display name edit (Room `profiles.displayName`), last-played line, `BuildConfig` version string, informational tick/save cadence (`GameViewModel` constants), **Test sound** (`ToneGenerator`); rename + session refresh flow: `ArteriaApp` holds `AccountSessionInfo`, `GameScreen` passes `onRenameDisplayName` / `onRefreshAccountSession`.
 - **Doc canon reference:** `DOCS/SUMMARY.md` section `Doc Canon (single source rules)`.
 - **`[AMENDED 2026-03-31]:`** `GameDatabase` is **version 2** (`MIGRATION_1_2`); `game_meta` carries `lastOfflineTickAppliedAt` for offline catch-up audit. See `DOCS/SBOM.md` Android Targets table.
 
@@ -75,9 +81,9 @@ Android OS
 |------|------------|----------------|
 | Entry/UI host | `app/src/main/java/com/arteria/game/MainActivity.kt` | Application entry; Compose host setup |
 | Navigation/UI composition | `app/src/main/java/com/arteria/game/ui/ArteriaApp.kt` | Builds `NavHost`, wires VM to screens, route transitions |
-| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (Skills/Bank/Combat tabs), `TopAppBar` (account name + settings gear), and `SettingsScreen` overlay (full-screen, back-dismissible) |
+| Screen UI | `app/src/main/java/com/arteria/game/ui/account/*`, `app/src/main/java/com/arteria/game/ui/game/*` | Account flow (select/create); game hub with bottom nav (Skills/Bank/Combat tabs), `TopAppBar` (account name + settings gear), `SettingsScreen` overlay (full-screen, back-dismissible), `OfflineReportDialog` / `SkillComingSoonDialog` (modal dialogs over hub), `SkillDetailScreen` (in-tab push for implemented skills) |
 | UI Components | `app/src/main/java/com/arteria/game/ui/components/*` | `DockingBackground` (animated space backdrop), `DockingAccountCard` (glitch materialization + timeline sidebar + ambient selected-state), `DockingGlitch` (7-layer Canvas animation system: `GlitchMaterializeOverlay`, `AmbientScanOverlay`, `EntryAnimations`, `AmbientAnimations`, `GlitchLayout`), `DockingChrome` (title block, lore footer, new account slot) |
-| State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations |
+| State orchestration | `app/src/main/java/com/arteria/game/ui/account/AccountViewModel.kt` | Validates input, handles user actions, updates UI state, executes repository operations; **`[AMENDED 2026-04-01]:`** `resolveSession`, `updateDisplayName` for in-game settings rename |
 | Navigation contracts | `app/src/main/java/com/arteria/game/navigation/NavRoutes.kt` | Route constants and encoded route-builder API |
 | Persistence boundary | `app/src/main/java/com/arteria/game/data/profile/ProfileRepository.kt` | App-facing persistence contract |
 | Persistence implementation | `app/src/main/java/com/arteria/game/data/profile/RoomProfileRepository.kt` | Room-backed implementation of profile operations |

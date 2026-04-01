@@ -12,4 +12,7 @@ interface ProfileRepository {
     suspend fun getProfileById(profileId: String): ProfileRecord?
 
     suspend fun getActiveProfile(): ProfileRecord?
+
+    /** Returns failure if validation fails, name taken by another profile, or profile missing. */
+    suspend fun updateDisplayName(profileId: String, displayName: String): Result<Unit>
 }

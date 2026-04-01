@@ -4,6 +4,16 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-03-31 | Cursor Agent | Composer | **README polish:** multi-row shields (KSP, Navigation, Lifecycle, Coroutines, compileSdk 36.1, JVM 21 vs JDK 26 build story), quick start + tree for `build-with-jdk26.bat`, prerequisites/toolchain/troubleshooting aligned with `DOCS/SBOM.md`. |
+| 2026-04-01 | Cursor Agent | Composer | **Settings V1 parity slice:** `updateDisplayName` on profiles; `AccountSessionInfo`; `SettingsScreen` rename dialog, last played, `BuildConfig` version, tick/save cadence, test sound; `GameScreen`/`ArteriaApp` wiring; `FakeProfileRepository` updated; `ARCHITECTURE`/`SBOM`/`master_settings_suggestions_doc.md`; `:app:compileDebugKotlin` green. |
+| 2026-04-01 | Cursor Agent | Composer | **Herblore + Scavenging:** `HerbloreData.kt` (8 potions, 1× `HarvestingData` herb each via `inputItems`), `ScavengingData.kt` (8 salvage tiers); `SkillDataRegistry`; docs `CLAUDE` / `ARCHITECTURE` / `README`. |
+| 2026-03-31 | Cursor Agent | Composer | **In-app What's New v1.3.0:** `ChangelogScreen.kt` new top `APP_CHANGELOG` entry (six skills, Coming Soon dialog, DB v2/offline audit, transactional saves, background tick sim, custom bottom bar); `app/build.gradle.kts` `versionName` **1.3.0**, `versionCode` **2**. |
+| 2026-04-01 | Cursor Agent | Composer | **Harvesting** skill content: `HarvestingData.kt` (8 gather nodes, items + XP aligned with `LoggingData`); wired in `SkillDataRegistry`; `CLAUDE.md` skill-add note; `:app:compileDebugKotlin` green. |
+| 2026-03-31 | Cursor Agent | Composer | Docs: `ARCHITECTURE.md` (snapshot + Screen UI row), `CLAUDE.md` (skill flow, Key Files, Game State), `README.md` (feature + diagram line) for Coming Soon skill modal. |
+| 2026-03-31 | Cursor Agent | Composer | Coming Soon modal for unimplemented skills: `SkillDataRegistry.isSkillImplemented`, `SkillComingSoonDialog.kt` (matches `OfflineReportDialog` pattern), `GameScreen` tap branch + `BackHandler`; `:app:compileDebugKotlin` green. |
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | `DOCS/ARTERIA-V1-DOCS/DOCU/STYLE_GUIDE.md`: preservation header, Part A (V2 Kotlin/Compose, A.1–A.10), Contents table, Part B label for legacy §1–§10; fixed `SUMMARY.md` relative link; aligned with `CLAUDE.md`. |
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Dependency update sweep completed: no-bump pass (stable pins retained); updated `DOCS/SBOM.md` and `README.md` with findings and rationale. |
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Began save-cadence hardening: added deterministic `GameViewModel` cadence tests (before/after interval), introduced test-only time/loop controls, and verified green `:app:testDebugUnitTest`. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 **DONE**: `GameDatabase` v2 migration, `lastOfflineTickAppliedAt` persistence, `GameDatabaseMigrationTest` + JVM round-trip test; ROADMAP/README/SBOM/ARCHITECTURE updated. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | README Phase 4 status row + next-goal aligned with `DOCS/ROADMAP.md` Phase 4 amendment and scratchpad next actions. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Docs modernization pass: added doc canon alignment, README link/staleness fixes, SBOM modernization policy, architecture verification snapshot, scratchpad consolidation block, and rule cross-reference notes in `CLAUDE.md` + `.claude/cursor.rules`. |
@@ -52,7 +62,12 @@ Use this section as the live handoff source. Older repeated status/next-action b
 - Native Android V2 stack is active (`Kotlin + Compose + Room + Gradle/AGP`).
 - Core gameplay routing is live: `account_select` -> `account_create` -> `game/{profileId}`.
 - Game shell is live with 3 tabs (`Skills`, `Bank`, `Combat`) and settings/changelog overlays.
+- **`[AMENDED 2026-03-31]:`** Tapping a skill with no actions in `SkillDataRegistry` shows `SkillComingSoonDialog` instead of `SkillDetailScreen` (implemented skills unchanged).
+- **`[AMENDED 2026-04-01]:`** **Harvesting** is playable: `HarvestingData` registered in `SkillDataRegistry` (gathering pillar).
+- **`[AMENDED 2026-04-01]:`** **Settings** includes V1-style **display name edit** (persisted on `profiles`), **last played** line, **About** version from `BuildConfig`, **tick/save cadence** copy, and **Test sound**; see `master_settings_suggestions_doc.md` checklist updates.
+- **`[AMENDED 2026-04-01]:`** **Herblore** (crafting, `inputItems` from harvest) and **Scavenging** (gathering) registered; same tick/bank rules as Cooking/Smithing.
 - Toolchain snapshot remains Gradle nightly `9.6.0-20260331012943+0000`, AGP `9.1.0`, JDK `21`.
+- **`[AMENDED 2026-03-31]:`** Maintainer builds often run the **Gradle JVM on JDK 26** (`build-with-jdk26.bat` or `org.gradle.java.home`); Foojay daemon pin in-repo stays **JDK 21**; `:app`/`:core` bytecode target stays **Java 21** (see `README.md` + `DOCS/SBOM.md`).
 - `[AMENDED 2026-03-31]:` Any older mention of `play/{profileId}` is superseded by `game/{profileId}`.
 - **`[AMENDED 2026-03-31]:` Phase 4 (persistence + offline) is DONE** per `DOCS/ROADMAP.md` — `GameDatabase` v2, migration test + cold-start round-trip instrumented test, JVM meta round-trip. Optional manual device smoke remains a QA habit, not a phase gate.
 
@@ -63,7 +78,7 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 ### Active Next Actions (single list)
 
-1. Run manual device smoke pass (account create/select -> game -> mining -> bank -> switch account).
+1. Run manual device smoke pass (account create/select -> game -> mining -> bank -> switch account); add **Settings** checks: rename display name (top bar + account list refresh), test sound, version string.
 2. Add/refresh `GameViewModel` tests for periodic save cadence (offline report path already covered by existing test).
 3. Advance **Phase 5** vertical slice (mining + bank) to polish + **DONE** in `DOCS/ROADMAP.md` when smoke is clean.
 4. Keep `DOCS/SBOM.md` and `DOCS/ARCHITECTURE.md` in sync for any dependency or route changes.
@@ -85,6 +100,22 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-01:** **Herblore + Scavenging:** `HerbloreData.kt` (brews from `flax_bundle` … `star_herb`); `ScavengingData.kt` (junk heap → echo dump, logging-aligned XP/times). Registry + `CLAUDE.md` (`SkillAction` / skill-add task / Key Files), `ARCHITECTURE.md`, `README.md` Skills UX.
+
+**2026-03-31:** **What's New / version bump:** Shipped **v1.3.0** in `ChangelogScreen` (`APP_CHANGELOG` first card) summarizing post–v1.2.0 work: `SkillDataRegistry` skills (Mining through Cooking), `SkillComingSoonDialog`, Game DB v2 + `lastOfflineTickAppliedAt`, transactional `saveGameState`, `Dispatchers.Default` offline ticks, `ArteriaBottomBar`. Android `versionName` → `1.3.0`, `versionCode` → `2`.
+
+**2026-04-01:** **Harvesting skill data:** Added `core/data/HarvestingData.kt` (flax → star herb, levels 1–95, XP/time curve matches logging); merged into `SkillDataRegistry` action/item registries and `actionsForSkill(HARVESTING)`. `CLAUDE.md` “Adding a new skill” references `HarvestingData` as a gathering template.
+
+**2026-03-31:** **Doc pass (Coming Soon skills):** Updated `DOCS/ARCHITECTURE.md` verification snapshot + Screen UI responsibilities; `CLAUDE.md` skill system, Game Screen bullets, Game State, Key Files; `README.md` Key Features + architecture ASCII for `GameScreen`.
+
+**2026-03-31:** **Coming Soon skill modal:** Added `SkillDataRegistry.isSkillImplemented(skillId)`; new `SkillComingSoonDialog` (`Dialog` + `Surface`, `ArteriaPalette`, skill name + enum `description`, "Got it"); `GameScreen` branches `onSkillClick`, `comingSoonSkillId` state, `BackHandler` dismiss. `SkillDetailScreen` empty-actions path kept as fallback.
+
+**2026-03-31:** **STYLE_GUIDE dual-track refresh:** `DOCS/ARTERIA-V1-DOCS/DOCU/STYLE_GUIDE.md` now opens with standard preservation header, a **Contents** table (A.1–A.10 + legacy §1–§10), **Part A** for active Gradle/Kotlin/Compose rules (trace, limits, comments, naming, MVVM/coroutines, Compose touch/theming, Gradle build, errors, feature UI), and **Part B** framing for unchanged legacy RN/Expo sections. `SUMMARY.md` link corrected to `../../SUMMARY.md` from this doc path.
+
+**2026-03-31:** **Dependency sweep (no-bump):** Audited root/app/core Gradle declarations against current SBOM policy. No coordinate changes applied; retained stable pins (`AGP 9.1.0`, Compose plugin `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`) because available newer lines are predominantly alpha/nightly and not required for active Phase 5 work. Updated `DOCS/SBOM.md` and `README.md` with this decision and next-review cadence.
+
+**2026-03-31:** **Save cadence tests started + green:** Added `GameViewModelTest.tickLoop_doesNotSaveBeforeSaveInterval` and `tickLoop_savesAfterSaveInterval`. Added test-only controls in `GameViewModel` (`setNowProviderForTests`, `setMaxTickIterationsForTests`) to make cadence checks deterministic under virtual time. Ran `:app:testDebugUnitTest` -> **BUILD SUCCESSFUL**.
 
 **2026-03-31:** **Phase 4 closed:** Shipped `GameDatabase` **v2** with `MIGRATION_1_2` (`game_meta.lastOfflineTickAppliedAt`); `GameState`/`GameRepository`/`GameViewModel` persist audit timestamp after offline catch-up; `GameDatabaseMigrationTest` (migration + save/close/reopen); `GameRepositoryTest.saveGameState_roundTripsLastOfflineTickAppliedAt`. `:app:testDebugUnitTest` green. Docs: `ROADMAP` `[DONE]`, `README`, `SBOM`, `ARCHITECTURE` amended.
 

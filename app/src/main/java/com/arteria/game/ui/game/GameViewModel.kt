@@ -1,9 +1,10 @@
 package com.arteria.game.ui.game
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.arteria.game.core.data.MiningData
+import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.engine.TickEngine
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
@@ -46,14 +47,27 @@ class GameViewModel(
 
     private var tickJob: Job? = null
     private var lastSaveTime = 0L
+    private var nowProvider: () -> Long = { System.currentTimeMillis() }
+    /** Test-only guard to stop infinite loop under virtual-time tests. */
+    private var maxTickIterations: Int? = null
 
-    private val actionRegistry: Map<String, SkillAction> = MiningData.actionRegistry
+    private val actionRegistry: Map<String, SkillAction> = SkillDataRegistry.actionRegistry
+
+    @VisibleForTesting
+    internal fun setNowProviderForTests(provider: () -> Long) {
+        nowProvider = provider
+    }
+
+    @VisibleForTesting
+    internal fun setMaxTickIterationsForTests(value: Int?) {
+        maxTickIterations = value
+    }
 
     init {
         viewModelScope.launch {
             val loaded = repository.loadGameState(profileId)
 
-            val now = System.currentTimeMillis()
+            val now = nowProvider()
             val elapsed = now - loaded.lastSaveTimestamp
             if (elapsed > TICK_INTERVAL_MS * 2) {
                 val offlineResult = withContext(Dispatchers.Default) {
@@ -88,6 +102,16 @@ class GameViewModel(
         _gameState.update { state ->
             state?.let {
                 val updatedSkills = it.skills.toMutableMap()
+                // Enforce one-at-a-time: stop every other currently-training skill first
+                updatedSkills.keys.toList().forEach { id ->
+                    if (id != skillId && updatedSkills[id]?.isTraining == true) {
+                        updatedSkills[id] = updatedSkills[id]!!.copy(
+                            isTraining = false,
+                            currentActionId = null,
+                            actionProgressMs = 0L,
+                        )
+                    }
+                }
                 updatedSkills[skillId] = (updatedSkills[skillId] ?: SkillState(skillId = skillId)).copy(
                     isTraining = true,
                     currentActionId = actionId,
@@ -115,7 +139,8 @@ class GameViewModel(
 
     private fun startTickLoop() {
         tickJob = viewModelScope.launch {
-            lastSaveTime = System.currentTimeMillis()
+            lastSaveTime = nowProvider()
+            var tickIterations = 0
             while (isActive) {
                 delay(TICK_INTERVAL_MS)
                 val current = _gameState.value ?: continue
@@ -126,10 +151,15 @@ class GameViewModel(
                     _levelUpEvents.tryEmit(levelUp)
                 }
 
-                val now = System.currentTimeMillis()
+                val now = nowProvider()
                 if (now - lastSaveTime >= SAVE_INTERVAL_MS) {
                     repository.saveGameState(result.state)
                     lastSaveTime = now
+                }
+                tickIterations += 1
+                val maxIterations = maxTickIterations
+                if (maxIterations != null && tickIterations >= maxIterations) {
+                    break
                 }
             }
         }

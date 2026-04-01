@@ -45,6 +45,20 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.3.0",
+        date = "2026-04-01",
+        tag = "SKILLS",
+        tagColor = ArteriaPalette.BalancedEnd,
+        changes = listOf(
+            "Six trainable skill lines in the registry: Mining, Logging, Fishing, Harvesting, Smithing, Cooking",
+            "Tiered actions, XP, timers, and bank resources for each implemented skill",
+            "Coming Soon dialog when tapping skills not yet wired — replaces empty detail confusion",
+            "Game DB v2: offline catch-up audit field persisted across saves and migrations",
+            "Atomic Room transactions for game saves; offline tick simulation off the UI thread",
+            "Custom bottom bar (Skills · Bank · Combat) with animated tab chrome",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.2.0",
         date = "2026-03-31",
         tag = "UI",

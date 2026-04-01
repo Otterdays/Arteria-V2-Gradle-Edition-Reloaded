@@ -9,8 +9,11 @@ import com.arteria.game.data.game.SkillStateEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -103,6 +106,82 @@ class GameViewModelTest {
         assertNull(viewModel.offlineReport.value)
     }
 
+    @Test
+    fun tickLoop_doesNotSaveBeforeSaveInterval() = runTest {
+        val schedulerDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(schedulerDispatcher)
+
+        val dao = FakeGameDao(
+            skillStates = mutableListOf(
+                SkillStateEntity(
+                    profileId = "p3",
+                    skillId = SkillId.MINING.name,
+                    xp = 0.0,
+                    isTraining = true,
+                    currentActionId = "mine_copper",
+                    actionProgressMs = 0L,
+                ),
+            ),
+        )
+        val repository = GameRepository(dao)
+        val viewModel = GameViewModel(
+            profileId = "p3",
+            repository = repository,
+            enableTickLoop = true,
+        )
+        viewModel.setNowProviderForTests { testScheduler.currentTime }
+        viewModel.setMaxTickIterationsForTests(20)
+        runCurrent()
+        assertNotNull(viewModel.gameState.value)
+        val baselineCalls = dao.upsertGameMetaCalls
+
+        advanceTimeBy(GameViewModel.SAVE_INTERVAL_MS - 1)
+        runCurrent()
+
+        assertTrue(
+            "Save should not run before save interval",
+            dao.upsertGameMetaCalls - baselineCalls == 0,
+        )
+    }
+
+    @Test
+    fun tickLoop_savesAfterSaveInterval() = runTest {
+        val schedulerDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(schedulerDispatcher)
+
+        val dao = FakeGameDao(
+            skillStates = mutableListOf(
+                SkillStateEntity(
+                    profileId = "p4",
+                    skillId = SkillId.MINING.name,
+                    xp = 0.0,
+                    isTraining = true,
+                    currentActionId = "mine_copper",
+                    actionProgressMs = 0L,
+                ),
+            ),
+        )
+        val repository = GameRepository(dao)
+        val viewModel = GameViewModel(
+            profileId = "p4",
+            repository = repository,
+            enableTickLoop = true,
+        )
+        viewModel.setNowProviderForTests { testScheduler.currentTime }
+        viewModel.setMaxTickIterationsForTests(20)
+        runCurrent()
+        assertNotNull(viewModel.gameState.value)
+        val baselineCalls = dao.upsertGameMetaCalls
+
+        advanceTimeBy(GameViewModel.SAVE_INTERVAL_MS + GameViewModel.TICK_INTERVAL_MS)
+        runCurrent()
+
+        assertTrue(
+            "Save should run after save interval elapses",
+            dao.upsertGameMetaCalls - baselineCalls == 1,
+        )
+    }
+
     private suspend fun waitUntilLoaded(viewModel: GameViewModel) {
         withTimeout(2_000) {
             while (viewModel.gameState.value == null) {
@@ -117,6 +196,8 @@ private class FakeGameDao(
     val bankItems: MutableList<BankItemEntity> = mutableListOf(),
     val metaByProfile: MutableMap<String, GameMetaEntity> = mutableMapOf(),
 ) : GameDao {
+    var upsertGameMetaCalls: Int = 0
+
     override suspend fun getSkillStates(profileId: String): List<SkillStateEntity> =
         skillStates.filter { it.profileId == profileId }
 
@@ -142,6 +223,7 @@ private class FakeGameDao(
 
     override suspend fun upsertGameMeta(meta: GameMetaEntity) {
         metaByProfile[meta.profileId] = meta
+        upsertGameMetaCalls += 1
     }
 }
 

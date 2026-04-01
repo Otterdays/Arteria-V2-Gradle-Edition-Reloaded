@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew :app:compileDebugKotlin)",
-      "Bash(./gradlew :app:assembleDebug)"
+      "Bash(./gradlew :app:assembleDebug)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs basename:*)"
     ]
   }
 }

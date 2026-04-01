@@ -28,4 +28,7 @@ interface ProfileDao {
 
     @Query("UPDATE profiles SET isActive = 1, lastPlayedAt = :playedAt WHERE id = :profileId")
     suspend fun setActive(profileId: String, playedAt: Long): Int
+
+    @Query("UPDATE profiles SET displayName = :displayName WHERE id = :profileId")
+    suspend fun updateDisplayName(profileId: String, displayName: String): Int
 }

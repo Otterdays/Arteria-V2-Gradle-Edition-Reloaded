@@ -18,6 +18,8 @@ object TickEngine {
         val resourcesGained = mutableMapOf<String, Int>()
         val xpGained = mutableMapOf<SkillId, Double>()
         val levelUps = mutableListOf<LevelUp>()
+        // Mutable bank — crafting actions deduct inputs from this during the tick
+        val updatedBank = state.bank.toMutableMap()
 
         for ((skillId, skill) in state.skills) {
             if (!skill.isTraining || skill.currentActionId == null) {
@@ -48,8 +50,23 @@ object TickEngine {
             var progressMs = skill.actionProgressMs + deltaMs
             var xp = skill.xp
             var tickXp = 0.0
+            var ranOutOfMaterials = false
 
             while (progressMs >= action.actionTimeMs) {
+                // For crafting actions, verify and consume inputs before completing
+                if (action.inputItems.isNotEmpty()) {
+                    val canAfford = action.inputItems.all { (itemId, required) ->
+                        (updatedBank[itemId] ?: 0) >= required
+                    }
+                    if (!canAfford) {
+                        ranOutOfMaterials = true
+                        break
+                    }
+                    for ((itemId, required) in action.inputItems) {
+                        updatedBank[itemId] = ((updatedBank[itemId] ?: 0) - required).coerceAtLeast(0)
+                    }
+                }
+
                 progressMs -= action.actionTimeMs
                 xp += action.xpPerAction
                 tickXp += action.xpPerAction
@@ -58,6 +75,20 @@ object TickEngine {
                     resourcesGained[action.resourceId] =
                         (resourcesGained[action.resourceId] ?: 0) + action.resourceAmount
                 }
+            }
+
+            if (ranOutOfMaterials) {
+                // Stop training — no materials left
+                updatedSkills[skillId] = skill.copy(
+                    isTraining = false,
+                    currentActionId = null,
+                    actionProgressMs = 0L,
+                    xp = xp,
+                )
+                if (tickXp > 0.0) {
+                    xpGained[skillId] = (xpGained[skillId] ?: 0.0) + tickXp
+                }
+                continue
             }
 
             if (tickXp > 0.0) {
@@ -73,7 +104,7 @@ object TickEngine {
             updatedSkills[skillId] = skill.copy(xp = xp, actionProgressMs = progressMs)
         }
 
-        val updatedBank = state.bank.toMutableMap()
+        // Add gathered/crafted resources to bank
         for ((itemId, qty) in resourcesGained) {
             updatedBank[itemId] = (updatedBank[itemId] ?: 0) + qty
         }

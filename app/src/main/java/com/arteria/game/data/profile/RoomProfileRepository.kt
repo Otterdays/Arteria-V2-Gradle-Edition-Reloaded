@@ -52,4 +52,21 @@ class RoomProfileRepository(
 
     override suspend fun getActiveProfile(): ProfileRecord? =
         dao.getActive()?.toRecord()
+
+    override suspend fun updateDisplayName(profileId: String, displayName: String): Result<Unit> {
+        val trimmed = displayName.trim()
+        if (trimmed.isEmpty()) {
+            return Result.failure(IllegalArgumentException("Name cannot be empty."))
+        }
+
+        val existing = dao.getByDisplayName(trimmed)
+        if (existing != null && existing.id != profileId) {
+            return Result.failure(IllegalArgumentException("That name is already taken."))
+        }
+
+        return runCatching {
+            val rows = dao.updateDisplayName(profileId = profileId, displayName = trimmed)
+            check(rows > 0) { "Profile not found." }
+        }
+    }
 }

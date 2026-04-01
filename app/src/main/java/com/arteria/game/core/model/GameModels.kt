@@ -11,6 +11,8 @@ data class SkillAction(
     val actionTimeMs: Long,
     val resourceId: String? = null,
     val resourceAmount: Int = 1,
+    /** Items consumed from the bank per action completion. Empty = pure gathering. */
+    val inputItems: Map<String, Int> = emptyMap(),
 )
 
 data class ItemDef(

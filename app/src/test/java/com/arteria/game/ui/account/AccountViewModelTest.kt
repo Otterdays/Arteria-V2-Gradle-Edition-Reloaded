@@ -110,5 +110,19 @@ private class FakeProfileRepository : ProfileRepository {
     override suspend fun getActiveProfile(): ProfileRecord? =
         data.value.firstOrNull { it.isActive }
 
+    override suspend fun updateDisplayName(profileId: String, displayName: String): Result<Unit> {
+        val trimmed = displayName.trim()
+        if (data.value.none { it.id == profileId }) {
+            return Result.failure(IllegalStateException("Profile not found."))
+        }
+        if (data.value.any { it.id != profileId && it.displayName.equals(trimmed, ignoreCase = true) }) {
+            return Result.failure(IllegalArgumentException("That name is already taken."))
+        }
+        data.value = data.value.map { profile ->
+            if (profile.id == profileId) profile.copy(displayName = trimmed) else profile
+        }
+        return Result.success(Unit)
+    }
+
     fun currentProfilesCount(): Int = data.value.size
 }

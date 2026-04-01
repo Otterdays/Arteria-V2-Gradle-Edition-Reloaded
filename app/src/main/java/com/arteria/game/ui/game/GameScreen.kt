@@ -14,17 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,34 +27,35 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.skill.SkillId
+import com.arteria.game.core.skill.XPTable
 import com.arteria.game.data.game.GameRepository
+import com.arteria.game.ui.account.AccountSessionInfo
 import com.arteria.game.ui.theme.ArteriaPalette
-
-private enum class GameTab(val label: String, val icon: ImageVector) {
-    SKILLS("Skills", Icons.Filled.Star),
-    BANK("Bank", Icons.Filled.Home),
-    COMBAT("Combat", Icons.Filled.Favorite),
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     profileId: String,
     gameRepository: GameRepository,
-    accountDisplayName: String,
+    accountSession: AccountSessionInfo,
+    onRefreshAccountSession: suspend () -> Unit,
+    onRenameDisplayName: suspend (String) -> String?,
     onBackToAccounts: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,12 +67,37 @@ fun GameScreen(
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var expandedSkillId by remember { mutableStateOf<SkillId?>(null) }
+    var comingSoonSkillId by remember { mutableStateOf<SkillId?>(null) }
     var showSettings by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Close settings or skill detail on back press (settings takes priority)
+    // ── Derived state for the bottom bar ─────────────────────────────────────
+    val hasTrainingActive by remember {
+        derivedStateOf { gameState?.skills?.values?.any { it.isTraining } == true }
+    }
+    val activeTrainingProgress by remember {
+        derivedStateOf {
+            val trainSkill = gameState?.skills?.values?.firstOrNull { it.isTraining }
+                ?: return@derivedStateOf 0f
+            XPTable.progressToNextLevel(trainSkill.xp)
+        }
+    }
+    val bankHasOpportunity by remember {
+        derivedStateOf {
+            val bank = gameState?.bank ?: return@derivedStateOf false
+            SkillDataRegistry.actionRegistry.values.any { action ->
+                action.inputItems.isNotEmpty() &&
+                    action.inputItems.all { (id, qty) -> (bank[id] ?: 0) >= qty }
+            }
+        }
+    }
+
+    // Close settings, coming-soon dialog, or skill detail (settings takes priority)
     BackHandler(enabled = showSettings) { showSettings = false }
+    BackHandler(enabled = comingSoonSkillId != null && !showSettings) {
+        comingSoonSkillId = null
+    }
     BackHandler(enabled = expandedSkillId != null && !showSettings) { expandedSkillId = null }
 
     LaunchedEffect(Unit) {
@@ -100,10 +120,17 @@ fun GameScreen(
 
     // Settings overlay — full-screen, sits above game content
     if (showSettings) {
+        val scope = rememberCoroutineScope()
         SettingsScreen(
-            accountDisplayName = accountDisplayName,
+            accountSession = accountSession,
+            tickIntervalMs = GameViewModel.TICK_INTERVAL_MS,
+            saveIntervalMs = GameViewModel.SAVE_INTERVAL_MS,
             onBack = { showSettings = false },
             onBackToAccounts = onBackToAccounts,
+            onRenameDisplayName = onRenameDisplayName,
+            onRenameSuccess = {
+                scope.launch { onRefreshAccountSession() }
+            },
             modifier = modifier,
         )
         return
@@ -114,6 +141,14 @@ fun GameScreen(
         OfflineReportDialog(
             report = report,
             onDismiss = gameViewModel::dismissOfflineReport,
+        )
+    }
+
+    val pendingComingSoon = comingSoonSkillId
+    if (pendingComingSoon != null) {
+        SkillComingSoonDialog(
+            skillId = pendingComingSoon,
+            onDismiss = { comingSoonSkillId = null },
         )
     }
 
@@ -150,88 +185,76 @@ fun GameScreen(
                 onStopTraining = { gameViewModel.stopTraining(expandedId) },
             )
         } else {
-    Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .background(bgBrush),
-        containerColor = ArteriaPalette.BgDeepSpaceTop,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = accountDisplayName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = ArteriaPalette.TextPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { showSettings = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = "Settings",
-                            tint = ArteriaPalette.TextSecondary,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = ArteriaPalette.BgCard,
-                ),
-            )
-        },
-        bottomBar = {
-            NavigationBar(
-                containerColor = ArteriaPalette.BgCard,
-                contentColor = ArteriaPalette.TextPrimary,
-            ) {
-                GameTab.entries.forEachIndexed { index, tab ->
-                    NavigationBarItem(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = {
+            Scaffold(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(bgBrush),
+                containerColor = ArteriaPalette.BgDeepSpaceTop,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+                topBar = {
+                    TopAppBar(
+                        title = {
                             Text(
-                                tab.label,
-                                style = MaterialTheme.typography.labelSmall,
+                                text = accountSession.displayName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = ArteriaPalette.TextPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ArteriaPalette.AccentPrimary,
-                            selectedTextColor = ArteriaPalette.AccentPrimary,
-                            unselectedIconColor = ArteriaPalette.TextMuted,
-                            unselectedTextColor = ArteriaPalette.TextMuted,
-                            indicatorColor = ArteriaPalette.BgCardHover,
+                        actions = {
+                            IconButton(onClick = { showSettings = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = "Settings",
+                                    tint = ArteriaPalette.TextSecondary,
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.Transparent,
+                            scrolledContainerColor = ArteriaPalette.BgCard,
                         ),
                     )
-                }
-            }
-        },
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(bgBrush)
-                .padding(padding),
-        ) {
-            AnimatedContent(
-                targetState = selectedTab,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
-                label = "tab_content",
-            ) { tab ->
-                when (tab) {
-                    0 -> SkillsScreen(
-                        skills = gameState?.skills ?: emptyMap(),
-                        onSkillClick = { expandedSkillId = it },
+                },
+                bottomBar = {
+                    ArteriaBottomBar(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it },
+                        activeTrainingProgress = activeTrainingProgress,
+                        hasTrainingActive = hasTrainingActive,
+                        bankHasOpportunity = bankHasOpportunity,
                     )
-                    1 -> BankScreen(bank = gameState?.bank ?: emptyMap())
-                    2 -> CombatScreen()
+                },
+            ) { padding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(bgBrush)
+                        .padding(padding),
+                ) {
+                    AnimatedContent(
+                        targetState = selectedTab,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "tab_content",
+                    ) { tab ->
+                        when (tab) {
+                            0 -> SkillsScreen(
+                                skills = gameState?.skills ?: emptyMap(),
+                                onSkillClick = { skillId ->
+                                    if (SkillDataRegistry.isSkillImplemented(skillId)) {
+                                        expandedSkillId = skillId
+                                    } else {
+                                        comingSoonSkillId = skillId
+                                    }
+                                },
+                            )
+                            1 -> BankScreen(bank = gameState?.bank ?: emptyMap())
+                            2 -> CombatScreen()
+                        }
+                    }
                 }
             }
-        }
-    }
         } // else (scaffold)
     } // AnimatedContent (skill_nav)
 }

@@ -25,6 +25,7 @@ import com.arteria.game.data.profile.RoomProfileRepository
 import com.arteria.game.navigation.NavRoutes
 import com.arteria.game.ui.account.AccountCreationScreen
 import com.arteria.game.ui.account.AccountSelectionScreen
+import com.arteria.game.ui.account.AccountSessionInfo
 import com.arteria.game.ui.account.AccountViewModel
 import com.arteria.game.ui.game.GameScreen
 import kotlinx.coroutines.launch
@@ -107,14 +108,33 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
         ) { entry ->
             val raw = entry.arguments?.getString("profileId").orEmpty()
             val profileId = android.net.Uri.decode(raw)
-            var accountName by remember(profileId) { mutableStateOf("Preparing session...") }
+            var accountSession by remember(profileId) {
+                mutableStateOf(
+                    AccountSessionInfo(
+                        displayName = "Preparing session…",
+                        lastPlayedAtEpochMs = 0L,
+                        gameMode = "Standard",
+                    ),
+                )
+            }
             LaunchedEffect(profileId) {
-                accountName = accountViewModel.resolveDisplayName(profileId)
+                accountViewModel.resolveSession(profileId)?.let { accountSession = it }
+                    ?: run {
+                        accountSession = AccountSessionInfo(
+                            displayName = accountViewModel.resolveDisplayName(profileId),
+                            lastPlayedAtEpochMs = 0L,
+                            gameMode = "Standard",
+                        )
+                    }
             }
             GameScreen(
                 profileId = profileId,
                 gameRepository = gameRepository,
-                accountDisplayName = accountName,
+                accountSession = accountSession,
+                onRefreshAccountSession = {
+                    accountViewModel.resolveSession(profileId)?.let { accountSession = it }
+                },
+                onRenameDisplayName = { newName -> accountViewModel.updateDisplayName(profileId, newName) },
                 onBackToAccounts = {
                     navController.popBackStack(NavRoutes.AccountSelect, inclusive = false)
                 },

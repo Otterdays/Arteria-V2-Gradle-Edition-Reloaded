@@ -4,6 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-01 | Cursor Agent | Composer | `:app` `buildFeatures.buildConfig = true` for `BuildConfig.VERSION_NAME` / `VERSION_CODE` in Settings About row (no new Maven coordinates). |
+| 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Dependency sweep (no-bump pass): verified live Gradle declarations and held current pins; only newer options are alpha/nightly channels for core AndroidX/AGP lines. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Phase 4 close: documented `GameDatabase` schema v2 + `MIGRATION_1_2` in Android Targets appendix row. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | SBOM schema refresh: replaced `Declared` with `Installed` + `Next available` columns across toolchain and dependency tables. |
 | 2026-03-31 | Cursor Agent | GPT-5.3 Codex (Cursor) | Kotlin/dep modernization pass: Kotlin Compose plugin `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`; no tests executed per user preference. |
@@ -16,7 +18,7 @@
 
 # SBOM (Software Bill of Materials) — Arteria V2 Gradle Edition Reloaded
 
-> Last updated: 2026-03-31
+> Last updated: 2026-04-01
 > Source of truth: `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, `core/build.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties`, `gradle/gradle-daemon-jvm.properties`
 > Scope: Declared build/runtime/test dependencies and bundled non-Maven assets.
 
@@ -40,6 +42,12 @@
 | Compose BOM | `2026.03.01` | `stable` (monthly BOM) | `2026-04-30` |
 | Lifecycle / Navigation / Room track | `2.10.0` / `2.9.7` / `2.8.4` | `stable` | `2026-04-30` |
 | Daemon JDK | `21 (ADOPTIUM)` | `pinned` | `2026-04-30` |
+
+**`[AMENDED 2026-03-31]:` Dependency sweep result (no-bump pass):**
+- `AGP 9.1.0` remains the stable baseline in this repo; `9.2.x` is alpha track.
+- Lifecycle, Navigation, and Room have newer alpha lines available, but no required stable migration for current Phase 5 work.
+- Compose BOM remains on monthly stable cadence (`2026.03.01` currently pinned); next review on the scheduled monthly window.
+- No dependency edits were applied in this sweep.
 
 ---
 
@@ -73,6 +81,8 @@
 | `ProfileDatabase` (Room) | `version = 1` | `app/.../data/profile/ProfileDatabase.kt` |
 
 **`[AMENDED 2026-03-31]:`** Game persistence schema bumped to **v2** for Phase 4 (offline audit column). Existing installs migrate on upgrade via `addMigrations(GameDatabase.MIGRATION_1_2)` in `ArteriaApp`.
+
+**`[AMENDED 2026-04-01]:`** `:app` enables **`buildConfig = true`** (`app/build.gradle.kts`) so UI can read `com.arteria.game.BuildConfig` for version labels.
 
 ---
 
@@ -138,6 +148,7 @@
 
 | Date | Method | Result |
 |------|--------|--------|
+| 2026-03-31 | Dependency update sweep vs pinned Gradle files | No dependency coordinate changes applied; current pins retained because available newer lines are primarily alpha/nightly and not required for active feature slice |
 | 2026-03-31 | Coordinate-level review after Kotlin/dependency bump | Updated to Kotlin Compose `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`; no new non-AndroidX third-party dependencies introduced |
 | 2026-03-30 | Coordinate-level review of declared deps | No known high-risk third-party dependencies introduced; stack is AndroidX/Google/Kotlin ecosystem plus JUnit |
 

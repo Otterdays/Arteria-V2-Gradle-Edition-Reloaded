@@ -127,15 +127,19 @@ MainActivity (ComponentActivity)
 
 `SkillId.byPillar(pillar)` returns all skills for a given pillar. Each `SkillId` carries `displayName`, `pillar`, and `description`.
 
+**Implemented vs Coming Soon:** `SkillDataRegistry.isSkillImplemented(skillId)` is true when `actionsForSkill` is non-empty. `GameScreen` shows `SkillComingSoonDialog` for unimplemented taps; `SkillDetailScreen` still has an empty-actions fallback if opened without actions.
+
 ### Core data models (`GameModels.kt`)
 
 ```kotlin
-SkillAction(id, skillId, name, levelRequired, xpPerAction, actionTimeMs, resourceId?, resourceAmount)
+SkillAction(id, skillId, name, levelRequired, xpPerAction, actionTimeMs, resourceId?, resourceAmount, inputItems)
 SkillState(skillId, xp, isTraining, currentActionId?, actionProgressMs)
 GameState(profileId, skills: Map<SkillId, SkillState>, bank: Map<String, Int>, lastSaveTimestamp)
 TickResult(state, xpGained, resourcesGained, levelUps)
 LevelUp(skillId, oldLevel, newLevel)
 ```
+
+`inputItems` is `Map<String, Int>` (bank deduction per completed action in `TickEngine`); empty for pure gathering.
 
 Use `data class` for all models. Use `sealed class` for UI state variants.
 
@@ -261,6 +265,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 - 3-tab bottom nav: Skills · Bank · Combat
 - `TopAppBar` (transparent, Cinzel account name, gear icon → `showSettings = true`)
 - Settings rendered as conditional full-screen composable with `BackHandler`
+- Unimplemented skill tap → `SkillComingSoonDialog`; implemented → `SkillDetailScreen` (`AnimatedContent` push)
 - Space gradient brush on container background
 
 **Settings (`SettingsScreen.kt`):**
@@ -275,6 +280,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 - **TickEngine** (`core/engine/TickEngine.kt`): Simulates accumulated offline ticks from `lastSaveTimestamp` to now.
 - **GameViewModel** calls tick simulation on startup, emits `offlineReport`, fires `levelUpEvents` as `SharedFlow`.
 - **Offline report dialog** (`OfflineReportDialog.kt`): Shows only when `xpGained` or `resourcesGained` is non-empty.
+- **Coming Soon dialog** (`SkillComingSoonDialog.kt`): Shown when the user taps a skill with no registry actions (`SkillDataRegistry.isSkillImplemented` is false).
 - **Tick loop in GameViewModel:** `enableTickLoop` constructor param — set `false` in tests to prevent `runTest` hangs.
 
 ---
@@ -306,7 +312,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 
 ### Adding a new skill to the game
 1. Add entry to `SkillId` enum with `displayName`, `pillar`, `description`
-2. Add action data in `core/data/` (see `MiningData.kt` as reference)
+2. Add action data in `core/data/` (gathering: `MiningData.kt` / `HarvestingData.kt` / `ScavengingData.kt`; bank inputs → output: `CookingData.kt` / `HerbloreData.kt` with `inputItems`)
 3. Add `SkillState` initialization in `GameRepository` load path
 4. Add `SkillStateEntity` rows will be created automatically on first save
 
@@ -359,6 +365,10 @@ Before considering any task complete:
 | `core/model/GameModels.kt` | Domain data classes (SkillState, GameState, TickResult…) |
 | `core/skill/SkillId.kt` | All 16 skills + 4 pillars enum |
 | `core/engine/TickEngine.kt` | Offline tick simulation |
+| `core/data/SkillDataRegistry.kt` | Skill actions/items; `isSkillImplemented`, `actionsForSkill` |
+| `core/data/HerbloreData.kt` | Potions from `HarvestingData` inputs (`inputItems`) |
+| `core/data/ScavengingData.kt` | Salvage gathering tiers |
+| `ui/game/SkillComingSoonDialog.kt` | Modal when a skill has no registry actions yet |
 | `data/game/GameRepository.kt` | Safe game state load/save (transactional) |
 | `data/profile/ProfileRepository.kt` | Profile persistence interface |
 | `DOCS/SCRATCHPAD.md` | **Read this first** — live session state |

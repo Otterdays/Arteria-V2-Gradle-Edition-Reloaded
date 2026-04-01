@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arteria.game.core.data.MiningData
+import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.ui.theme.ArteriaPalette
 import java.text.NumberFormat
 
@@ -94,8 +94,7 @@ private fun BankSlotCard(
     quantity: Int,
     modifier: Modifier = Modifier,
 ) {
-    val itemDef = MiningData.items[itemId]
-    val name = itemDef?.name ?: itemId.replace("_", " ").replaceFirstChar { it.uppercase() }
+    val name = SkillDataRegistry.itemName(itemId)
     val nf = NumberFormat.getIntegerInstance()
     val cardShape = RoundedCornerShape(10.dp)
 

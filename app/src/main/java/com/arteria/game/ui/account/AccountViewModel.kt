@@ -18,6 +18,13 @@ data class AccountUiState(
     val errorMessage: String? = null,
 )
 
+/** Snapshot for in-game settings (profile row + rename). */
+data class AccountSessionInfo(
+    val displayName: String,
+    val lastPlayedAtEpochMs: Long,
+    val gameMode: String,
+)
+
 class AccountViewModel(
     private val repository: ProfileRepository,
 ) : ViewModel() {
@@ -112,6 +119,30 @@ class AccountViewModel(
             return fromState
         }
         return repository.getProfileById(profileId)?.displayName ?: "Adventurer"
+    }
+
+    suspend fun resolveSession(profileId: String): AccountSessionInfo? {
+        val record = repository.getProfileById(profileId) ?: return null
+        return AccountSessionInfo(
+            displayName = record.displayName,
+            lastPlayedAtEpochMs = record.lastPlayedAt,
+            gameMode = record.gameMode,
+        )
+    }
+
+    /**
+     * @return null on success, or a user-facing error string.
+     */
+    suspend fun updateDisplayName(profileId: String, raw: String): String? {
+        val validationError = validateDisplayName(raw)
+        if (validationError != null) {
+            return validationError
+        }
+        val result = repository.updateDisplayName(profileId, raw)
+        return result.fold(
+            onSuccess = { null },
+            onFailure = { it.message ?: "Could not update name." },
+        )
     }
 
     private fun validateDisplayName(raw: String): String? {
