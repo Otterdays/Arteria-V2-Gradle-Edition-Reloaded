@@ -14,6 +14,11 @@ object MiningData {
     val ADAMANTITE_ORE = ItemDef("adamantite_ore", "Adamantite Ore", "Dark green, incredibly dense")
     val RUNITE_ORE = ItemDef("runite_ore", "Runite Ore", "Cyan crystalline ore pulsing with energy")
 
+    val RAW_SAPPHIRE = ItemDef("raw_sapphire", "Raw Sapphire", "A cloudly blue gemstone")
+    val RAW_EMERALD = ItemDef("raw_emerald", "Raw Emerald", "A rough green gemstone")
+    val RAW_RUBY = ItemDef("raw_ruby", "Raw Ruby", "A dull red gemstone")
+    val RAW_DIAMOND = ItemDef("raw_diamond", "Raw Diamond", "A hard, unpolished gemstone")
+
     val items: Map<String, ItemDef> = listOf(
         COPPER_ORE,
         TIN_ORE,
@@ -23,6 +28,10 @@ object MiningData {
         MITHRIL_ORE,
         ADAMANTITE_ORE,
         RUNITE_ORE,
+        RAW_SAPPHIRE,
+        RAW_EMERALD,
+        RAW_RUBY,
+        RAW_DIAMOND,
     ).associateBy { it.id }
 
     val MINE_COPPER = SkillAction(
@@ -43,6 +52,16 @@ object MiningData {
         xpPerAction = 17.5,
         actionTimeMs = 2400L,
         resourceId = "tin_ore",
+    )
+
+    val MINE_GEMS = SkillAction(
+        id = "mine_gems",
+        skillId = SkillId.MINING,
+        name = "Gem Rock",
+        levelRequired = 1,
+        xpPerAction = 25.0,
+        actionTimeMs = 3000L,
+        resourceId = "raw_sapphire", // Basic drop for now
     )
 
     val MINE_IRON = SkillAction(
@@ -108,6 +127,7 @@ object MiningData {
     val actions: List<SkillAction> = listOf(
         MINE_COPPER,
         MINE_TIN,
+        MINE_GEMS,
         MINE_IRON,
         MINE_COAL,
         MINE_GOLD,

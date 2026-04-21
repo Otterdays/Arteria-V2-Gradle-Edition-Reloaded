@@ -24,6 +24,9 @@ object SkillDataRegistry {
         putAll(ThievingData.actionRegistry)
         putAll(WoodworkingData.actionRegistry)
         putAll(TailoringData.actionRegistry)
+        putAll(ForgingData.actionRegistry)
+        putAll(JewelcraftingData.actionRegistry)
+        putAll(FiremakingData.actionRegistry)
     }
 
     /** All known item definitions across every implemented skill, keyed by item id. */
@@ -40,6 +43,9 @@ object SkillDataRegistry {
         putAll(ThievingData.items)
         putAll(WoodworkingData.items)
         putAll(TailoringData.items)
+        putAll(ForgingData.items)
+        putAll(JewelcraftingData.items)
+        putAll(FiremakingData.items)
     }
 
     /** Actions available for a given skill, in display order. */
@@ -56,6 +62,9 @@ object SkillDataRegistry {
         SkillId.THIEVING     -> ThievingData.actions
         SkillId.WOODWORKING  -> WoodworkingData.actions
         SkillId.TAILORING    -> TailoringData.actions
+        SkillId.FORGING      -> ForgingData.actions
+        SkillId.JEWELCRAFTING-> JewelcraftingData.actions
+        SkillId.FIREMAKING   -> FiremakingData.actions
         else                 -> emptyList()
     }
 

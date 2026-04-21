@@ -2,6 +2,8 @@ package com.arteria.game.core.model
 
 import com.arteria.game.core.skill.SkillId
 
+// EquippedGear is defined in Equipment.kt (same package)
+
 data class SkillAction(
     val id: String,
     val skillId: SkillId,
@@ -37,6 +39,10 @@ data class GameState(
     val lastSaveTimestamp: Long,
     /** Wall-clock ms when offline catch-up was last applied on session load (persisted in `game_meta`). */
     val lastOfflineTickAppliedAt: Long = 0L,
+    /** Currently equipped gear slots (persisted). */
+    val equippedGear: EquippedGear = EquippedGear(),
+    /** Active companion id, or null if none summoned (persisted). */
+    val activeCompanionId: String? = null,
 )
 
 data class LevelUp(

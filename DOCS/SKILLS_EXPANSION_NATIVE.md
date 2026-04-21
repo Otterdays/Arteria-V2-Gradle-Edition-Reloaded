@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented data for Forging, Jewelcrafting, and Firemaking; updated Mining with Gem Rocks; bridged the economy gap to make `EquipmentRegistry` items craftable via bars/gems. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc sync:** Glossary §0 — Farming, Thieving, Woodworking, Tailoring marked trainable; duplicate §5 → **§5b**; §7.1 counts + Phase 2 callouts amended; intro version parity **1.5.0** / `versionCode` **8**. |
 | 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). **`[AMENDED 2026-04-01]:`** Superseded by **1.5.0** row above for canonical version. |
 | 2026-04-01 | Cursor Agent | Composer | Initial **SKILLS_EXPANSION_NATIVE.md**: V1 design sources → V2 native playbook; roster vs implementation; vertical-slice steps; synergy/UI deferrals; cross-links to bundled V1 DOCU. |
@@ -40,6 +41,9 @@ These skills have active data in `:core` and are fully playable in the current b
 - **Smithing** (Crafting): Smelting ores into bars.
 - **Cooking** (Crafting): Preparing food from fish/crops.
 - **Herblore** (Crafting): Brewing potions from harvested reagents.
+- **Forging** (Crafting): Crafts actual Equipment from bars (`ForgingData` in `:core`).
+- **Jewelcrafting** (Crafting): Cuts gems and crafts accessories (`JewelcraftingData` in `:core`).
+- **Firemaking** (Crafting): Consumes logs for high XP and ashes (`FiremakingData` in `:core`).
 - **Farming** (Gathering): Crop tiers and growth loops (`FarmingData` in `:core`).
 - **Thieving** (Gathering): Pickpocket / stall-style tiers (`ThievingData` in `:core`).
 - **Woodworking** (Crafting): Crafts from logging materials (`WoodworkingData` in `:core`).
@@ -477,9 +481,9 @@ The mastery system is **Phase 7+** — it layers on TOP of the existing skill lo
 
 | Priority | Skill | Lines of Code | New Mechanics | Economy Impact |
 |----------|-------|---------------|---------------|----------------|
-| **1** | Forging | ~120 | None (pure inputItems) | **Critical** — closes equipment gap |
-| **2** | Gemcutting | ~60 | None | **High** — unlocks gem pipeline |
-| **3** | Firemaking | ~50 | None | **Medium** — log sink, ash source |
+| **1** | Forging | ~120 | None (pure inputItems) | **DONE** — bridged equipment gap |
+| **2** | Gemcutting | ~60 | None | **DONE** — bridged gem pipeline |
+| **3** | Firemaking | ~50 | None | **DONE** — bridged log sink |
 | **4** | Jewelcrafting | ~80 | None | **High** — accessory crafting |
 | **5** | Salvaging | ~80 | None | **Medium** — rare material source |
 | **6** | Fletching | ~80 | None | **Medium** — ranged ammo pipeline |
