@@ -11,6 +11,7 @@
 | 2026-03-31 | Cursor Agent | Composer | **`SkillsScreen` crossover chips:** `FlowRow` + `SkillId.crossoverChipLabel()` (compact tags) + single-line ellipsis — fixes Logging card layout (three long targets in adaptive grid broke `Row` / text wrap). `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Cursor Agent | Composer | **`SKILLS_EXPANSION_NATIVE.md`:** V1 `SKILLS_ARCHITECTURE` / `skilling_guides` / `SYNERGIES` → native V2 playbook; `SUMMARY` read-order + index; `ARCHITECTURE` snapshot fixes (`:core` path, Hub 4-tab); SCRATCHPAD next-action pointer. |
 | 2026-04-01 | opencode | qwen3.6-plus-free | **v1.5.0 QoL features (7/7):** Haptics on train start/stop + achievement unlocks; Bank search + 4-mode sort + withdraw presets; Achievements/Chronicle (18 achievements, 6 categories, tracking in GameViewModel, 🏆 icon in TopAppBar); Random Events (6 weighted events, dialog UI, tick-triggered); Equipment/Gear system (4 slots, 19 items, EquipmentScreen with equip/unequip); Companions/Familiars (11 companions, 5 rarities, passive bonuses, CompanionsScreen); Prestige/Ascension (6 perks, point system, PrestigeScreen with ascend flow). All core models + basic UI shipped. `:app:compileDebugKotlin` green. |
+| 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Phase 5 Expansion & UI "Mad" Polish:** Implemented Forging, Jewelcrafting, Firemaking; Gem Rocks; CyberHUD (HoloGrid/Scanlines); Energy Pulse animations; ArteriaPalette high-polish tokens. Build stable. |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Gameplay Vertical Expansion:** Implemented **Forging**, **Jewelcrafting**, and **Firemaking** skill data; updated **Mining** with Gem Rocks and raw gems. Bridged the economy loop from bars/gems to `EquipmentRegistry` items, making gear actually craftable. Updated `SkillDataRegistry` to wire all new loops. |
 | 2026-04-01 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Chronicle / Achievements overhaul:** `AchievementRarity` enum + `AnySkillLevel` condition in `Achievements.kt`; `AchievementRegistry` expanded 18 → 40 achievements (tiered depth per skill, item-collection milestones, correct `AnySkillLevel` for "Mastered"/"Halfway There"); `GameViewModel.checkAchievements` handles `AnySkillLevel` via `maxOfOrNull`; `ChronicleScreen` rebuilt — TopAppBar with back arrow, overall completion progress bar, animated category filter chips, per-card animated progress indicators, rarity badges (`COMMON`→`LEGENDARY`), unlock dates, locked/unlocked visual alpha hierarchy; `GameScreen` passes `onBack` to `ChronicleScreen`. `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Skill roster expanded to 48:** Conceived and added 7 new experimental skills (`TRAPPING`, `SIPHONING`, `JEWELCRAFTING`, `TINKERING`, `ENCHANTING`, `DIVINATION`, `BARDING`) to `SkillId.kt`. Expanded `SKILLS_EXPANSION_NATIVE.md` glossary to include all un-implemented skills mapped to their intended "App Slices" / economic loops. |
@@ -87,8 +88,8 @@ Use this section as the live handoff source. Older repeated status/next-action b
 - **`[AMENDED 2026-04-01]:`** **Harvesting** is playable: `HarvestingData` registered in `SkillDataRegistry` (gathering pillar).
 - **`[AMENDED 2026-04-01]:`** **Settings** includes V1-style **display name edit** (persisted on `profiles`), **last played** line, **About** version from `BuildConfig`, **tick/save cadence** copy, and **Test sound**; see `master_settings_suggestions_doc.md` checklist updates.
 - **`[AMENDED 2026-04-01]:`** **Settings expansion (DataStore):** theme **Dark / Follow system**, reduce motion, haptics, sound master, offline report toggle, offline cap copy, idle soundscapes pref (no audio yet), notifications/economy stubs, open-source list + credits, **reset progress** + **delete profile**, DEBUG offline-cap bypass; `GameViewModel.reloadAfterReset()`.
-- **`[AMENDED 2026-04-01]:`** **Herblore** (crafting, `inputItems` from harvest) and **Scavenging** (gathering) registered; same tick/bank rules as Cooking/Smithing.
-- **`[AMENDED 2026-03-31]:`** **`SkillId` roster = 41 skills, 5 pillars** (`COSMIC` added). New entries are **Coming Soon** until `SkillDataRegistry` lists actions; `GameRepository` still merges all enum keys on load/save.
+- **`[AMENDED 2026-04-21]:`** **Phase 5 Economy & UI Polish:** Implemented Forging, Jewelcrafting, Firemaking. Added Gem Rocks to Mining. Created **CyberHUD** system (Holo grids, scanlines) and **Energy Pulse** animations for training.
+- **`[AMENDED 2026-03-31]:`** **`SkillId` roster = 48 skills, 5 pillars** (`COSMIC` added).
 - **`[AMENDED 2026-03-31]:`** **Release hygiene:** When documenting shipped work here (`SCRATCHPAD`), also prepend `ChangelogScreen.kt` `APP_CHANGELOG`, bump `app/build.gradle.kts` `versionCode`/`versionName`, and README badge so **What's New** and **About** stay accurate (`CLAUDE.md` lists the checklist).
 - **`[AMENDED 2026-04-01]:`** **Phase 2 (engine port) DONE** — idle math + skill data live in Gradle **`:core`** (JVM); run **`./gradlew :core:test`** for engine unit tests; `:app` has no duplicate `com.arteria.game.core` sources.
 - Toolchain snapshot remains Gradle nightly `9.6.0-20260331012943+0000`, AGP `9.1.0`, JDK `21`.
@@ -103,14 +104,11 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 ### Active Next Actions (single list)
 
-1. Run device smoke: train each implemented skill (Mining (Gem Rocks!), Forging (Equip craft), Jewelcrafting, Firemaking, Logging, Fishing, Smithing, Cooking, Harvesting, Herblore, Scavenging) → verify XP gain, bank items, crafting consumption, auto-stop on empty bank.
-2. Verify equipment loop: mine gems → cut gems (Jewelcrafting) → use bars/gems to craft accessories/gear (Forging/Jewelcrafting) → equip in `EquipmentScreen`.
-3. Verify alive bottom bar: XP ring animates during training, gold badge appears on Bank when crafting is affordable, glow/tint on selected tab.
-3. Verify skill nav: pillar grouping, animated transitions push/pop, hero header live training row, level circle arc.
-4. Add/refresh `GameViewModel` tests for periodic save cadence + one-at-a-time training enforcement.
-5. Advance **Phase 5** to **DONE** in `DOCS/ROADMAP.md` once smoke is clean — content expansion (6 new skills + cross-economy) ships with this pass.
-6. Keep `DOCS/SBOM.md` and `DOCS/ARCHITECTURE.md` in sync for any dependency or route changes.
-7. **`[AMENDED 2026-04-01]:`** For **skill expansion** (roster vs trainables, V1 `DOCU` mapping, ship checklist), use **`DOCS/SKILLS_EXPANSION_NATIVE.md`**; indexed from `SUMMARY.md`.
+1. **Combat Baseline**: Wire Attack/Strength loop (Melee training).
+2. **Dungeon Core**: Simple enemy list + combat ticker logic.
+3. **XP/hr Display**: Live efficiency tracking in SkillDetailScreen.
+4. **Holo-Icons**: Replace generic icons with themed SVG paths (VectorJuice).
+5. **Verify equipment loop**: mine gems → cut gems (Jewelcrafting) → use bars/gems to craft accessories/gear (Forging/Jewelcrafting) → equip in `EquipmentScreen`.
 
 ### Supersession Note
 

@@ -58,6 +58,7 @@ import com.arteria.game.core.skill.SkillPillar
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
 import com.arteria.game.ui.theme.LocalReduceMotion
+import com.arteria.game.ui.components.CyberHUD
 import java.text.NumberFormat
 
 /**
@@ -107,12 +108,13 @@ fun HubScreen(
         }
     }
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
+    CyberHUD(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
         item { Spacer(Modifier.height(4.dp)) }
 
         // ── 1b. Welcome-back card (inline offline gains) ─────────────────────
@@ -217,6 +219,7 @@ fun HubScreen(
 
         item { Spacer(Modifier.height(8.dp)) }
     }
+}
 }
 
 // ─── 1b. Offline Gains Card ─────────────────────────────────────────────────
@@ -356,6 +359,7 @@ private fun ActiveTrainingCard(
     HubCard(
         accent = accent,
         modifier = modifier.clickable(onClick = onTap),
+        isHolo = true, // Extra holo juice for active training
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -748,15 +752,16 @@ private fun EmptyHubPrompt(
 private fun HubCard(
     accent: Color,
     modifier: Modifier = Modifier,
+    isHolo: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = ArteriaPalette.BgCard,
+        color = ArteriaPalette.BgCard.copy(alpha = if (isHolo) 0.8f else 1f),
         modifier = modifier
             .fillMaxWidth()
             .drawBehind {
-                // Gradient accent stripe (fades at bottom)
+                // Gradient accent stripe
                 val stripeW = 3.dp.toPx()
                 drawRect(
                     brush = Brush.verticalGradient(
@@ -767,6 +772,21 @@ private fun HubCard(
                     topLeft = Offset.Zero,
                     size = androidx.compose.ui.geometry.Size(stripeW, size.height),
                 )
+
+                // Subtitle/Detail subtle grid background for Holo cards
+                if (isHolo) {
+                    val gSize = 20.dp.toPx()
+                    var gx = 0f
+                    while (gx < size.width) {
+                        drawLine(ArteriaPalette.GridLine, Offset(gx, 0f), Offset(gx, size.height), 0.5f)
+                        gx += gSize
+                    }
+                    var gy = 0f
+                    while (gy < size.height) {
+                        drawLine(ArteriaPalette.GridLine, Offset(0f, gy), Offset(size.width, gy), 0.5f)
+                        gy += gSize
+                    }
+                }
             },
     ) {
         Box {

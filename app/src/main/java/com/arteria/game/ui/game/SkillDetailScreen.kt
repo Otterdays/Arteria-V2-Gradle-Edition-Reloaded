@@ -1,7 +1,12 @@
 package com.arteria.game.ui.game
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -54,6 +59,7 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.SkillPillar
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
+import com.arteria.game.ui.components.CyberHUD
 import java.text.NumberFormat
 
 // Re-use the pillarColor map from SkillsScreen (internal visibility)
@@ -92,31 +98,23 @@ fun SkillDetailScreen(
         onStopTraining()
     }
 
-    Column(
+    CyberHUD(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        ArteriaPalette.BgDeepSpaceTop,
-                        ArteriaPalette.BgDeepSpaceMid,
-                        ArteriaPalette.BgDeepSpaceBottom,
-                    ),
-                ),
-            )
             .navigationBarsPadding(),
     ) {
-        // ── Hero header (replaces TopAppBar) ─────────────────────────────────
-        SkillHeroHeader(
-            skillId = skillId,
-            level = level,
-            xpProgress = progress,
-            accent = accent,
-            isTraining = skillState.isTraining,
-            activeActionName = activeAction?.name,
-            trainingProgress = trainingProgress,
-            onBack = onBack,
-        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            // ── Hero header (replaces TopAppBar) ─────────────────────────────────
+            SkillHeroHeader(
+                skillId = skillId,
+                level = level,
+                xpProgress = progress,
+                accent = accent,
+                isTraining = skillState.isTraining,
+                activeActionName = activeAction?.name,
+                trainingProgress = trainingProgress,
+                onBack = onBack,
+            )
 
         // ── Stats strip ───────────────────────────────────────────────────────
         Row(
@@ -192,6 +190,7 @@ fun SkillDetailScreen(
             }
         }
     }
+}
 }
 
 // ─── Hero Header ─────────────────────────────────────────────────────────────
@@ -299,7 +298,12 @@ private fun SkillHeroHeader(
             Spacer(Modifier.width(16.dp))
 
             // Right: circular level display with XP arc
-            LevelCircle(level = level, xpProgress = xpProgress, accent = accent)
+            LevelCircle(
+                level = level,
+                xpProgress = xpProgress,
+                accent = accent,
+                isTraining = isTraining
+            )
         }
     }
 }
@@ -311,12 +315,24 @@ private fun LevelCircle(
     level: Int,
     xpProgress: Float,
     accent: Color,
+    isTraining: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = xpProgress.coerceIn(0f, 1f),
         animationSpec = tween(700),
         label = "level_circle_arc",
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = if (isTraining) 1f else 1f,
+        targetValue = if (isTraining) 1.08f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "level_pulse"
     )
 
     Box(
@@ -341,6 +357,15 @@ private fun LevelCircle(
                     sweepAngle = 360f * animatedProgress,
                     useCenter = false,
                     style = stroke,
+                )
+            }
+
+            // Training Pulse Ring
+            if (isTraining) {
+                drawCircle(
+                    color = accent.copy(alpha = 0.2f),
+                    radius = (size.minDimension / 2) * pulseScale,
+                    style = Stroke(width = 2.dp.toPx())
                 )
             }
         }

@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented 3 new crafting skills bridging the gear gap; updated Mining gems; Phase 5 near-complete. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 doc sync:** ROADMAP Phase 5/7/9 done-markers; "Immediate Next Point" rewritten; SCRATCHPAD Last Actions + Next Action aligned; SUMMARY credits row. |
 | 2026-04-01 | Cursor Agent | Composer | Added **[SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md)** (V1 DOCU → V2 skill playbook); doc index + read-order row. |
 | 2026-03-30 | Cursor Agent | GPT-5.3 Codex (Cursor) | Amended hub: local checkout folder name `Arteria-V2-Gradle-Edition-Reloaded` vs doc `Arteria-Gradle-Edition-V2/` alias. |

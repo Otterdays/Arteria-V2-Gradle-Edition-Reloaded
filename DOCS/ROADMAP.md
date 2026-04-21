@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Gameplay Vertical Expansion:** Implemented data for **Forging**, **Jewelcrafting**, and **Firemaking**; bridged bars/gems to equipment inventory; updated Mining gem drops. Phase 5 significantly advanced toward closure. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 ROADMAP doc pass:** Phase 5 amended for 12 trainable skills; Phase 7 items checked off (haptics, reduce-motion, bank search/sort/presets); Phase 9 items checked off (companions, chronicle/achievements, random events, equipment/gear); "Immediate Next Point" updated; SUMMARY + SCRATCHPAD Last Actions + Next Action refreshed. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.5.0 ship pointer:** `versionName` **1.5.0** / `versionCode` **8**; four new trainable skills in `:core` + `SkillDataRegistry`; `GameDatabase` v3 (`game_meta` gear + companion); README + `APP_CHANGELOG` aligned. See `SCRATCHPAD` Agent Credits (Haiku row) for file list. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.4.5 release hygiene:** `versionName` **1.4.5** / `versionCode` **7** in `app/build.gradle.kts`; README release shield; `ChangelogScreen` `APP_CHANGELOG` top card; Settings About matches build. |
@@ -161,15 +162,15 @@ Phased plan for the **native** Android line. Game content and tone remain define
 
 ## [AMENDED 2026-04-01] Immediate Next Point (single focus)
 
-**`[AMENDED 2026-03-31]:`** ~~Run manual smoke pass and mark Phase 5 done~~ — superseded.
+**`[AMENDED 2026-04-21]:`** Phase 5 is **near-complete**. 15 skills are now trainable, including the critical **Forging** and **Jewelcrafting** bridges that make the equipment system functional. Mining now drops gems. Remaining: final verification of the production chain and a formal balancing pass.
 
 **`[AMENDED 2026-04-01]:`** Current standing as of **v1.5.0**:
-- [x] 12 trainable skills live (Gathering: Mining, Logging, Fishing, Harvesting, Scavenging, Farming, Thieving; Crafting: Smithing, Cooking, Herblore, Woodworking, Tailoring)
+- [x] 15 trainable skills live (Gathering: Mining (gems!), Logging, Fishing, Harvesting, Scavenging, Farming, Thieving; Crafting: Smithing, Cooking, Herblore, Woodworking, Tailoring, Forging, Jewelcrafting, Firemaking)
 - [x] Equipment + Companions frameworks live (XP multipliers, DB persistence, UI overlays)
 - [x] Achievements, Random Events, Bank search/sort, Haptics, Prestige screen all shipped
-- [ ] **Next:** Manual smoke pass on new skills — train Farming/Thieving (gathering), train Woodworking/Tailoring (confirm material deduction from bank), equip gear and verify XP boost applies, summon companion and verify bonus shows in training.
+- [ ] **Next:** Manual smoke pass on the full production chain: mine gems → cut gems (Jewelcrafting) → use bars/gems to craft gear (Forging/Jewelcrafting) → verify in `EquipmentScreen`.
 - [ ] **Next combat candidate:** Wire the first Combat skill (`Attack` or `Strength`) as a simple idle loop — enemies, damage calc, `Hitpoints` XP, drops to bank.
-- [ ] **Nice to have:** `PrestigeScreen` wiring — currently a UI stub; hook perk multipliers into `TickEngine`.
+- [ ] **Priority QoL:** XP/hr calculations on `SkillDetailScreen` now that resource consumption is a major gameplay part.
 
 ---
 

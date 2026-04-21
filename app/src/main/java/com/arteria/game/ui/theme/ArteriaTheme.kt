@@ -67,6 +67,16 @@ object ArteriaPalette {
     val LightTextSecondary = Color(0xFF4A5168)
     val LightTextMuted = Color(0xFF6B7288)
     val LightBorder = Color(0xFFC5CDDF)
+
+    /** Cybernetic / Mad polish tokens. */
+    val HoloBlue = Color(0xFF00F5FF)
+    val HoloBlueDim = Color(0x3300F5FF)
+    val CyberPink = Color(0xFFFF00E5)
+    val CyberPinkDim = Color(0x33FF00E5)
+    val MatrixGreen = Color(0xFF00FF41)
+    val MatrixGreenDim = Color(0x3300FF41)
+    val Scanline = Color(0x08FFFFFF)
+    val GridLine = Color(0x05FFFFFF)
 }
 
 private val ArteriaDarkScheme = darkColorScheme(
