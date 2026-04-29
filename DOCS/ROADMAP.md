@@ -183,6 +183,11 @@ Phased plan for the **native** Android line. Game content and tone remain define
 - Play listing: signing config, versionCode policy, privacy/data safety notes.
 - Optional: retain C++/OpenGL subview for effects — compose over GL per `ARCHITECTURE.md`.
 
+**`[AMENDED 2026-04-29]:`** Phase 6 has started (partial): release minification is already on in
+`app/build.gradle.kts` (`buildTypes.release.isMinifyEnabled = true` with ProGuard wiring).
+Remaining Phase 6 scope is primarily release hardening: project keep-rules review, upload signing
+flow/AAB readiness, and Play Console metadata (privacy/data safety + listing hygiene).
+
 **Primary sources:**
 
 - `apps/mobile/android/app/proguard-rules.pro` — patterns for native/RN (adapt, do not copy blindly).

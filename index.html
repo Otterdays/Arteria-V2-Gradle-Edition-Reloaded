@@ -754,7 +754,7 @@
                         <span class="tl-tag tl-tag--found">FOUNDATION</span>
                     </div>
                     <ul class="tight">
-                        <li>Gradle 9.6 + AGP 9.1, Cinzel, Docking backdrop, NavHost + profile routing</li>
+                        <li>Gradle 9.6 + AGP 9.2, Cinzel, Docking backdrop, NavHost + profile routing</li>
                     </ul>
                 </article>
             </div>
@@ -774,13 +774,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>0</strong></td><td>Scaffold, Gradle 9.6 nightly, AGP 9.1, API 36</td><td><span class="pill pill--done">Done</span></td></tr>
+                        <tr><td><strong>0</strong></td><td>Scaffold, Gradle 9.6 nightly, AGP 9.2, API 36</td><td><span class="pill pill--done">Done</span></td></tr>
                         <tr><td><strong>1</strong></td><td>Compose shell, package <code>com.arteria.game</code>, navigation</td><td><span class="pill pill--done">Done</span></td></tr>
                         <tr><td><strong>2</strong></td><td>Engine in JVM <code>:core</code>, tick + XP tests</td><td><span class="pill pill--done">Done</span> <small style="color:var(--text-muted)">2026-04-01</small></td></tr>
                         <tr><td><strong>3</strong></td><td>UI shell, ViewModels, tabs</td><td><span class="pill pill--done">Done</span></td></tr>
                         <tr><td><strong>4</strong></td><td>Room persistence, offline, migrations</td><td><span class="pill pill--done">Done</span></td></tr>
-                        <tr><td><strong>5</strong></td><td>Content port, vertical slices, skill data</td><td><span class="pill pill--wip">In progress</span> — smoke + balance</td></tr>
-                        <tr><td><strong>6</strong></td><td>R8, a11y, audio/haptics, Play hygiene</td><td><span class="pill pill--backlog">Backlog</span></td></tr>
+                        <tr><td><strong>5</strong></td><td>Content port, vertical slices, skill data</td><td><span class="pill pill--wip">In progress</span> — near-complete, smoke + balance</td></tr>
+                        <tr><td><strong>6</strong></td><td>R8, a11y, audio/haptics, Play hygiene</td><td><span class="pill pill--wip">In progress</span> — R8/minify on; release hardening remains</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -832,7 +832,7 @@ MainActivity → ArteriaTheme → ArteriaApp (NavHost)
                     </thead>
                     <tbody>
                         <tr><td>Gradle wrapper</td><td><code>9.6.0-20260331012943+0000</code></td></tr>
-                        <tr><td>AGP</td><td><code>9.1.0</code></td></tr>
+                        <tr><td>AGP</td><td><code>9.2.0</code></td></tr>
                         <tr><td>Kotlin Compose plugin</td><td><code>2.3.20</code></td></tr>
                         <tr><td>Kotlin JVM (<code>:core</code>)</td><td><code>2.3.20</code></td></tr>
                         <tr><td>KSP</td><td><code>2.3.6</code></td></tr>
@@ -856,9 +856,11 @@ MainActivity → ArteriaTheme → ArteriaApp (NavHost)
                 <div class="card">
                     <h3>Phase 7 — QoL &amp; a11y</h3>
                     <ul class="tight">
-                        <li>TalkBack, contrast, reduced motion parity</li>
-                        <li>Haptics mapping, bank search/sort/presets when UX lands</li>
-                        <li>Offline report field parity with WYWA intent</li>
+                        <li>Reduced motion support <strong>done</strong> (<code>LocalReduceMotion</code>)</li>
+                        <li>Haptic feedback path <strong>done</strong> (training + achievements)</li>
+                        <li>Bank search/sort/presets <strong>done</strong></li>
+                        <li>Offline report parity <strong>done</strong> (<code>OfflineReportDialog</code>)</li>
+                        <li>TalkBack/focus-order pass still open</li>
                     </ul>
                 </div>
                 <div class="card">
@@ -872,8 +874,9 @@ MainActivity → ArteriaTheme → ArteriaApp (NavHost)
                 <div class="card">
                     <h3>Phase 9 — Feature verticals</h3>
                     <ul class="tight">
-                        <li>Skill slices in dependency order; combat/dungeons shells</li>
-                        <li>Companions per <code>COMPANIONS.md</code>; chronicle / random events</li>
+                        <li>Companions, equipment, chronicle, random events <strong>done</strong></li>
+                        <li>Skill slices are live and still expanding (combat baseline active)</li>
+                        <li>Dungeons/instances and economy surfaces still open</li>
                     </ul>
                 </div>
                 <div class="card">

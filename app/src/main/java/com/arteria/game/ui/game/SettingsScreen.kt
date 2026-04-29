@@ -279,7 +279,7 @@ fun SettingsScreen(
             )
             settingsSwitchRow(
                 title = "Idle soundscapes",
-                subtitle = "Coming soon — preference saved; no audio yet",
+                subtitle = "Ambient drone while in the game screen (requires Sound on)",
                 checked = prefs.idleSoundscapesEnabled,
                 onCheckedChange = { v -> updatePrefs { it.copy(idleSoundscapesEnabled = v) } },
             )

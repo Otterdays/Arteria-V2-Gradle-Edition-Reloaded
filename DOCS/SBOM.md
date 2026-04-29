@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Codex | GPT-5 | **SBOM audit/sync:** Reconciled `DOCS/SBOM.md` with live Gradle + `GameDatabase.kt`: AGP **9.2.0** (was stale 9.1.0); toolchain “Next available” for AGP amended; `GameDatabase` **v5** + `MIGRATION_2_3`–`MIGRATION_4_5` documented; release `isMinifyEnabled` noted; appended security snapshot row. |
 | 2026-04-01 | Cursor Agent | Composer | **Phase 2 close:** `:core` converted to JVM Kotlin (`kotlin("jvm")` 2.3.20); engine moved from `app/.../core` to `core/src/main/kotlin`; `TickEngineTest` + `XPTableTest`; `app` → `implementation(project(":core"))`; root `org.jetbrains.kotlin.jvm` apply false; `:core:test` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: `androidx.datastore:datastore-preferences:1.2.0`; app prefs + theme/motion/audio/haptics/offline-report; OSS/Credits screens; reset/delete profile + `GameDao` deletes; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `:app:compileDebugKotlin` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | `:app` `buildFeatures.buildConfig = true` for `BuildConfig.VERSION_NAME` / `VERSION_CODE` in Settings About row (no new Maven coordinates). |
@@ -20,7 +21,7 @@
 
 # SBOM (Software Bill of Materials) — Arteria V2 Gradle Edition Reloaded
 
-> Last updated: 2026-04-01 (Phase 2 `:core` JVM extraction)
+> Last updated: 2026-04-29 (SBOM reconciliation vs live Gradle + Room schema)
 > Source of truth: `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, `core/build.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties`, `gradle/gradle-daemon-jvm.properties`
 > Scope: Declared build/runtime/test dependencies and bundled non-Maven assets.
 
@@ -38,7 +39,7 @@
 | Component group | Installed baseline | Update channel | Next review date |
 |------|------|------|------|
 | Gradle wrapper | `9.6.0-20260331012943+0000` | `nightly` | `2026-04-30` |
-| AGP | `9.1.0` | `stable` | `2026-04-30` |
+| AGP | `9.2.0` | `stable` | `2026-04-30` |
 | Kotlin Compose plugin | `2.3.20` | `stable` | `2026-04-30` |
 | KSP plugin | `2.3.6` | `stable` | `2026-04-30` |
 | Compose BOM | `2026.03.01` | `stable` (monthly BOM) | `2026-04-30` |
@@ -51,6 +52,8 @@
 - Compose BOM remains on monthly stable cadence (`2026.03.01` currently pinned); next review on the scheduled monthly window.
 - No dependency edits were applied in this sweep.
 
+**`[AMENDED 2026-04-29]:`** The **2026-03-31** sweep bullet about `AGP 9.1.0` was accurate **at that date**. The repo now pins **`AGP 9.2.0`** in root `build.gradle.kts` — treat the **Update channel map** + **Build Toolchain** rows as current **Installed** truth; keep the sweep block as historical context.
+
 ---
 
 ## Build Toolchain
@@ -58,7 +61,7 @@
 | Component | Installed | Next available | Source |
 |-----------|-----------|----------------|--------|
 | Gradle wrapper | `9.6.0-20260331012943+0000` | `nightly` (rolling) | `gradle/wrapper/gradle-wrapper.properties` |
-| Android Gradle Plugin | `9.1.0` | `9.2.0-alpha` | root `build.gradle.kts` |
+| Android Gradle Plugin | `9.2.0` | `verify before bump` (next AGP stable line) | root `build.gradle.kts` |
 | Compose plugin | `org.jetbrains.kotlin.plugin.compose:2.3.20` | `2.3.20` (current stable) | root `build.gradle.kts` |
 | Kotlin JVM plugin | `org.jetbrains.kotlin.jvm:2.3.20` (`apply false`) | `2.3.20` (current stable) | root `build.gradle.kts` — used by `:core` |
 | KSP plugin | `com.google.devtools.ksp:2.3.6` | `2.3.6` (current stable) | root `build.gradle.kts` |
@@ -81,9 +84,13 @@
 | `targetSdk` | `36` | `app/build.gradle.kts` |
 | `minSdk` | `26` | `app/build.gradle.kts` only **`[AMENDED 2026-04-01]:`** `:core` is not an Android module. |
 | `GameDatabase` (Room) | `version = 2`; `MIGRATION_1_2` adds `lastOfflineTickAppliedAt` on `game_meta` | `app/.../data/game/GameDatabase.kt` |
+| `GameDatabase` (Room) — **current** | `version = 5`; `MIGRATION_1_2` … `MIGRATION_4_5` (equipment/companion, resonance, encounter combat columns on `game_meta`) | `app/.../data/game/GameDatabase.kt` |
 | `ProfileDatabase` (Room) | `version = 1` | `app/.../data/profile/ProfileDatabase.kt` |
+| `buildTypes.release` | `isMinifyEnabled = true` (R8/minify + `proguard-android-optimize.txt` + `proguard-rules.pro`) | `app/build.gradle.kts` |
 
 **`[AMENDED 2026-03-31]:`** Game persistence schema bumped to **v2** for Phase 4 (offline audit column). Existing installs migrate on upgrade via `addMigrations(GameDatabase.MIGRATION_1_2)` in `ArteriaApp`.
+
+**`[AMENDED 2026-04-29]:`** `GameDatabase` is **version 5** in the current tree; `ArteriaApp` registers **`MIGRATION_1_2`**, **`MIGRATION_2_3`**, **`MIGRATION_3_4`**, and **`MIGRATION_4_5`** (see `ArteriaApp.kt`). The v2 paragraph above is **historical milestone** text only — the **GameDatabase (Room) — current** table row is authoritative for schema level.
 
 **`[AMENDED 2026-04-01]:`** `:app` enables **`buildConfig = true`** (`app/build.gradle.kts`) so UI can read `com.arteria.game.BuildConfig` for version labels.
 
@@ -158,6 +165,7 @@
 | 2026-03-31 | Dependency update sweep vs pinned Gradle files | No dependency coordinate changes applied; current pins retained because available newer lines are primarily alpha/nightly and not required for active feature slice |
 | 2026-03-31 | Coordinate-level review after Kotlin/dependency bump | Updated to Kotlin Compose `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`; no new non-AndroidX third-party dependencies introduced |
 | 2026-03-30 | Coordinate-level review of declared deps | No known high-risk third-party dependencies introduced; stack is AndroidX/Google/Kotlin ecosystem plus JUnit |
+| 2026-04-29 | SBOM doc vs live Gradle + Room | Reconciled stale **AGP 9.1.0** / **GameDatabase v2-only** narrative: **AGP 9.2.0**, **Room v5** + migration chain, release minify row; dependency coordinates unchanged vs `app/build.gradle.kts` |
 
 ---
 

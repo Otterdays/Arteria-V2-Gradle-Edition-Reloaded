@@ -4,6 +4,11 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Codex | GPT-5 | **SBOM audit:** Reconciled `DOCS/SBOM.md` with live `build.gradle.kts` + `GameDatabase.kt`: AGP **9.2.0**, **Room v5** + migration-chain notes, release **minify** row; dependency table coordinates unchanged (still match `app/build.gradle.kts`). |
+| 2026-04-29 | Claude Sonnet 4.6 | Anthropic Claude | **Idle soundscapes:** Created `ui/audio/IdleSoundscapePlayer.kt` — `AudioTrack`-based PCM synthesizer (two detuned drones at 55/58.5 Hz + shimmer, slow breathing envelope, daemon thread); wired into `GameScreen` via `DisposableEffect(soundscapesActive)` so it starts/stops on toggle or screen exit; updated Settings subtitle from "Coming soon" to accurate description. No build run per user preference. |
+| 2026-04-29 | Codex | GPT-5.3 | **Roadmap horizon audit (website):** Verified additional completed roadmap items against code and docs (reduce motion, haptics, bank search/sort/presets, offline report, companions/equipment/chronicle/random events) and updated `index.html` Horizon Phase 7/9 bullets to explicitly show done vs open items. |
+| 2026-04-29 | Codex | GPT-5.3 | **Roadmap spine audit (QoL website/docs):** Audited Phase 6 against live build config; confirmed release minify is enabled (`buildTypes.release.isMinifyEnabled = true`). Amended `DOCS/ROADMAP.md` to mark Phase 6 as partial/in-progress and synced website `index.html` roadmap spine row to reflect R8 done but release hardening pending. |
+| 2026-04-29 | Codex | GPT-5.3 | **Website sync (QoL):** Updated root `index.html` to match live toolchain and roadmap wording: AGP references now `9.2/9.2.0` (Roadmap spine + Toolchain snapshot + foundation timeline) and Phase 5 spine copy now "near-complete, smoke + balance" per ROADMAP amendment. |
 | 2026-04-29 | Codex | GPT-5 | **Combat Loadouts 2.0:** Added combat stats to equipment models/registry and wired them into `CombatEngine` engage snapshot; upgraded `EquipmentScreen` with Paper Doll Lite + aggregate loadout stats + slot-grouped owned gear cards; added rare `bronze_sword` Barn Rat drop for starter progression; updated `CombatEngineTest`; bumped app to **1.9.0 (12)** with changelog + README badge. Verified `:app:compileDebugKotlin` and `:core:test` green. |
 | 2026-04-29 | Codex | GPT-5 | **Settings panel polish:** Added command summary hero, mode/build/last-played info chips, tighter 8dp settings cards, and moved Switch Account into Profile actions. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
 | 2026-04-29 | Codex | GPT-5 | **Main menu polish:** Account selection now has a primary Continue panel, current-release What's New strip, and account cards enriched with mode + last-played metadata. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
@@ -145,6 +150,14 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **SBOM reconciliation (Codex):** Audited `DOCS/SBOM.md` against live Gradle + Room schema. Updated stale **AGP 9.1.0** references to **9.2.0**, documented **GameDatabase version 5** and full `MIGRATION_1_2`…`4_5` chain + **release minify** row; preserved historical 2026-03-31 dependency-sweep bullets with a 2026-04-29 supersession note. No Maven coordinate bumps (current pins still match `app/build.gradle.kts`).
+
+**2026-04-29:** **Roadmap horizon completion sync (Codex):** Audited website Phase 7/9 horizon bullets against `ROADMAP.md` + code references and marked completed items explicitly in `index.html`: reduce motion, haptics, bank search/sort/presets, offline report parity, companions/equipment/chronicle/random events. Left open items labeled as open.
+
+**2026-04-29:** **Roadmap spine audit + phase correction (Codex):** Checked live release config and confirmed R8/minify is already active in `app/build.gradle.kts` (`release.isMinifyEnabled = true`). Updated `DOCS/ROADMAP.md` Phase 6 with an amendment marking it **partial/in-progress** and clarified remaining work (keep rules review, signing/AAB flow, Play metadata). Synced website `index.html` Phase 6 spine row to match.
+
+**2026-04-29:** **Website QoL sync (Codex):** Updated root `index.html` so the website reflects current docs/build truth: AGP values changed to **9.2/9.2.0** in Roadmap spine, Toolchain table, and foundation timeline entry; Phase 5 spine status copy now reads **"near-complete, smoke + balance"** to match `DOCS/ROADMAP.md` amendments.
 
 **2026-04-29:** **Combat Loadouts 2.0 (Codex):** Gear now carries explicit combat stats (`accuracy`, `maxHit`, `meleeDefence`, `attackSpeedBonusMs`) and these are applied when encounter combat starts. Rebuilt Equipment panel around a Paper Doll Lite + aggregate combat stat block + slot-grouped owned gear cards; Barn Rat now has a rare `bronze_sword` drop to seed early loadouts. Updated `CombatEngineTest`. Version **1.9.0 (12)** with What's New + README badge. Build: `:app:compileDebugKotlin`, `:core:test` green.
 

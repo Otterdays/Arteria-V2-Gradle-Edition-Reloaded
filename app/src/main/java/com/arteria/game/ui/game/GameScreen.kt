@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -57,6 +58,7 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.data.game.GameRepository
 import com.arteria.game.ui.account.AccountSessionInfo
+import com.arteria.game.ui.audio.IdleSoundscapePlayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,6 +159,13 @@ fun GameScreen(
                 )
             }
         }
+    }
+
+    // Idle soundscapes — start/stop whenever either toggle changes or this screen leaves
+    val soundscapesActive = userPrefs.soundEnabled && userPrefs.idleSoundscapesEnabled
+    DisposableEffect(soundscapesActive) {
+        val player = if (soundscapesActive) IdleSoundscapePlayer().also { it.start() } else null
+        onDispose { player?.stop() }
     }
 
     val darkSpace = LocalArteriaDarkSpace.current
