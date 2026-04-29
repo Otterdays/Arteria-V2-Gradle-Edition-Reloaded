@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arteria.game.data.preferences.UserPreferences
 import com.arteria.game.data.preferences.asProvider
 import com.arteria.game.ui.theme.ArteriaContentColors
 import com.arteria.game.ui.theme.ArteriaPalette
@@ -72,6 +73,9 @@ fun GameScreen(
     modifier: Modifier = Modifier,
 ) {
     val userPrefsRepository = LocalUserPreferencesRepository.current
+    val userPrefs by userPrefsRepository.userPreferences.collectAsStateWithLifecycle(
+        initialValue = UserPreferences.DEFAULT,
+    )
     val gameViewModel: GameViewModel = viewModel(
         factory = GameViewModel.factory(
             profileId,
@@ -83,7 +87,6 @@ fun GameScreen(
     val offlineReport by gameViewModel.offlineReport.collectAsStateWithLifecycle()
     val activeRandomEvent by gameViewModel.activeRandomEvent.collectAsStateWithLifecycle()
     val achievements by gameViewModel.achievements.collectAsStateWithLifecycle()
-    val companions by gameViewModel.companions.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var expandedSkillId by remember { mutableStateOf<SkillId?>(null) }
@@ -91,7 +94,6 @@ fun GameScreen(
     var showSettings by remember { mutableStateOf(false) }
     var showChronicle by remember { mutableStateOf(false) }
     var showEquipment by remember { mutableStateOf(false) }
-    var showCompanions by remember { mutableStateOf(false) }
 
     // Track recent level-ups for the Hub screen (1g)
     val recentLevelUps = remember { mutableStateListOf<Pair<SkillId, Int>>() }
@@ -119,11 +121,10 @@ fun GameScreen(
         }
     }
 
-    // Close overlays in reverse priority: settings > companions > equipment > chronicle > dialogs > detail
+    // Close overlays in reverse priority: settings > equipment > chronicle > dialogs > detail
     BackHandler(enabled = showSettings) { showSettings = false }
-    BackHandler(enabled = showCompanions && !showSettings) { showCompanions = false }
-    BackHandler(enabled = showEquipment && !showSettings && !showCompanions) { showEquipment = false }
-    BackHandler(enabled = showChronicle && !showSettings && !showEquipment && !showCompanions) {
+    BackHandler(enabled = showEquipment && !showSettings) { showEquipment = false }
+    BackHandler(enabled = showChronicle && !showSettings && !showEquipment) {
         showChronicle = false
     }
     BackHandler(enabled = comingSoonSkillId != null && !showSettings) {
@@ -185,23 +186,6 @@ fun GameScreen(
             bank = currentState?.bank ?: emptyMap(),
             onEquip = gameViewModel::equip,
             onUnequip = gameViewModel::unequip,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(bgBrush),
-        )
-        return
-    }
-
-    // Companions overlay — full-screen, sits above game content
-    if (showCompanions) {
-        val currentState = gameState
-        val playerLevel = currentState?.skills?.values
-            ?.sumOf { com.arteria.game.core.skill.XPTable.levelForXp(it.xp) } ?: 1
-        CompanionsScreen(
-            ownedCompanions = companions,
-            playerLevel = playerLevel,
-            onSummon = gameViewModel::equipCompanion,
-            onDismiss = { gameViewModel.dismissCompanion() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(bgBrush),
@@ -283,10 +267,11 @@ fun GameScreen(
             currentGameState.skills[expandedId]
         } else null
 
-        if (expandedId != null && skillState != null) {
+        if (expandedId != null && skillState != null && currentGameState != null) {
             SkillDetailScreen(
                 skillId = expandedId,
                 skillState = skillState,
+                bank = currentGameState.bank,
                 onBack = { expandedSkillId = null },
                 onStartTraining = { actionId -> gameViewModel.startTraining(expandedId, actionId) },
                 onStopTraining = { gameViewModel.stopTraining(expandedId) },
@@ -316,7 +301,13 @@ fun GameScreen(
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                             }
-                            IconButton(onClick = { showCompanions = true }) {
+                            IconButton(onClick = {
+                                if (SkillDataRegistry.isSkillImplemented(SkillId.SUMMONING)) {
+                                    expandedSkillId = SkillId.SUMMONING
+                                } else {
+                                    comingSoonSkillId = SkillId.SUMMONING
+                                }
+                            }) {
                                 Text(
                                     text = "🐾",
                                     style = MaterialTheme.typography.titleMedium,
@@ -373,7 +364,9 @@ fun GameScreen(
                                         recentLevelUps = recentLevelUps.toList(),
                                         onDismissOffline = gameViewModel::dismissOfflineReport,
                                         onSkillTap = { skillId ->
-                                            if (SkillDataRegistry.isSkillImplemented(skillId)) {
+                                            if (skillId == SkillId.RESONANCE) {
+                                                selectedTab = 4
+                                            } else if (SkillDataRegistry.isSkillImplemented(skillId)) {
                                                 expandedSkillId = skillId
                                             } else {
                                                 comingSoonSkillId = skillId
@@ -381,13 +374,16 @@ fun GameScreen(
                                         },
                                         onNavigateToSkills = { selectedTab = 1 },
                                         onNavigateToBank = { selectedTab = 2 },
+                                        onNavigateToResonance = { selectedTab = 4 },
                                     )
                                 }
                             }
                             1 -> SkillsScreen(
                                 skills = currentState?.skills ?: emptyMap(),
                                 onSkillClick = { skillId ->
-                                    if (SkillDataRegistry.isSkillImplemented(skillId)) {
+                                    if (skillId == SkillId.RESONANCE) {
+                                        selectedTab = 4
+                                    } else if (SkillDataRegistry.isSkillImplemented(skillId)) {
                                         expandedSkillId = skillId
                                     } else {
                                         comingSoonSkillId = skillId
@@ -395,7 +391,27 @@ fun GameScreen(
                                 },
                             )
                             2 -> BankScreen(bank = currentState?.bank ?: emptyMap())
-                            3 -> CombatScreen()
+                            3 -> {
+                                if (currentState != null) {
+                                    CombatScreen(
+                                        gameState = currentState,
+                                        onStartEncounter = { loc, enemy ->
+                                            gameViewModel.startEncounter(loc, enemy)
+                                        },
+                                        onFlee = gameViewModel::fleeCombat,
+                                    )
+                                }
+                            }
+                            4 -> {
+                                if (currentState != null) {
+                                    ResonanceScreen(
+                                        gameState = currentState,
+                                        onPulse = gameViewModel::pulseResonance,
+                                        onHeavyPulse = gameViewModel::heavyPulseResonance,
+                                        hapticsEnabled = userPrefs.hapticsEnabled,
+                                    )
+                                }
+                            }
                         }
                     }
                 }

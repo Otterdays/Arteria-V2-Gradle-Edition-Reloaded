@@ -5,14 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arteria.game.core.data.AchievementRegistry
-import com.arteria.game.core.data.CompanionRegistry
 import com.arteria.game.core.data.EquipmentRegistry
+import com.arteria.game.core.data.ResonanceData
 import com.arteria.game.core.data.SkillDataRegistry
+import com.arteria.game.core.engine.CombatEngine
 import com.arteria.game.core.engine.TickEngine
+import com.arteria.game.core.engine.TickResonanceOptions
 import com.arteria.game.core.model.AchievementProgress
 import com.arteria.game.core.model.ActiveRandomEvent
 import com.arteria.game.core.model.AchievementCondition
-import com.arteria.game.core.model.CompanionState
 import com.arteria.game.core.model.EquipmentSlots
 import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
@@ -35,12 +36,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -155,6 +153,14 @@ class GameViewModel(
     fun startTraining(skillId: SkillId, actionId: String) {
         _gameState.update { state ->
             state?.let {
+                if (it.activeCombat != null) return@let it
+                val action = actionRegistry[actionId] ?: return@let it
+                if (action.skillId != skillId) return@let it
+                val canAfford = action.inputItems.all { (itemId, required) ->
+                    (it.bank[itemId] ?: 0) >= required
+                }
+                if (!canAfford) return@let it
+
                 val updatedSkills = it.skills.toMutableMap()
                 // Enforce one-at-a-time: stop every other currently-training skill first
                 updatedSkills.keys.toList().forEach { id ->
@@ -191,16 +197,6 @@ class GameViewModel(
         }
     }
 
-    /** All companions from the registry, summoned state derived from activeCompanionId. */
-    val companions: StateFlow<List<CompanionState>> = _gameState
-        .map { state ->
-            val activeId = state?.activeCompanionId
-            CompanionRegistry.all.map { c ->
-                CompanionState(companionId = c.id, isSummoned = c.id == activeId)
-            }
-        }
-        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly, emptyList())
-
     fun equip(itemId: String) {
         val equipment = EquipmentRegistry.getById(itemId) ?: return
         _gameState.update { state ->
@@ -234,12 +230,75 @@ class GameViewModel(
         }
     }
 
-    fun equipCompanion(companionId: String) {
-        _gameState.update { state -> state?.copy(activeCompanionId = companionId) }
+    /** Begin encounter at a location (stops skilling). */
+    fun startEncounter(locationId: String, enemyId: String) {
+        _gameState.update { state ->
+            state?.let { s ->
+                CombatEngine.startCombat(s, locationId, enemyId) ?: s
+            }
+        }
+        _gameState.value?.let { _achievements.value = checkAchievements(it) }
     }
 
-    fun dismissCompanion() {
-        _gameState.update { state -> state?.copy(activeCompanionId = null) }
+    fun fleeCombat() {
+        _gameState.update { state -> state?.let { CombatEngine.fleeCombat(it) } }
+    }
+
+    /** Normal orb tap — Resonance XP + Momentum (see `ResonanceData`). */
+    fun pulseResonance() {
+        _gameState.update { state ->
+            state?.let { s ->
+                val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
+                val level = XPTable.levelForXp(res.xp)
+                val xpAdd = ResonanceData.resonanceXpPerTap(level)
+                val momAdd = ResonanceData.momentumPerTap(level)
+                val newXp = res.xp + xpAdd
+                val newMom = (s.momentum + momAdd).coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
+                val oldLevel = XPTable.levelForXp(res.xp)
+                val newLevel = XPTable.levelForXp(newXp)
+                val skills = s.skills.toMutableMap()
+                skills[SkillId.RESONANCE] = res.copy(xp = newXp)
+                if (newLevel > oldLevel) {
+                    _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
+                }
+                s.copy(
+                    skills = skills,
+                    momentum = newMom,
+                    peakMomentum = maxOf(s.peakMomentum, newMom),
+                    totalResonancePulses = s.totalResonancePulses + 1L,
+                )
+            }
+        }
+        _gameState.value?.let { _achievements.value = checkAchievements(it) }
+    }
+
+    /** Lv 60+ Soul Cranking — consumes Anchor Energy for a surge (no-op if requirements unmet). */
+    fun heavyPulseResonance() {
+        _gameState.update { state ->
+            state?.let { s ->
+                val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
+                val level = XPTable.levelForXp(res.xp)
+                if (!ResonanceData.canHeavyPulse(level, s.anchorEnergy)) return@let s
+                val newXp = res.xp + ResonanceData.HEAVY_PULSE_XP
+                val newMom = (s.momentum + ResonanceData.HEAVY_PULSE_MOMENTUM)
+                    .coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
+                val oldLevel = XPTable.levelForXp(res.xp)
+                val newLevel = XPTable.levelForXp(newXp)
+                val skills = s.skills.toMutableMap()
+                skills[SkillId.RESONANCE] = res.copy(xp = newXp)
+                if (newLevel > oldLevel) {
+                    _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
+                }
+                s.copy(
+                    skills = skills,
+                    momentum = newMom,
+                    anchorEnergy = s.anchorEnergy - ResonanceData.HEAVY_PULSE_ENERGY_COST,
+                    peakMomentum = maxOf(s.peakMomentum, newMom),
+                    totalHeavyPulses = s.totalHeavyPulses + 1L,
+                )
+            }
+        }
+        _gameState.value?.let { _achievements.value = checkAchievements(it) }
     }
 
     private fun startTickLoop() {
@@ -249,15 +308,45 @@ class GameViewModel(
             while (isActive) {
                 delay(TICK_INTERVAL_MS)
                 val current = _gameState.value ?: continue
-                val result = TickEngine.processTick(current, TICK_INTERVAL_MS, actionRegistry)
-                _gameState.value = result.state
+                val resonanceXp = current.skills[SkillId.RESONANCE]?.xp ?: 0.0
+                val resonanceLevel = XPTable.levelForXp(resonanceXp)
+                val haste = ResonanceData.hasteMultiplier(current.momentum)
+                val result = TickEngine.processTick(
+                    current,
+                    TICK_INTERVAL_MS,
+                    actionRegistry,
+                    TickResonanceOptions(
+                        hasteMultiplier = haste,
+                        enableKineticFeedback = resonanceLevel >= ResonanceData.UNLOCK_KINETIC_FEEDBACK,
+                        random = kotlin.random.Random.Default,
+                    ),
+                )
+                var nextState = result.state
+                var mom = (nextState.momentum + result.kineticMomentumDelta)
+                    .coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
+                mom = ResonanceData.applyMomentumDecay(mom, TICK_INTERVAL_MS, resonanceLevel)
+                val peak = maxOf(nextState.peakMomentum, mom)
+                nextState = nextState.copy(momentum = mom, peakMomentum = peak)
+                nextState = ResonanceData.accrueAnchorEnergy(nextState, TICK_INTERVAL_MS)
+                if (nextState.activeCombat != null) {
+                    val cr = CombatEngine.processCombatTick(
+                        nextState,
+                        TICK_INTERVAL_MS,
+                        kotlin.random.Random.Default,
+                    )
+                    nextState = cr.state
+                    for (lu in cr.levelUps) {
+                        _levelUpEvents.tryEmit(lu)
+                    }
+                }
+                _gameState.value = nextState
 
                 for (levelUp in result.levelUps) {
                     _levelUpEvents.tryEmit(levelUp)
                 }
 
                 // Check achievements
-                val updatedAchievements = checkAchievements(result.state)
+                val updatedAchievements = checkAchievements(nextState)
                 _achievements.value = updatedAchievements
 
                 // Random event trigger
@@ -273,7 +362,7 @@ class GameViewModel(
 
                 val now = nowProvider()
                 if (now - lastSaveTime >= SAVE_INTERVAL_MS) {
-                    repository.saveGameState(result.state)
+                    repository.saveGameState(nextState)
                     lastSaveTime = now
                 }
                 val maxIterations = maxTickIterations
@@ -303,6 +392,12 @@ class GameViewModel(
                 is AchievementCondition.ItemCollected -> bank[condition.itemId] ?: 0
                 is AchievementCondition.BankItems -> bank.values.sum()
                 is AchievementCondition.SkillActions -> 0
+                is AchievementCondition.ResonancePulseTotal ->
+                    state.totalResonancePulses.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                is AchievementCondition.HeavyPulseTotal ->
+                    state.totalHeavyPulses.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                is AchievementCondition.PeakMomentumReached ->
+                    state.peakMomentum.toInt().coerceIn(0, ResonanceData.MOMENTUM_CAP.toInt())
             }
             val required = AchievementRegistry.getRequiredProgress(achievement.condition)
             val isUnlocked = currentProgress >= required

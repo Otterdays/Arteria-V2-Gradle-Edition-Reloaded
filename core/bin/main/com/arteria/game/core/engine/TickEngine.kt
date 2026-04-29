@@ -2,6 +2,7 @@ package com.arteria.game.core.engine
 
 import com.arteria.game.core.data.CompanionRegistry
 import com.arteria.game.core.data.EquipmentRegistry
+import com.arteria.game.core.data.ResonanceData
 import com.arteria.game.core.model.CompanionBonus
 import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
@@ -11,6 +12,17 @@ import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.model.TickResult
 import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
+import kotlin.random.Random
+
+data class TickResonanceOptions(
+    val hasteMultiplier: Double = 1.0,
+    val enableKineticFeedback: Boolean = false,
+    val random: Random = Random.Default,
+) {
+    companion object {
+        val Default = TickResonanceOptions()
+    }
+}
 
 object TickEngine {
     /** Default wall-clock cap for offline catch-up (one day). */
@@ -49,13 +61,15 @@ object TickEngine {
         state: GameState,
         deltaMs: Long,
         actionRegistry: Map<String, SkillAction>,
+        resonanceOptions: TickResonanceOptions = TickResonanceOptions.Default,
     ): TickResult {
         val updatedSkills = mutableMapOf<SkillId, SkillState>()
         val resourcesGained = mutableMapOf<String, Int>()
         val xpGained = mutableMapOf<SkillId, Double>()
         val levelUps = mutableListOf<LevelUp>()
-        // Mutable bank — crafting actions deduct inputs from this during the tick
         val updatedBank = state.bank.toMutableMap()
+        val resonanceLevel = XPTable.levelForXp(state.skills[SkillId.RESONANCE]?.xp ?: 0.0)
+        var kineticMomentumDelta = 0.0
 
         for ((skillId, skill) in state.skills) {
             if (!skill.isTraining || skill.currentActionId == null) {
@@ -86,13 +100,18 @@ object TickEngine {
             val xpMultiplier = gearXpMultiplier(state.equippedGear, skillId) *
                 companionXpMultiplier(state.activeCompanionId, skillId)
 
-            var progressMs = skill.actionProgressMs + deltaMs
+            val adjustedDelta = if (skillId == SkillId.RESONANCE) {
+                deltaMs
+            } else {
+                (deltaMs.toDouble() * resonanceOptions.hasteMultiplier).toLong()
+            }
+
+            var progressMs = skill.actionProgressMs + adjustedDelta
             var xp = skill.xp
             var tickXp = 0.0
             var ranOutOfMaterials = false
 
             while (progressMs >= action.actionTimeMs) {
-                // For crafting actions, verify and consume inputs before completing
                 if (action.inputItems.isNotEmpty()) {
                     val canAfford = action.inputItems.all { (itemId, required) ->
                         (updatedBank[itemId] ?: 0) >= required
@@ -111,6 +130,14 @@ object TickEngine {
                 xp += earnedXp
                 tickXp += earnedXp
 
+                if (resonanceOptions.enableKineticFeedback &&
+                    skillId != SkillId.RESONANCE &&
+                    resonanceLevel >= ResonanceData.UNLOCK_KINETIC_FEEDBACK &&
+                    resonanceOptions.random.nextDouble() < ResonanceData.KINETIC_FEEDBACK_CHANCE
+                ) {
+                    kineticMomentumDelta += ResonanceData.KINETIC_MOMENTUM_BONUS
+                }
+
                 if (action.resourceId != null) {
                     resourcesGained[action.resourceId] =
                         (resourcesGained[action.resourceId] ?: 0) + action.resourceAmount
@@ -118,7 +145,6 @@ object TickEngine {
             }
 
             if (ranOutOfMaterials) {
-                // Stop training — no materials left
                 updatedSkills[skillId] = skill.copy(
                     isTraining = false,
                     currentActionId = null,
@@ -144,7 +170,6 @@ object TickEngine {
             updatedSkills[skillId] = skill.copy(xp = xp, actionProgressMs = progressMs)
         }
 
-        // Add gathered/crafted resources to bank
         for ((itemId, qty) in resourcesGained) {
             updatedBank[itemId] = (updatedBank[itemId] ?: 0) + qty
         }
@@ -154,6 +179,7 @@ object TickEngine {
             xpGained = xpGained,
             resourcesGained = resourcesGained,
             levelUps = levelUps,
+            kineticMomentumDelta = kineticMomentumDelta,
         )
     }
 
@@ -176,7 +202,7 @@ object TickEngine {
         var current = state
 
         for (i in 0 until tickCount) {
-            val result = processTick(current, tickIntervalMs, actionRegistry)
+            val result = processTick(current, tickIntervalMs, actionRegistry, TickResonanceOptions.Default)
             current = result.state
             for ((skill, xp) in result.xpGained) {
                 totalXpGained[skill] = (totalXpGained[skill] ?: 0.0) + xp

@@ -141,7 +141,11 @@ fun SkillsScreen(
     // 3g: view toggle
     var showStarMap  by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(ArteriaPalette.BgApp),
+    ) {
 
         // ── Filter + sort + view-toggle bar (3f / 3g) ────────────────────────
         FilterSortBar(

@@ -4,6 +4,15 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Codex | GPT-5 | **Settings panel polish:** Added command summary hero, mode/build/last-played info chips, tighter 8dp settings cards, and moved Switch Account into Profile actions. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
+| 2026-04-29 | Codex | GPT-5 | **Main menu polish:** Account selection now has a primary Continue panel, current-release What's New strip, and account cards enriched with mode + last-played metadata. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
+| 2026-04-29 | Codex | GPT-5 | **Build fix:** Fixed nullable `currentGameState.bank` access in `GameScreen` after adding stock-aware skill detail. No tests or compile run per user instruction. |
+| 2026-04-29 | Codex | GPT-5 | **Training stock guard:** Added start-training affordability validation in `GameViewModel`; `SkillDetailScreen` now receives bank stock, disables recipe actions with missing inputs, and shows owned/required counts. No tests or compile run per user instruction. |
+| 2026-04-29 | Codex | GPT-5 | **Summoning unlock/layout pass:** Added `SummoningData` pouch actions and registered them with `SkillDataRegistry`; Barn Rat now drops starter charms/shards; `SkillDetailScreen` action list now reserves scrollable space with bottom padding; top-bar familiar button now opens Summoning instead of the old `CompanionsScreen`, which was removed with its unused ViewModel bridge. Version/changelog/README bumped to **1.8.0**. Verified `:app:compileDebugKotlin` green; no tests run per user preference. |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Encounter area v1:** `CombatModels` + `EncounterData` (Sunny Meadow Barn, Barn Rat), `CombatEngine` (hit rolls, kills, XP split, loot, respawn, death/flee), `GameState` `activeCombat`/`combatLog`; Room **v4→v5** `MIGRATION_4_5` + `GameRepository` persistence; `GameViewModel` start/flee + tick integration + block skilling during combat; **`CombatScreen`** hub UI; `rat_tail` item; **`CombatEngineTest`**; `versionName` **1.7.0** / `versionCode` **10**, changelog + README badge. `:app:compileDebugKotlin` + `:core:test` green. |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Resonance clicker (V1 port slice):** `GameState` momentum/anchor/pulse counters + `ResonanceData`; Room **`game_meta` v3→v4** (`MIGRATION_3_4`); `TickEngine` foreground **haste** + **Kinetic Feedback** + `TickResonanceOptions`; `GameViewModel` pulse/heavy + tick post-process (decay, anchor accrual); **`ResonanceScreen`**, **5th bottom tab**, Hub shortcut, **RESONANCE** skill tap routes to tab; **5 achievements** + `AchievementCategory.RESONANCE`; `versionName` **1.6.0** / `versionCode` **9**, `APP_CHANGELOG`, README badge. Verified `:app:compileDebugKotlin` (green). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Phone navigation bar theme fix:** Set explicit dark edge-to-edge system bar styles in `MainActivity` and adjusted `SkillDetailScreen` so `CyberHUD`/`BgApp` draw behind the navigation inset while content still respects `navigationBarsPadding`. Verified with `:app:compileDebugKotlin` (green). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skills theme consistency fix:** Patched `SkillsScreen` and `SkillDetailScreen` to enforce `ArteriaPalette.BgApp` as base background under HUD overlays and themed the stop-training control with `ArteriaPalette.CombatAccent`/`BgCard` so skill pages no longer inherit light/white surfaces unexpectedly. Verified with `:app:compileDebugKotlin` (green). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `ExplorationData` and `AstrologyData` in `:core` with full action/item registries and inter-skill progression dependencies; wired both in `SkillDataRegistry` (`EXPLORATION`, `ASTROLOGY`) so both skills now expose playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `TrappingData` and `SiphoningData` in `:core` with full action/item registries and cross-skill input dependencies; wired both in `SkillDataRegistry` (`TRAPPING`, `SIPHONING`) so both skills now provide playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `DivinationData` and `BardingData` in `:core` with full action/item registries and deep cross-skill input chains; wired both in `SkillDataRegistry` (`DIVINATION`, `BARDING`) so both skills now expose playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
@@ -111,11 +120,12 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 ### Active Next Actions (single list)
 
-1. **Combat Baseline**: Wire Attack/Strength loop (Melee training).
-2. **Dungeon Core**: Simple enemy list + combat ticker logic.
-3. **XP/hr Display**: Live efficiency tracking in SkillDetailScreen.
-4. **Holo-Icons**: Replace generic icons with themed SVG paths (VectorJuice).
-5. **Verify equipment loop**: mine gems → cut gems (Jewelcrafting) → use bars/gems to craft accessories/gear (Forging/Jewelcrafting) → equip in `EquipmentScreen`.
+1. **Summoning smoke:** Fight Barn Rats for gold charms/spirit shards, then open Summoning and verify the pouch action list scrolls and the first pouch trains once materials are present.
+2. **Combat Baseline**: Wire Attack/Strength loop (Melee training).
+3. **Dungeon Core**: Simple enemy list + combat ticker logic.
+4. **XP/hr Display**: Live efficiency tracking in SkillDetailScreen.
+5. **Holo-Icons**: Replace generic icons with themed SVG paths (VectorJuice).
+6. **Verify equipment loop**: mine gems → cut gems (Jewelcrafting) → use bars/gems to craft accessories/gear (Forging/Jewelcrafting) → equip in `EquipmentScreen`.
 
 ### Supersession Note
 
@@ -134,6 +144,14 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **Encounter area + first mob (Cursor):** Added `EncounterData` / `CombatEngine` / `ActiveCombat` + combat log on `GameState`; Room `game_meta` v5 columns + migration; `GameRepository` load/save; `GameViewModel` engage/flee + per-tick combat after skilling/Resonance; replaced **Combat** tab placeholder with Sunny Meadow Barn + Barn Rat UI; skilling blocked while `activeCombat` set. Version **1.7.0 (10)** + What's New + README badge. Build: `:app:compileDebugKotlin`, `:core:test` green.
+
+**2026-04-29:** **Resonance clicker shipped (Cursor):** Core `ResonanceData` + extended `GameState`; Room v4 migration; `TickEngine` haste multiplier for non-Resonance skills + optional kinetic momentum on other skills' action completes (Lv 80+, foreground ticks only); `GameViewModel` `pulseResonance` / `heavyPulseResonance`, momentum decay + anchor energy accrual in tick loop; new `ResonanceScreen`, Hub card, bottom tab, Skills/Hub routing for `SkillId.RESONANCE`; five new achievements + Chronicle accent mapping. Version **1.6.0 (9)**, What's New + README badge. Build: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **Phone nav bar styled (Cursor):** Updated `MainActivity` `enableEdgeToEdge` with explicit dark status/nav system bar styles and moved `SkillDetailScreen` nav inset padding inside the dark background layer, so the Android phone navigation area no longer appears as a white strip under skill detail content. Build check: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **Skills screen theme bug fixed (Cursor):** Forced explicit dark background tokens on `SkillsScreen` and `SkillDetailScreen` (`ArteriaPalette.BgApp`) so HUD overlays do not reveal light inherited surfaces; updated stop-training button styling to palette-based combat accent + dark card container for visual consistency. Build check: `:app:compileDebugKotlin` green.
 
 **2026-04-29:** **More skills shipped again (Cursor):** Implemented **Exploration** and **Astrology** as trainable skills (`ExplorationData.kt`, `AstrologyData.kt`) and wired both in `SkillDataRegistry`. Added world-progression and celestial loops that consume/produce support resources and bridge into late-tier content. Build check: `:app:compileDebugKotlin` green.
 

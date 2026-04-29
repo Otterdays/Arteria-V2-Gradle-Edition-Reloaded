@@ -57,6 +57,7 @@ import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.SkillPillar
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
+import kotlin.math.roundToInt
 import com.arteria.game.ui.theme.LocalReduceMotion
 import com.arteria.game.ui.components.CyberHUD
 import java.text.NumberFormat
@@ -77,6 +78,7 @@ fun HubScreen(
     onSkillTap: (SkillId) -> Unit,
     onNavigateToSkills: () -> Unit,
     onNavigateToBank: () -> Unit,
+    onNavigateToResonance: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val nf = remember { NumberFormat.getIntegerInstance() }
@@ -156,6 +158,13 @@ fun HubScreen(
                 implementedCount = skills.keys.count {
                     SkillDataRegistry.isSkillImplemented(it)
                 },
+            )
+        }
+
+        item(key = "resonance") {
+            ResonanceHubCard(
+                momentum = gameState.momentum,
+                onOpen = onNavigateToResonance,
             )
         }
 
@@ -454,6 +463,38 @@ private fun ActiveTrainingCard(
                     }
                 }
             }
+        }
+    }
+}
+
+// ─── Resonance shortcut (CLICKER_DESIGN §2.2) ────────────────────────────────
+
+@Composable
+private fun ResonanceHubCard(
+    momentum: Double,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HubCard(
+        accent = ArteriaPalette.VoidAccent,
+        modifier = modifier.clickable(onClick = onOpen),
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                text = "RESONANCE",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.Gold,
+            )
+            Text(
+                text = "Pulse the orb — haste every other skill",
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaPalette.TextPrimary,
+            )
+            Text(
+                text = "Momentum ${momentum.roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaPalette.TextMuted,
+            )
         }
     }
 }

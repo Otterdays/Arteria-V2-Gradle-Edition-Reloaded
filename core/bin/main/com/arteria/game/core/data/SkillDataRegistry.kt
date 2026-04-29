@@ -39,6 +39,7 @@ object SkillDataRegistry {
         putAll(SiphoningData.actionRegistry)
         putAll(ExplorationData.actionRegistry)
         putAll(AstrologyData.actionRegistry)
+        putAll(SummoningData.actionRegistry)
     }
 
     /** All known item definitions across every implemented skill, keyed by item id. */
@@ -70,6 +71,16 @@ object SkillDataRegistry {
         putAll(SiphoningData.items)
         putAll(ExplorationData.items)
         putAll(AstrologyData.items)
+        putAll(SummoningData.items)
+        put(
+            "rat_tail",
+            ItemDef(
+                id = "rat_tail",
+                name = "Rat tail",
+                description = "A trophy from the barn; alchemists pay coin for these.",
+                stackable = true,
+            ),
+        )
     }
 
     /** Actions available for a given skill, in display order. */
@@ -101,6 +112,7 @@ object SkillDataRegistry {
         SkillId.SIPHONING    -> SiphoningData.actions
         SkillId.EXPLORATION  -> ExplorationData.actions
         SkillId.ASTROLOGY    -> AstrologyData.actions
+        SkillId.SUMMONING    -> SummoningData.actions
         else                 -> emptyList()
     }
 

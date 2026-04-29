@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,7 +41,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arteria.game.BuildConfig
@@ -165,6 +168,12 @@ fun SettingsScreen(
             Text(err, color = ArteriaPalette.GoldDim, style = MaterialTheme.typography.bodySmall)
         }
 
+        SettingsHero(
+            accountSession = accountSession,
+            cadenceLine = cadenceLine,
+            offlineCapLine = offlineCapLine,
+        )
+
         settingsCard(title = "Profile") {
             Text(
                 text = accountSession.displayName,
@@ -188,6 +197,13 @@ fun SettingsScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentPrimary),
             ) {
                 Text("Edit display name")
+            }
+            OutlinedButton(
+                onClick = onBackToAccounts,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentPrimary),
+            ) {
+                Text("Switch account")
             }
         }
 
@@ -346,14 +362,6 @@ fun SettingsScreen(
         }
 
         Spacer(Modifier.height(8.dp))
-
-        OutlinedButton(
-            onClick = onBackToAccounts,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ArteriaPalette.AccentPrimary),
-        ) {
-            Text("Switch Account")
-        }
     }
 
     if (showRenameDialog) {
@@ -439,13 +447,90 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun settingsCard(title: String, content: @Composable () -> Unit) {
+private fun SettingsHero(
+    accountSession: AccountSessionInfo,
+    cadenceLine: String,
+    offlineCapLine: String,
+) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
+        color = ArteriaPalette.BgCard.copy(alpha = 0.82f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, ArteriaPalette.AccentPrimary.copy(alpha = 0.38f), RoundedCornerShape(8.dp)),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = "COMMAND SETTINGS",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.Gold,
+            )
+            Text(
+                text = accountSession.displayName,
+                style = MaterialTheme.typography.headlineMedium,
+                color = ArteriaContentColors.primary(),
+                fontWeight = FontWeight.Bold,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                InfoPill("Mode", accountSession.gameMode, Modifier.weight(1f))
+                InfoPill("Build", "v${BuildConfig.VERSION_NAME}", Modifier.weight(1f))
+            }
+            InfoPill(
+                label = "Last played",
+                value = formatLastPlayed(accountSession.lastPlayedAtEpochMs),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                text = cadenceLine,
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.secondary(),
+            )
+            Text(
+                text = offlineCapLine,
+                style = MaterialTheme.typography.bodySmall,
+                color = ArteriaContentColors.muted(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoPill(label: String, value: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(ArteriaPalette.BgInput.copy(alpha = 0.72f))
+            .border(1.dp, ArteriaContentColors.border(), RoundedCornerShape(6.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+    ) {
+        Column {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaContentColors.muted(),
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaContentColors.primary(),
+                maxLines = 1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun settingsCard(title: String, content: @Composable () -> Unit) {
+    val shape = RoundedCornerShape(8.dp)
+    Surface(
+        shape = shape,
         color = ArteriaContentColors.cardSurface().copy(alpha = 0.94f),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, ArteriaContentColors.border(), RoundedCornerShape(12.dp)),
+            .border(1.dp, ArteriaContentColors.border(), shape),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -454,7 +539,7 @@ private fun settingsCard(title: String, content: @Composable () -> Unit) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
-                color = ArteriaContentColors.muted(),
+                color = ArteriaPalette.Gold,
             )
             content()
         }

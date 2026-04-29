@@ -60,6 +60,58 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.8.0",
+        date = "2026-04-29",
+        tag = "SKILLS",
+        tagEmoji = "SK",
+        tagColor = ArteriaPalette.VoidAccent,
+        changes = listOf(
+            "Summoning is now trainable: bind familiar pouches with charms, spirit shards, " +
+                "and skill materials across a RuneScape-inspired progression ladder",
+            "Barn Rat encounters can now drop gold charms and spirit shards, giving Summoning " +
+                "an early combat-to-pouch entry loop",
+            "The top-bar familiar button now opens the Summoning skill page instead of the old " +
+                "standalone companion roster, keeping familiar progression in the normal skill flow",
+            "Main menu polish: a fast Continue panel, richer account metadata, and a current-release " +
+                "strip make returning to a save cleaner",
+            "Settings panel upgrade: clearer command summary, compact session chips, and account " +
+                "actions grouped with the profile card",
+            "Skill detail action lists now reserve scrollable space with bottom padding, so long " +
+                "recipe pages like Summoning stay usable on smaller screens",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.7.0",
+        date = "2026-04-29",
+        tag = "COMBAT",
+        tagEmoji = "⚔️",
+        tagColor = ArteriaPalette.CombatAccent,
+        changes = listOf(
+            "First encounter area: Sunny Meadow Barn with a Barn Rat — Engage from the Combat tab " +
+                "for auto-battle ticks, HP bars, kill counter, and a scrolling combat log",
+            "Combat XP splits across Attack, Strength, Defence, and Hitpoints on each kill; " +
+                "rat tails can drop into your bank (new item entry)",
+            "Active combat persists per profile in `game_meta` (Room v5) and resumes when you return; " +
+                "skilling is blocked while a fight is active; Flee clears the encounter",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.6.0",
+        date = "2026-04-29",
+        tag = "FEATURE",
+        tagEmoji = "💠",
+        tagColor = ArteriaPalette.VoidAccent,
+        changes = listOf(
+            "Resonance clicker tab — pulse the orb for Resonance XP and Momentum; Momentum grants " +
+                "global haste to all other training skills and decays while you play",
+            "Anchor Energy builds when you train non-Resonance skills (1 per minute, cap 50). " +
+                "At Lv 60+, long-press the orb for a Heavy Pulse (costs 5 Anchor, big Momentum + XP surge)",
+            "Level unlocks Lv 20 / 40 / 60 / 80 / 99 (Multi-Pulse proxy, Resonant Echo, Soul Cranking, " +
+                "Kinetic Feedback, Perfect Stability floor) with on-screen unlock list + Hub shortcut card",
+            "Five new Resonance achievements in the Chronicle (pulses, Heavy Pulse, 100% peak Momentum)",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.5.0",
         date = "2026-04-01",
         tag = "CONTENT",

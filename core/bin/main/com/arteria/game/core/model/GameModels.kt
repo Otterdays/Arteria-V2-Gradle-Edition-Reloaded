@@ -43,6 +43,22 @@ data class GameState(
     val equippedGear: EquippedGear = EquippedGear(),
     /** Active companion id, or null if none summoned (persisted). */
     val activeCompanionId: String? = null,
+    /** Resonance clicker: global haste driver, 0–100 (persisted). */
+    val momentum: Double = 0.0,
+    /** Soul Cranking fuel; earned from non-Resonance training, capped (persisted). */
+    val anchorEnergy: Int = 0,
+    /** Ms accumulated toward the next +1 anchor energy while training other skills (persisted). */
+    val anchorEnergyAccMs: Long = 0L,
+    /** Lifetime normal pulses (persisted). */
+    val totalResonancePulses: Long = 0L,
+    /** Lifetime heavy pulses (persisted). */
+    val totalHeavyPulses: Long = 0L,
+    /** High-water mark for momentum (achievements / UI) (persisted). */
+    val peakMomentum: Double = 0.0,
+    /** Auto-encounter combat session, or null when not fighting (persisted in `game_meta`). */
+    val activeCombat: ActiveCombat? = null,
+    /** Recent combat log lines (persisted; capped in `CombatEngine`). */
+    val combatLog: List<CombatLogEntry> = emptyList(),
 )
 
 data class LevelUp(
@@ -56,5 +72,7 @@ data class TickResult(
     val xpGained: Map<SkillId, Double>,
     val resourcesGained: Map<String, Int>,
     val levelUps: List<LevelUp>,
+    /** Foreground-only: momentum from Kinetic Feedback (Lv 80+) on other skills' action completes. */
+    val kineticMomentumDelta: Double = 0.0,
 )
 

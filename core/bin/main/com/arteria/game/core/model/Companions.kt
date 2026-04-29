@@ -27,10 +27,3 @@ sealed class CompanionBonus {
     data class OfflineEfficiency(val multiplier: Double) : CompanionBonus()
     data class BankCapacity(val extraSlots: Int) : CompanionBonus()
 }
-
-data class CompanionState(
-    val companionId: String,
-    val isSummoned: Boolean = false,
-    val experience: Double = 0.0,
-    val level: Int = 1,
-)

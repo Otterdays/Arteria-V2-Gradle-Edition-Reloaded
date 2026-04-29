@@ -142,6 +142,18 @@ fun ArteriaBottomBar(
                     SwordsIcon(color = tint, modifier = Modifier.size(20.dp))
                 }
             }
+
+            // Resonance clicker tab
+            NavTab(
+                selected = selectedTab == 4,
+                label = "Resonance",
+                onClick = { onTabSelected(4) },
+                modifier = Modifier.weight(1f),
+            ) { tint ->
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(38.dp)) {
+                    PulseOrbitIcon(color = tint, modifier = Modifier.size(22.dp))
+                }
+            }
         }
         // Push content above gesture navigation bar
         Spacer(Modifier.navigationBarsPadding())
@@ -382,6 +394,25 @@ private fun AnchorIcon(color: Color, modifier: Modifier = Modifier) {
             quadraticTo(w * 0.86f, h * 0.90f, w * 0.5f, h * 0.88f)
         }
         drawPath(rightFluke, color, style = Stroke(width = stroke, cap = StrokeCap.Round))
+    }
+}
+
+/** Concentric pulse rings — Resonance tab identity */
+@Composable
+private fun PulseOrbitIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val cx = w * 0.5f
+        val cy = size.height * 0.5f
+        val stroke = w * 0.08f
+        listOf(0.42f, 0.30f, 0.18f).forEach { r ->
+            drawCircle(
+                color = color,
+                radius = w * r,
+                center = Offset(cx, cy),
+                style = Stroke(width = stroke, cap = StrokeCap.Round),
+            )
+        }
     }
 }
 

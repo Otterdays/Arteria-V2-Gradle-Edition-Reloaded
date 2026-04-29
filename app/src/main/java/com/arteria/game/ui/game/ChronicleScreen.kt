@@ -72,6 +72,7 @@ private fun categoryAccent(cat: AchievementCategory): Color = when (cat) {
     AchievementCategory.BANKING     -> ArteriaPalette.GoldDim
     AchievementCategory.COMBAT      -> ArteriaPalette.CombatAccent
     AchievementCategory.EXPLORATION -> ArteriaPalette.LuminarEnd
+    AchievementCategory.RESONANCE   -> ArteriaPalette.VoidAccent
 }
 
 private fun rarityColor(rarity: AchievementRarity): Color = when (rarity) {

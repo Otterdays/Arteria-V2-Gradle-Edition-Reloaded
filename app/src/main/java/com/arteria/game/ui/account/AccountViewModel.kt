@@ -38,6 +38,9 @@ class AccountViewModel(
                     AccountSlot(
                         id = record.id,
                         displayName = record.displayName,
+                        gameMode = GameMode.fromLabel(record.gameMode),
+                        lastPlayedAtEpochMs = record.lastPlayedAt,
+                        isActive = record.isActive,
                     )
                 }
                 _uiState.update { current ->

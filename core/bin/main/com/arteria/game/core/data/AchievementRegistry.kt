@@ -10,6 +10,53 @@ object AchievementRegistry {
 
     val all: List<Achievement> = listOf(
 
+        // ── Resonance (clicker crossover) ───────────────────────────────────
+        Achievement(
+            id = "resonance_first_pulse",
+            title = "First Pulse",
+            description = "Tap the Resonance orb once",
+            category = AchievementCategory.RESONANCE,
+            icon = "💠",
+            condition = AchievementCondition.ResonancePulseTotal(1),
+            rarity = AchievementRarity.COMMON,
+        ),
+        Achievement(
+            id = "resonance_100_pulses",
+            title = "Steady Rhythm",
+            description = "Reach 100 Resonance pulses",
+            category = AchievementCategory.RESONANCE,
+            icon = "✨",
+            condition = AchievementCondition.ResonancePulseTotal(100),
+            rarity = AchievementRarity.COMMON,
+        ),
+        Achievement(
+            id = "resonance_1000_pulses",
+            title = "World Tempo",
+            description = "Reach 1,000 Resonance pulses",
+            category = AchievementCategory.RESONANCE,
+            icon = "🌌",
+            condition = AchievementCondition.ResonancePulseTotal(1000),
+            rarity = AchievementRarity.UNCOMMON,
+        ),
+        Achievement(
+            id = "resonance_first_heavy",
+            title = "Soul Surge",
+            description = "Perform your first Heavy Pulse",
+            category = AchievementCategory.RESONANCE,
+            icon = "⚡",
+            condition = AchievementCondition.HeavyPulseTotal(1),
+            rarity = AchievementRarity.UNCOMMON,
+        ),
+        Achievement(
+            id = "resonance_peak_momentum_100",
+            title = "Full Resonance",
+            description = "Reach 100% Momentum at least once",
+            category = AchievementCategory.RESONANCE,
+            icon = "🔮",
+            condition = AchievementCondition.PeakMomentumReached(100),
+            rarity = AchievementRarity.RARE,
+        ),
+
         // ── Milestones ────────────────────────────────────────────────────────
         Achievement(
             id = "total_level_10",
@@ -366,5 +413,8 @@ object AchievementRegistry {
         is AchievementCondition.ItemCollected -> condition.amount
         is AchievementCondition.BankItems     -> condition.count
         is AchievementCondition.SkillActions  -> condition.actions
+        is AchievementCondition.ResonancePulseTotal -> condition.pulses
+        is AchievementCondition.HeavyPulseTotal -> condition.pulses
+        is AchievementCondition.PeakMomentumReached -> condition.minPeak
     }
 }

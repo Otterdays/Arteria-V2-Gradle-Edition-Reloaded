@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -62,14 +63,25 @@ import com.arteria.game.ui.components.dockingGradientForIndex
 import com.arteria.game.ui.theme.ArteriaContentColors
 import com.arteria.game.ui.theme.ArteriaPalette
 import com.arteria.game.ui.theme.LocalReduceMotion
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class AccountSlot(
     val id: String,
     val displayName: String,
     val gameMode: GameMode = GameMode.STANDARD,
+    val lastPlayedAtEpochMs: Long = 0L,
+    val isActive: Boolean = false,
 ) {
     val gameModeLabel: String
-        get() = "Game mode · ${gameMode.displayName}"
+        get() = "${gameMode.displayName} | ${lastPlayedLabel()}"
+
+    fun lastPlayedLabel(): String {
+        if (lastPlayedAtEpochMs <= 0L) return "Never played"
+        val formatter = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+        return "Last played ${formatter.format(Date(lastPlayedAtEpochMs))}"
+    }
 }
 
 enum class GameMode(
@@ -103,7 +115,12 @@ enum class GameMode(
         losses = "-50% offline progress · Random void events can destroy items · No prestige safety net",
         comingSoon = true,
         avatarIcon = "🌀",
-    ),
+    );
+
+    companion object {
+        fun fromLabel(value: String): GameMode =
+            entries.firstOrNull { it.displayName.equals(value, ignoreCase = true) } ?: STANDARD
+    }
 }
 
 @Composable
@@ -168,6 +185,16 @@ fun AccountSelectionScreen(
                 EmptyStateSection(onCreateNewClick = onCreateNewClick)
                 Spacer(Modifier.weight(1f))
             } else {
+                val selectedAccount = accounts.firstOrNull { it.id == selectedId }
+                    ?: accounts.firstOrNull { it.isActive }
+                    ?: accounts.first()
+                ContinueHero(
+                    account = selectedAccount,
+                    onContinue = onContinueWithAccount,
+                )
+                Spacer(Modifier.height(8.dp))
+                CurrentReleaseStrip(onClick = { showChangelog = true })
+                Spacer(Modifier.height(8.dp))
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 12.dp),
@@ -241,14 +268,6 @@ fun AccountSelectionScreen(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            val hasSelection = selectedId != null && accounts.isNotEmpty()
-            EnterTimelineButton(
-                enabled = hasSelection,
-                onClick = { onContinueWithAccount() },
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -260,7 +279,7 @@ fun AccountSelectionScreen(
                     onClick = { showChangelog = true },
                 ) {
                     Text(
-                        text = "What's New",
+                        text = "Version history",
                         style = MaterialTheme.typography.bodySmall,
                         color = ArteriaContentColors.muted(),
                     )
@@ -280,6 +299,85 @@ fun AccountSelectionScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
         }
+    }
+}
+
+@Composable
+private fun ContinueHero(
+    account: AccountSlot,
+    onContinue: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = ArteriaPalette.BgCard.copy(alpha = 0.82f),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            ArteriaPalette.AccentPrimary.copy(alpha = 0.45f),
+        ),
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(
+                text = "CONTINUE",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.Gold,
+            )
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = account.gameMode.avatarIcon,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = account.displayName,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ArteriaPalette.TextPrimary,
+                        maxLines = 1,
+                    )
+                    Text(
+                        text = "${account.gameMode.displayName} | ${account.lastPlayedLabel()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ArteriaPalette.TextMuted,
+                    )
+                }
+                Button(
+                    onClick = onContinue,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ArteriaPalette.AccentPrimary,
+                        contentColor = Color.White,
+                    ),
+                ) {
+                    Text("Enter")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CurrentReleaseStrip(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = ArteriaPalette.TextSecondary,
+            containerColor = ArteriaPalette.BgCard.copy(alpha = 0.45f),
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            ArteriaPalette.VoidAccent.copy(alpha = 0.35f),
+        ),
+    ) {
+        Text(
+            text = "v${BuildConfig.VERSION_NAME} | Summoning unlocked | What's New",
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 

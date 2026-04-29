@@ -14,6 +14,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,6 +71,7 @@ private fun pillarColorFor(pillar: SkillPillar): Color =
 fun SkillDetailScreen(
     skillId: SkillId,
     skillState: SkillState,
+    bank: Map<String, Int>,
     onBack: () -> Unit,
     onStartTraining: (actionId: String) -> Unit,
     onStopTraining: () -> Unit,
@@ -99,11 +101,14 @@ fun SkillDetailScreen(
     }
 
     CyberHUD(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding(),
+        modifier = modifier.fillMaxSize(),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(ArteriaPalette.BgApp)
+                .navigationBarsPadding(),
+        ) {
             // ── Hero header (replaces TopAppBar) ─────────────────────────────────
             SkillHeroHeader(
                 skillId = skillId,
@@ -145,7 +150,12 @@ fun SkillDetailScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFFE74C3C),
+                    contentColor = ArteriaPalette.CombatAccent,
+                    containerColor = ArteriaPalette.BgCard,
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = ArteriaPalette.CombatAccent.copy(alpha = 0.7f),
                 ),
             ) {
                 Text("Stop Training")
@@ -162,7 +172,10 @@ fun SkillDetailScreen(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
             )
             LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(bottom = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(actions, key = { it.id }) { action ->
@@ -172,6 +185,7 @@ fun SkillDetailScreen(
                         currentLevel = level,
                         isCurrentAction = isCurrent,
                         actionProgress = if (isCurrent) trainingProgress else null,
+                        bank = bank,
                         pillarColor = accent,
                         onTrain = { onStartWithHaptic(action.id) },
                     )
@@ -392,17 +406,21 @@ private fun ActionCard(
     currentLevel: Int,
     isCurrentAction: Boolean,
     actionProgress: Float?,
+    bank: Map<String, Int>,
     pillarColor: Color,
     onTrain: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val meetsLevel = currentLevel >= action.levelRequired
+    val canAfford = action.inputItems.all { (itemId, required) ->
+        (bank[itemId] ?: 0) >= required
+    }
     val cardShape = RoundedCornerShape(10.dp)
     val nf = NumberFormat.getIntegerInstance()
 
     val borderColor = when {
         isCurrentAction -> pillarColor.copy(alpha = 0.6f)
-        !meetsLevel -> ArteriaPalette.Border.copy(alpha = 0.3f)
+        !meetsLevel || !canAfford -> ArteriaPalette.Border.copy(alpha = 0.3f)
         else -> ArteriaPalette.Border
     }
 
@@ -439,7 +457,7 @@ private fun ActionCard(
         Surface(
             color = when {
                 isCurrentAction -> ArteriaPalette.BgCardHover.copy(alpha = 0.85f)
-                !meetsLevel -> ArteriaPalette.BgCard.copy(alpha = 0.5f)
+                !meetsLevel || !canAfford -> ArteriaPalette.BgCard.copy(alpha = 0.5f)
                 else -> ArteriaPalette.BgCard
             },
             shape = cardShape,
@@ -454,8 +472,13 @@ private fun ActionCard(
                     Text(
                         text = action.name,
                         style = MaterialTheme.typography.titleMedium,
-                        color = if (meetsLevel) ArteriaPalette.TextPrimary else ArteriaPalette.TextMuted,
+                        color = if (meetsLevel && canAfford) {
+                            ArteriaPalette.TextPrimary
+                        } else {
+                            ArteriaPalette.TextMuted
+                        },
                     )
+                    Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = "Lv ${action.levelRequired}",
@@ -474,11 +497,19 @@ private fun ActionCard(
                         )
                     }
                     if (action.inputItems.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
                         Text(
                             text = action.inputItems.entries
-                                .joinToString(" · ") { (id, qty) -> "$qty× ${SkillDataRegistry.itemName(id)}" },
+                                .joinToString(" | ") { (id, qty) ->
+                                    val owned = bank[id] ?: 0
+                                    "$owned/$qty ${SkillDataRegistry.itemName(id)}"
+                                },
                             style = MaterialTheme.typography.bodySmall,
-                            color = ArteriaPalette.Gold.copy(alpha = 0.8f),
+                            color = if (canAfford) {
+                                ArteriaPalette.Gold.copy(alpha = 0.8f)
+                            } else {
+                                ArteriaPalette.CombatAccent.copy(alpha = 0.9f)
+                            },
                         )
                     }
                 }
@@ -486,7 +517,7 @@ private fun ActionCard(
                 if (meetsLevel) {
                     Button(
                         onClick = onTrain,
-                        enabled = !isCurrentAction,
+                        enabled = !isCurrentAction && canAfford,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = pillarColor,
                             contentColor = Color.White,
@@ -494,7 +525,13 @@ private fun ActionCard(
                             disabledContentColor = Color.White,
                         ),
                     ) {
-                        Text(if (isCurrentAction) "Active" else "Train")
+                        Text(
+                            when {
+                                isCurrentAction -> "Active"
+                                !canAfford -> "No stock"
+                                else -> "Train"
+                            },
+                        )
                     }
                 } else {
                     Text(
