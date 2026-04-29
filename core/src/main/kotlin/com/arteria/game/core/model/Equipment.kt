@@ -15,9 +15,19 @@ data class Equipment(
     val description: String,
     val icon: String,
     val skillBoosts: Map<SkillId, Double>,
+    /** Combat modifiers applied when encounter starts. */
+    val combatStats: EquipmentCombatStats = EquipmentCombatStats(),
     val globalXpMultiplier: Double = 1.0,
     val levelRequired: Int = 1,
     val value: Int = 0,
+)
+
+data class EquipmentCombatStats(
+    val accuracy: Int = 0,
+    val maxHit: Int = 0,
+    val meleeDefence: Int = 0,
+    /** Subtracted from base attack interval (lower = faster). */
+    val attackSpeedBonusMs: Long = 0L,
 )
 
 data class EquippedGear(

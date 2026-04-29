@@ -1,6 +1,7 @@
 package com.arteria.game.core.engine
 
 import com.arteria.game.core.data.EncounterData
+import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.skill.SkillId
@@ -48,6 +49,33 @@ class CombatEngineTest {
             after.state.activeCombat!!.enemyCurrentHp < started.activeCombat!!.enemyCurrentHp ||
                 after.xpGained.isNotEmpty(),
         )
+    }
+
+    @Test
+    fun startCombat_appliesEquipmentCombatBonuses() {
+        val base = CombatEngine.startCombat(
+            minimalState(),
+            EncounterData.LOCATION_SUNNY_MEADOW_BARN,
+            EncounterData.ENEMY_BARN_RAT,
+        )!!.activeCombat!!
+
+        val gearedState = minimalState().copy(
+            equippedGear = EquippedGear(
+                weapon = "iron_sword",
+                armor = "iron_armor",
+                accessory = "amulet_of_accuracy",
+            ),
+        )
+        val geared = CombatEngine.startCombat(
+            gearedState,
+            EncounterData.LOCATION_SUNNY_MEADOW_BARN,
+            EncounterData.ENEMY_BARN_RAT,
+        )!!.activeCombat!!
+
+        assertTrue(geared.playerAccuracy > base.playerAccuracy)
+        assertTrue(geared.playerMaxHit > base.playerMaxHit)
+        assertTrue(geared.playerMeleeDefence > base.playerMeleeDefence)
+        assertTrue(geared.playerAttackIntervalMs < base.playerAttackIntervalMs)
     }
 
     private fun minimalState(): GameState {

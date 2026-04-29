@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Codex | GPT-5 | **Combat Loadouts 2.0:** Added combat stats to equipment models/registry and wired them into `CombatEngine` engage snapshot; upgraded `EquipmentScreen` with Paper Doll Lite + aggregate loadout stats + slot-grouped owned gear cards; added rare `bronze_sword` Barn Rat drop for starter progression; updated `CombatEngineTest`; bumped app to **1.9.0 (12)** with changelog + README badge. Verified `:app:compileDebugKotlin` and `:core:test` green. |
 | 2026-04-29 | Codex | GPT-5 | **Settings panel polish:** Added command summary hero, mode/build/last-played info chips, tighter 8dp settings cards, and moved Switch Account into Profile actions. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
 | 2026-04-29 | Codex | GPT-5 | **Main menu polish:** Account selection now has a primary Continue panel, current-release What's New strip, and account cards enriched with mode + last-played metadata. Changelog updated under v1.8.0. No tests or compile run per user instruction. |
 | 2026-04-29 | Codex | GPT-5 | **Build fix:** Fixed nullable `currentGameState.bank` access in `GameScreen` after adding stock-aware skill detail. No tests or compile run per user instruction. |
@@ -144,6 +145,8 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **Combat Loadouts 2.0 (Codex):** Gear now carries explicit combat stats (`accuracy`, `maxHit`, `meleeDefence`, `attackSpeedBonusMs`) and these are applied when encounter combat starts. Rebuilt Equipment panel around a Paper Doll Lite + aggregate combat stat block + slot-grouped owned gear cards; Barn Rat now has a rare `bronze_sword` drop to seed early loadouts. Updated `CombatEngineTest`. Version **1.9.0 (12)** with What's New + README badge. Build: `:app:compileDebugKotlin`, `:core:test` green.
 
 **2026-04-29:** **Encounter area + first mob (Cursor):** Added `EncounterData` / `CombatEngine` / `ActiveCombat` + combat log on `GameState`; Room `game_meta` v5 columns + migration; `GameRepository` load/save; `GameViewModel` engage/flee + per-tick combat after skilling/Resonance; replaced **Combat** tab placeholder with Sunny Meadow Barn + Barn Rat UI; skilling blocked while `activeCombat` set. Version **1.7.0 (10)** + What's New + README badge. Build: `:app:compileDebugKotlin`, `:core:test` green.
 

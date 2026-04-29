@@ -60,6 +60,21 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.9.0",
+        date = "2026-04-29",
+        tag = "COMBAT",
+        tagEmoji = "⚙️",
+        tagColor = ArteriaPalette.CombatAccent,
+        changes = listOf(
+            "Combat loadouts are now live: equipped weapon, armor, and accessories add real combat " +
+                "stats (accuracy, max hit, melee defence, and faster swing speed) when encounters start",
+            "Equipment panel overhaul: Paper Doll Lite slots, aggregate loadout combat panel, and " +
+                "owned-gear lists grouped by slot with requirement and stat clarity",
+            "Starter combat gear loop: Barn Rat now has a rare Bronze Sword drop so first encounters " +
+                "can feed your melee loadout progression",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.8.0",
         date = "2026-04-29",
         tag = "SKILLS",

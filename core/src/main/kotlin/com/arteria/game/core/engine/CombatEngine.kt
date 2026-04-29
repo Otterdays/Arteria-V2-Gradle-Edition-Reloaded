@@ -1,6 +1,7 @@
 package com.arteria.game.core.engine
 
 import com.arteria.game.core.data.EncounterData
+import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.model.ActiveCombat
 import com.arteria.game.core.model.CombatLogEntry
 import com.arteria.game.core.model.CombatLogType
@@ -21,6 +22,7 @@ data class CombatTickResult(
 object CombatEngine {
     const val MAX_COMBAT_LOG: Int = 40
     private const val PLAYER_ATTACK_INTERVAL_MS: Long = 1_800L
+    private const val PLAYER_ATTACK_INTERVAL_MIN_MS: Long = 900L
 
     fun startCombat(state: GameState, locationId: String, enemyId: String): GameState? {
         val loc = EncounterData.location(locationId) ?: return null
@@ -32,10 +34,32 @@ object CombatEngine {
         val defLv = XPTable.levelForXp(state.skills[SkillId.DEFENCE]?.xp ?: 0.0)
         val hpLv = XPTable.levelForXp(state.skills[SkillId.HITPOINTS]?.xp ?: 0.0)
 
-        val playerAccuracy = 5 + atkLv * 3
-        val playerMaxHit = (1 + strLv / 2).coerceAtLeast(1)
-        val playerMeleeDef = defLv
+        val weapon = state.equippedGear.weapon?.let { EquipmentRegistry.getById(it) }
+        val armor = state.equippedGear.armor?.let { EquipmentRegistry.getById(it) }
+        val accessory = state.equippedGear.accessory?.let { EquipmentRegistry.getById(it) }
+        val gearAccuracy =
+            (weapon?.combatStats?.accuracy ?: 0) +
+                (armor?.combatStats?.accuracy ?: 0) +
+                (accessory?.combatStats?.accuracy ?: 0)
+        val gearMaxHit =
+            (weapon?.combatStats?.maxHit ?: 0) +
+                (armor?.combatStats?.maxHit ?: 0) +
+                (accessory?.combatStats?.maxHit ?: 0)
+        val gearMeleeDef =
+            (weapon?.combatStats?.meleeDefence ?: 0) +
+                (armor?.combatStats?.meleeDefence ?: 0) +
+                (accessory?.combatStats?.meleeDefence ?: 0)
+        val gearSpeedBonusMs =
+            (weapon?.combatStats?.attackSpeedBonusMs ?: 0L) +
+                (armor?.combatStats?.attackSpeedBonusMs ?: 0L) +
+                (accessory?.combatStats?.attackSpeedBonusMs ?: 0L)
+
+        val playerAccuracy = 5 + atkLv * 3 + gearAccuracy
+        val playerMaxHit = (1 + strLv / 2 + gearMaxHit).coerceAtLeast(1)
+        val playerMeleeDef = (defLv + gearMeleeDef).coerceAtLeast(1)
         val playerMaxHp = 10 + hpLv * 3
+        val playerAttackIntervalMs =
+            (PLAYER_ATTACK_INTERVAL_MS - gearSpeedBonusMs).coerceAtLeast(PLAYER_ATTACK_INTERVAL_MIN_MS)
 
         val combat = ActiveCombat(
             locationId = locationId,
@@ -50,7 +74,7 @@ object CombatEngine {
             enemyAttackAccMs = 0L,
             playerMaxHp = playerMaxHp,
             playerCurrentHp = playerMaxHp,
-            playerAttackIntervalMs = PLAYER_ATTACK_INTERVAL_MS,
+            playerAttackIntervalMs = playerAttackIntervalMs,
             playerAttackAccMs = 0L,
             playerAccuracy = playerAccuracy,
             playerMaxHit = playerMaxHit,

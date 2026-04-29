@@ -30,6 +30,7 @@ object EncounterData {
             xpPerKill = 18.0,
             drops = listOf(
                 EnemyDrop(itemId = "rat_tail", chance = 0.35, minQty = 1, maxQty = 1),
+                EnemyDrop(itemId = "bronze_sword", chance = 0.03, minQty = 1, maxQty = 1),
                 EnemyDrop(itemId = "gold_charm", chance = 0.18, minQty = 1, maxQty = 1),
                 EnemyDrop(itemId = "spirit_shard", chance = 0.45, minQty = 2, maxQty = 5),
             ),

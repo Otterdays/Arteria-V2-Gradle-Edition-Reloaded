@@ -118,6 +118,10 @@
             font-weight: 500;
             letter-spacing: 0.04em;
             text-transform: uppercase;
+            padding: 6px 4px;
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
             transition: color 0.2s;
         }
         .shell-nav__links a:hover { color: var(--accent-hover); }
@@ -273,6 +277,7 @@
             max-width: 48rem;
             margin-bottom: 1.25rem;
             font-size: 1.01rem;
+            line-height: 1.65;
         }
 
         .card {
@@ -492,6 +497,57 @@
             background: rgba(232, 93, 93, 0.06);
             border: 1px solid rgba(232, 93, 93, 0.2);
         }
+
+        @media (max-width: 900px) {
+            .shell-nav {
+                justify-content: center;
+                gap: 8px;
+            }
+            .shell-nav__links {
+                justify-content: center;
+                gap: 4px 10px;
+            }
+            .hero {
+                padding: 28px 16px 38px;
+            }
+            .card {
+                padding: 18px 16px 18px;
+            }
+            .card::before {
+                margin: -18px -16px 14px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .scanlines {
+                opacity: 0.14;
+            }
+            .bg-drift {
+                opacity: 0.28;
+            }
+            .hero-orbit {
+                width: min(320px, 88vw);
+                height: min(320px, 88vw);
+            }
+            .hero-center {
+                font-size: clamp(1rem, 6vw, 1.5rem);
+            }
+            .cta-row {
+                gap: 10px;
+            }
+            .cta {
+                width: min(100%, 360px);
+                justify-content: center;
+                min-height: 44px;
+            }
+            .table-wrap {
+                margin: 0.8rem 0;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.76rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -502,6 +558,7 @@
     <nav class="shell-nav" aria-label="Section navigation">
         <a class="shell-nav__brand" href="#top">ARTERIA</a>
         <div class="shell-nav__links">
+            <a href="#features">Features</a>
             <a href="#pulse">Pulse</a>
             <a href="#releases">Releases</a>
             <a href="#roadmap">Roadmap</a>
@@ -520,9 +577,9 @@
         <h1>Docking Station Chronicle</h1>
         <p class="tagline">Gradle Edition V2 — Kotlin, Jetpack Compose, Room, and a JVM <code style="color:var(--gold);">:core</code> engine. Idle ticks, cross-skill economy, Docking UI.</p>
         <div class="build-pill" role="status">
-            <span>Shipped app <strong>v1.4.1</strong> <code>(versionCode 4)</code></span>
+            <span>Shipped app <strong>v1.9.0</strong> <code>(versionCode 12)</code></span>
             <span>·</span>
-            <span>Synced with <code>ChangelogScreen.kt</code> + <code>DOCS/</code> as of <strong>2026-04-01</strong></span>
+            <span>Synced with <code>ChangelogScreen.kt</code> + <code>DOCS/</code> as of <strong>2026-04-29</strong></span>
         </div>
         <div class="hero-orbit" aria-hidden="true">
             <div class="orbit-ring orbit-slow"></div>
@@ -537,6 +594,38 @@
     </header>
 
     <div class="wrap">
+        <!-- FEATURES -->
+        <section id="features">
+            <h2><span class="dia" aria-hidden="true">◆</span> Core features</h2>
+            <p class="lead">Current V2 experience in one glance — focused on shipped systems, not pitch-deck promises.</p>
+            <div class="grid3">
+                <div class="card">
+                    <h3>Resonance clicker</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Pulse the orb for Resonance XP and Momentum. Momentum boosts global haste while decaying in the foreground loop.</p>
+                </div>
+                <div class="card">
+                    <h3>Encounter combat</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Start in Sunny Meadow Barn against Barn Rat. Auto-combat ticks run with HP bars, logs, kill count, and flee controls.</p>
+                </div>
+                <div class="card">
+                    <h3>Combat loadouts</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Weapon, armor, and accessories now apply real combat stats: accuracy, max hit, melee defence, and swing speed bonuses.</p>
+                </div>
+                <div class="card">
+                    <h3>Skill economy chains</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Gathering and crafting loops feed each other through bank inputs/outputs, with unimplemented skills gated by Coming Soon dialogs.</p>
+                </div>
+                <div class="card">
+                    <h3>Profiles and persistence</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Room-backed profiles + per-profile game saves. Transactional writes, offline catch-up, and combat state resume on reopen.</p>
+                </div>
+                <div class="card">
+                    <h3>Summoning progression</h3>
+                    <p class="lead" style="font-size:0.92rem;margin:0;">Summoning is trainable with charms and spirit shards. Early Barn Rat drops help unlock first familiar pouches.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- PULSE -->
         <section id="pulse">
             <h2><span class="dia" aria-hidden="true">◆</span> Project pulse</h2>
@@ -547,7 +636,9 @@
                     <ul class="tight">
                         <li>Routes: <code>account_select</code> → <code>account_create</code> → <code>game/{profileId}</code></li>
                         <li>Game shell: <strong>Hub</strong> (default), Skills, Bank, Combat + settings / What’s New overlays</li>
-                        <li>Trainable skills: Mining, Logging, Fishing, Harvesting, Scavenging, Smithing, Herblore, Cooking</li>
+                        <li>Trainable highlights: Resonance, Summoning, and core gathering/crafting loops</li>
+                        <li>Combat vertical: encounter area + first enemy + persisted active-combat state</li>
+                        <li>Loadouts vertical: equipment screen now drives real combat stats</li>
                         <li>Roster: <strong>41</strong> <code>SkillId</code> entries, <strong>5</strong> pillars (incl. Cosmic); unwired = Coming Soon dialog</li>
                         <li>Engine: Gradle <code>:core</code> JVM — <code>TickEngine</code>, <code>XPTable</code>, <code>SkillDataRegistry</code></li>
                     </ul>
@@ -576,7 +667,7 @@
                     <ul class="tight">
                         <li><code>arteria_profiles.db</code> — profiles</li>
                         <li><code>arteria_game.db</code> — skills, bank, <code>game_meta</code></li>
-                        <li>Room <strong>v2</strong> + <code>lastOfflineTickAppliedAt</code> offline audit</li>
+                        <li>Room <strong>v5</strong> migrations include offline audit + active combat resume</li>
                         <li><code>GameRepository.saveGameState()</code> transactional write path</li>
                     </ul>
                 </div>
@@ -591,39 +682,38 @@
             <div class="timeline">
                 <article class="tl-item">
                     <div class="tl-head">
-                        <span class="tl-ver">1.4.1</span>
-                        <span class="tl-date">2026-03-31</span>
-                        <span class="tl-tag tl-tag--docs">DOCS</span>
+                        <span class="tl-ver">1.9.0</span>
+                        <span class="tl-date">2026-04-29</span>
+                        <span class="tl-tag tl-tag--hub">COMBAT</span>
                     </div>
                     <ul class="tight">
-                        <li>Settings About and What’s New aligned with this build number</li>
-                        <li>Release hygiene: new ships prepend this list + bump <code>versionName</code> / <code>versionCode</code></li>
+                        <li>Combat loadouts: equipped gear now affects combat stats and swing timing</li>
+                        <li>Equipment UI refresh: Paper Doll Lite, aggregate stats, slot-grouped owned gear cards</li>
+                        <li>Starter drop loop: Barn Rat can rarely drop Bronze Sword</li>
                     </ul>
                 </article>
                 <article class="tl-item">
                     <div class="tl-head">
-                        <span class="tl-ver">1.4.0</span>
-                        <span class="tl-date">2026-04-01</span>
-                        <span class="tl-tag tl-tag--hub">HUB</span>
-                    </div>
-                    <ul class="tight">
-                        <li>Hub home tab — inline offline gains, training panel, stats, nudges, level-up cards</li>
-                        <li>Fourth tab with Anchor icon; Herblore + Scavenging trainable lines</li>
-                        <li>Settings parity: rename, last played, About, cadence copy, test sound</li>
-                        <li>41-skill roster / 5 pillars; Coming Soon for unwired skills</li>
-                    </ul>
-                </article>
-                <article class="tl-item">
-                    <div class="tl-head">
-                        <span class="tl-ver">1.3.0</span>
-                        <span class="tl-date">2026-04-01</span>
+                        <span class="tl-ver">1.8.0</span>
+                        <span class="tl-date">2026-04-29</span>
                         <span class="tl-tag tl-tag--skills">SKILLS</span>
                     </div>
                     <ul class="tight">
-                        <li>Six skill lines: Mining, Logging, Fishing, Harvesting, Smithing, Cooking</li>
-                        <li>Coming Soon dialog for unimplemented skills</li>
-                        <li>Game DB v2, offline audit field, atomic saves, tick sim off UI thread</li>
-                        <li>Custom bottom bar (Skills · Bank · Combat)</li>
+                        <li>Summoning is trainable with charm + shard progression</li>
+                        <li>Main menu and settings got substantial UX polish</li>
+                        <li>Skill detail pages improved for long action lists</li>
+                    </ul>
+                </article>
+                <article class="tl-item">
+                    <div class="tl-head">
+                        <span class="tl-ver">1.7.0</span>
+                        <span class="tl-date">2026-04-29</span>
+                        <span class="tl-tag tl-tag--hub">COMBAT</span>
+                    </div>
+                    <ul class="tight">
+                        <li>First encounter area (Sunny Meadow Barn) and first mob (Barn Rat)</li>
+                        <li>Combat XP split across Attack, Strength, Defence, Hitpoints</li>
+                        <li>Active combat state persisted and resumed from Room metadata</li>
                     </ul>
                 </article>
                 <article class="tl-item">

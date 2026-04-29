@@ -1,7 +1,7 @@
 package com.arteria.game.ui.game
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +30,7 @@ import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.Equipment
 import com.arteria.game.core.model.EquipmentSlots
-import com.arteria.game.core.skill.SkillId
-import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
-import java.text.NumberFormat
 
 @Composable
 fun EquipmentScreen(
@@ -47,277 +41,378 @@ fun EquipmentScreen(
     onUnequip: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val nf = NumberFormat.getIntegerInstance()
-    var selectedSlot by remember { mutableStateOf<String?>(null) }
+    val slots = listOf(
+        SlotView(
+            slotId = EquipmentSlots.WEAPON.id,
+            slotName = EquipmentSlots.WEAPON.displayName,
+            equippedId = equippedGear.weapon,
+        ),
+        SlotView(
+            slotId = EquipmentSlots.ARMOR.id,
+            slotName = EquipmentSlots.ARMOR.displayName,
+            equippedId = equippedGear.armor,
+        ),
+        SlotView(
+            slotId = EquipmentSlots.ACCESSORY.id,
+            slotName = EquipmentSlots.ACCESSORY.displayName,
+            equippedId = equippedGear.accessory,
+        ),
+        SlotView(
+            slotId = EquipmentSlots.TOOL.id,
+            slotName = EquipmentSlots.TOOL.displayName,
+            equippedId = equippedGear.tool,
+        ),
+    )
+    val equipped = slots.mapNotNull { it.equippedId?.let(EquipmentRegistry::getById) }
+    val aggregate = aggregateCombatStats(equipped)
+
+    val groupedOwned = EquipmentRegistry.all
+        .filter { (bank[it.id] ?: 0) > 0 }
+        .groupBy { it.slot }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .background(ArteriaPalette.BgApp)
+            .padding(12.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "EQUIPMENT",
-                style = MaterialTheme.typography.labelSmall,
-                color = ArteriaPalette.Gold,
-            )
-            Text(
-                text = "Player Level $playerLevel",
-                style = MaterialTheme.typography.bodySmall,
-                color = ArteriaPalette.TextMuted,
-            )
-        }
-
-        // Equipped gear slots
         Text(
-            text = "EQUIPPED",
-            style = MaterialTheme.typography.labelSmall,
-            color = ArteriaPalette.AccentPrimary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+            text = "LOADOUT",
+            style = MaterialTheme.typography.headlineMedium,
+            color = ArteriaPalette.Gold,
+        )
+        Text(
+            text = "Player level $playerLevel",
+            style = MaterialTheme.typography.bodySmall,
+            color = ArteriaPalette.TextMuted,
+        )
+        Spacer(Modifier.height(10.dp))
+
+        PaperDollLite(
+            slots = slots,
+            onUnequip = onUnequip,
         )
 
-        EquipmentSlots.all.forEach { slot ->
-            val equippedId = when (slot.id) {
-                EquipmentSlots.WEAPON.id -> equippedGear.weapon
-                EquipmentSlots.TOOL.id -> equippedGear.tool
-                EquipmentSlots.ARMOR.id -> equippedGear.armor
-                EquipmentSlots.ACCESSORY.id -> equippedGear.accessory
-                else -> null
-            }
+        Spacer(Modifier.height(10.dp))
+        AggregateStatsCard(aggregate = aggregate)
+        Spacer(Modifier.height(10.dp))
 
-            EquippedSlotCard(
-                slot = slot,
-                equippedId = equippedId,
-                onUnequip = { onUnequip(slot.id) },
-                onSelect = { selectedSlot = slot.id },
-            )
-        }
+        Text(
+            text = "OWNED GEAR",
+            style = MaterialTheme.typography.labelSmall,
+            color = ArteriaPalette.AccentPrimary,
+        )
+        Spacer(Modifier.height(6.dp))
 
-        Spacer(Modifier.height(12.dp))
-
-        // Available equipment for selected slot
-        val slotToShow = selectedSlot
-        if (slotToShow != null) {
-            val slotDef = EquipmentSlots.all.find { it.id == slotToShow }
-            if (slotDef != null) {
-                Text(
-                    text = "${slotDef.displayName.uppercase()} — TAP TO EQUIP",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.AccentWeb,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
-                )
-
-                val available = EquipmentRegistry.getBySlot(slotToShow)
-                    .filter { it.levelRequired <= playerLevel }
-
-                if (available.isEmpty()) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            EquipmentSlots.all.forEach { slot ->
+                val owned = groupedOwned[slot.id].orEmpty().sortedBy { it.levelRequired }
+                item(key = "header_${slot.id}") {
                     Text(
-                        text = "No equipment available for this slot",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ArteriaPalette.TextMuted,
-                        modifier = Modifier.padding(start = 4.dp),
+                        text = slot.displayName.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ArteriaPalette.AccentWeb,
+                        modifier = Modifier.padding(start = 2.dp, top = 4.dp),
                     )
+                }
+                if (owned.isEmpty()) {
+                    item(key = "empty_${slot.id}") {
+                        Text(
+                            text = "No ${slot.displayName.lowercase()} owned yet.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ArteriaPalette.TextMuted,
+                            modifier = Modifier.padding(start = 4.dp, bottom = 2.dp),
+                        )
+                    }
                 } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(available, key = { it.id }) { equipment ->
-                            val isEquipped = when (slotToShow) {
-                                EquipmentSlots.WEAPON.id -> equippedGear.weapon == equipment.id
-                                EquipmentSlots.TOOL.id -> equippedGear.tool == equipment.id
-                                EquipmentSlots.ARMOR.id -> equippedGear.armor == equipment.id
-                                EquipmentSlots.ACCESSORY.id -> equippedGear.accessory == equipment.id
-                                else -> false
-                            }
-                            EquipmentCard(
-                                equipment = equipment,
-                                isEquipped = isEquipped,
-                                nf = nf,
-                                onEquip = { onEquip(equipment.id) },
-                            )
-                        }
+                    items(owned, key = { it.id }) { gear ->
+                        val qty = bank[gear.id] ?: 0
+                        val isEquipped = slots.any { it.equippedId == gear.id }
+                        val canEquip = playerLevel >= gear.levelRequired
+                        GearCard(
+                            gear = gear,
+                            quantity = qty,
+                            isEquipped = isEquipped,
+                            canEquip = canEquip,
+                            onEquip = { onEquip(gear.id) },
+                        )
                     }
                 }
             }
-        } else {
+            item { Spacer(Modifier.height(8.dp)) }
+        }
+    }
+}
+
+private data class SlotView(
+    val slotId: String,
+    val slotName: String,
+    val equippedId: String?,
+)
+
+private data class AggregateStats(
+    val accuracy: Int,
+    val maxHit: Int,
+    val meleeDefence: Int,
+    val attackSpeedBonusMs: Long,
+)
+
+@Composable
+private fun PaperDollLite(
+    slots: List<SlotView>,
+    onUnequip: (String) -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = ArteriaPalette.BgCard,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "Tap a slot above to browse equipment",
-                style = MaterialTheme.typography.bodySmall,
-                color = ArteriaPalette.TextMuted,
-                modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                text = "PAPER DOLL LITE",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.Gold,
+            )
+            slots.chunked(2).forEach { rowSlots ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    rowSlots.forEach { slot ->
+                        val gear = slot.equippedId?.let { EquipmentRegistry.getById(it) }
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            color = ArteriaPalette.BgInput,
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = slot.slotName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ArteriaPalette.TextMuted,
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(26.dp)
+                                            .border(
+                                                1.dp,
+                                                ArteriaPalette.Border,
+                                                RoundedCornerShape(6.dp),
+                                            ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = gear?.icon ?: "—",
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = gear?.name ?: "Empty",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (gear != null) {
+                                            ArteriaPalette.TextPrimary
+                                        } else {
+                                            ArteriaPalette.TextMuted
+                                        },
+                                        maxLines = 1,
+                                    )
+                                }
+                                if (gear != null) {
+                                    TextButton(
+                                        onClick = { onUnequip(slot.slotId) },
+                                        modifier = Modifier.align(Alignment.End),
+                                    ) {
+                                        Text("Unequip", color = ArteriaPalette.CombatAccent)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (rowSlots.size == 1) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AggregateStatsCard(aggregate: AggregateStats) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = ArteriaPalette.BgCard,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = "LOADOUT COMBAT STATS",
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.AccentPrimary,
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                StatChip("Accuracy", "+${aggregate.accuracy}")
+                StatChip("Max Hit", "+${aggregate.maxHit}")
+                StatChip("Melee Def", "+${aggregate.meleeDefence}")
+            }
+            StatChip(
+                label = "Attack Speed",
+                value = if (aggregate.attackSpeedBonusMs > 0L) {
+                    "-${aggregate.attackSpeedBonusMs} ms"
+                } else {
+                    "+0 ms"
+                },
+                centered = false,
             )
         }
     }
 }
 
 @Composable
-private fun EquippedSlotCard(
-    slot: com.arteria.game.core.model.EquipmentSlot,
-    equippedId: String?,
-    onUnequip: () -> Unit,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val cardShape = RoundedCornerShape(10.dp)
-    val equipment = equippedId?.let { EquipmentRegistry.getById(it) }
-
+private fun StatChip(label: String, value: String, centered: Boolean = true) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect),
-        shape = cardShape,
-        color = ArteriaPalette.BgCard,
+        color = ArteriaPalette.BgInput,
+        shape = RoundedCornerShape(8.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .border(1.dp, ArteriaPalette.Border, RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = equipment?.icon ?: "—",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = slot.displayName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ArteriaPalette.TextMuted,
-                )
-                Text(
-                    text = equipment?.name ?: "Empty",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (equipment != null) ArteriaPalette.TextPrimary else ArteriaPalette.TextMuted,
-                )
-                if (equipment != null && equipment.skillBoosts.isNotEmpty()) {
-                    Text(
-                        text = equipment.skillBoosts.entries.joinToString(", ") { (skill, boost) ->
-                            "+${(boost * 100).toInt()}% ${skill.displayName}"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ArteriaPalette.BalancedEnd,
-                    )
-                }
-                if (equipment != null && equipment.globalXpMultiplier > 1.0) {
-                    Text(
-                        text = "+${((equipment.globalXpMultiplier - 1) * 100).toInt()}% All XP",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ArteriaPalette.Gold,
-                    )
-                }
-            }
-
-            if (equipment != null) {
-                androidx.compose.material3.TextButton(onClick = onUnequip) {
-                    Text("Unequip", color = ArteriaPalette.CombatAccent)
-                }
-            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = ArteriaPalette.TextMuted,
+                textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaPalette.TextPrimary,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
 
 @Composable
-private fun EquipmentCard(
-    equipment: Equipment,
+private fun GearCard(
+    gear: Equipment,
+    quantity: Int,
     isEquipped: Boolean,
-    nf: NumberFormat,
+    canEquip: Boolean,
     onEquip: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val cardShape = RoundedCornerShape(10.dp)
-
+    val shape = RoundedCornerShape(10.dp)
     Surface(
-        modifier = modifier
+        shape = shape,
+        color = if (isEquipped) ArteriaPalette.BgCardHover else ArteriaPalette.BgCard,
+        modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = if (isEquipped) 1.dp else 0.dp,
-                color = if (isEquipped) ArteriaPalette.AccentPrimary.copy(alpha = 0.4f) else ArteriaPalette.Border,
-                shape = cardShape,
+                color = if (isEquipped) {
+                    ArteriaPalette.AccentPrimary.copy(alpha = 0.5f)
+                } else {
+                    ArteriaPalette.Border
+                },
+                shape = shape,
             ),
-        shape = cardShape,
-        color = if (isEquipped) ArteriaPalette.BgCardHover else ArteriaPalette.BgCard,
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .border(1.dp, ArteriaPalette.Border.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                    .size(34.dp)
+                    .border(1.dp, ArteriaPalette.Border, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = equipment.icon,
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                Text(text = gear.icon, style = MaterialTheme.typography.titleMedium)
             }
-
-            Spacer(Modifier.width(12.dp))
-
+            Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = equipment.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = gear.name,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = ArteriaPalette.TextPrimary,
                 )
                 Text(
-                    text = equipment.description,
+                    text = gear.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = ArteriaPalette.TextMuted,
                 )
-
-                if (equipment.skillBoosts.isNotEmpty()) {
+                Text(
+                    text = "Owned: $quantity · Req Lv ${gear.levelRequired}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (canEquip) ArteriaPalette.TextSecondary else ArteriaPalette.CombatAccent,
+                )
+                val skillLine = gear.skillBoosts.entries.joinToString(", ") { (skill, boost) ->
+                    "+${(boost * 100).toInt()}% ${skill.displayName}"
+                }
+                if (skillLine.isNotBlank()) {
                     Text(
-                        text = equipment.skillBoosts.entries.joinToString(", ") { (skill: SkillId, boost: Double) ->
-                            "+${(boost * 100).toInt()}% ${skill.displayName}"
-                        },
+                        text = skillLine,
                         style = MaterialTheme.typography.bodySmall,
                         color = ArteriaPalette.BalancedEnd,
                     )
                 }
-                if (equipment.globalXpMultiplier > 1.0) {
+                if (gear.globalXpMultiplier > 1.0) {
                     Text(
-                        text = "+${((equipment.globalXpMultiplier - 1) * 100).toInt()}% All XP",
+                        text = "+${((gear.globalXpMultiplier - 1.0) * 100).toInt()}% All XP",
                         style = MaterialTheme.typography.bodySmall,
                         color = ArteriaPalette.Gold,
                     )
                 }
-
-                Text(
-                    text = "Requires Level ${equipment.levelRequired}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ArteriaPalette.TextMuted,
-                )
+                val cs = gear.combatStats
+                if (cs.accuracy != 0 || cs.maxHit != 0 || cs.meleeDefence != 0 || cs.attackSpeedBonusMs != 0L) {
+                    Text(
+                        text = "Combat: +${cs.accuracy} acc, +${cs.maxHit} hit, +${cs.meleeDefence} def, " +
+                            "-${cs.attackSpeedBonusMs}ms swing",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ArteriaPalette.AccentPrimary,
+                    )
+                }
             }
-
             if (isEquipped) {
                 Text(
                     text = "EQUIPPED",
                     style = MaterialTheme.typography.labelSmall,
                     color = ArteriaPalette.AccentPrimary,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             } else {
-                androidx.compose.material3.TextButton(onClick = onEquip) {
+                TextButton(onClick = onEquip, enabled = canEquip && quantity > 0) {
                     Text("Equip")
                 }
             }
         }
     }
+}
+
+private fun aggregateCombatStats(equipped: List<Equipment>): AggregateStats {
+    var acc = 0
+    var hit = 0
+    var def = 0
+    var speed = 0L
+    equipped.forEach { gear ->
+        acc += gear.combatStats.accuracy
+        hit += gear.combatStats.maxHit
+        def += gear.combatStats.meleeDefence
+        speed += gear.combatStats.attackSpeedBonusMs
+    }
+    return AggregateStats(
+        accuracy = acc,
+        maxHit = hit,
+        meleeDefence = def,
+        attackSpeedBonusMs = speed,
+    )
 }

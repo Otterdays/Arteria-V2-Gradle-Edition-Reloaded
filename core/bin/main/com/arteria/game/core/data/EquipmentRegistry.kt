@@ -1,6 +1,7 @@
 package com.arteria.game.core.data
 
 import com.arteria.game.core.model.Equipment
+import com.arteria.game.core.model.EquipmentCombatStats
 import com.arteria.game.core.model.EquipmentSlots
 import com.arteria.game.core.skill.SkillId
 
@@ -107,6 +108,10 @@ object EquipmentRegistry {
             description = "A basic bronze sword",
             icon = "⚔️",
             skillBoosts = mapOf(SkillId.ATTACK to 0.05, SkillId.STRENGTH to 0.03),
+            combatStats = EquipmentCombatStats(
+                accuracy = 3,
+                maxHit = 1,
+            ),
             levelRequired = 1,
             value = 15,
         ),
@@ -117,6 +122,11 @@ object EquipmentRegistry {
             description = "A sharp iron sword",
             icon = "⚔️",
             skillBoosts = mapOf(SkillId.ATTACK to 0.10, SkillId.STRENGTH to 0.05),
+            combatStats = EquipmentCombatStats(
+                accuracy = 6,
+                maxHit = 2,
+                attackSpeedBonusMs = 120L,
+            ),
             levelRequired = 10,
             value = 75,
         ),
@@ -127,6 +137,10 @@ object EquipmentRegistry {
             description = "A simple wooden staff for spellcasting",
             icon = "🪄",
             skillBoosts = mapOf(SkillId.SORCERY to 0.05),
+            combatStats = EquipmentCombatStats(
+                accuracy = 2,
+                maxHit = 1,
+            ),
             levelRequired = 1,
             value = 15,
         ),
@@ -137,6 +151,10 @@ object EquipmentRegistry {
             description = "An oak staff with better focus",
             icon = "🪄",
             skillBoosts = mapOf(SkillId.SORCERY to 0.10),
+            combatStats = EquipmentCombatStats(
+                accuracy = 4,
+                maxHit = 2,
+            ),
             levelRequired = 10,
             value = 75,
         ),
@@ -149,6 +167,9 @@ object EquipmentRegistry {
             description = "Basic leather armor",
             icon = "🛡️",
             skillBoosts = mapOf(SkillId.DEFENCE to 0.05),
+            combatStats = EquipmentCombatStats(
+                meleeDefence = 2,
+            ),
             levelRequired = 1,
             value = 20,
         ),
@@ -159,6 +180,9 @@ object EquipmentRegistry {
             description = "Sturdy iron plate armor",
             icon = "🛡️",
             skillBoosts = mapOf(SkillId.DEFENCE to 0.10),
+            combatStats = EquipmentCombatStats(
+                meleeDefence = 5,
+            ),
             levelRequired = 10,
             value = 100,
         ),
@@ -169,6 +193,9 @@ object EquipmentRegistry {
             description = "A robe that enhances magical study",
             icon = "👘",
             skillBoosts = mapOf(SkillId.WIZARDRY to 0.10),
+            combatStats = EquipmentCombatStats(
+                meleeDefence = 2,
+            ),
             levelRequired = 10,
             value = 100,
         ),
@@ -181,6 +208,10 @@ object EquipmentRegistry {
             description = "Slightly improves all skill XP",
             icon = "📿",
             skillBoosts = emptyMap(),
+            combatStats = EquipmentCombatStats(
+                accuracy = 1,
+                maxHit = 1,
+            ),
             globalXpMultiplier = 1.02,
             levelRequired = 5,
             value = 100,
@@ -192,6 +223,11 @@ object EquipmentRegistry {
             description = "Increases chance of rare drops",
             icon = "💍",
             skillBoosts = emptyMap(),
+            combatStats = EquipmentCombatStats(
+                accuracy = 2,
+                maxHit = 1,
+                meleeDefence = 1,
+            ),
             globalXpMultiplier = 1.05,
             levelRequired = 20,
             value = 500,
@@ -203,6 +239,10 @@ object EquipmentRegistry {
             description = "Guides you to hidden resources",
             icon = "🧭",
             skillBoosts = mapOf(SkillId.EXPLORATION to 0.15),
+            combatStats = EquipmentCombatStats(
+                accuracy = 1,
+                meleeDefence = 1,
+            ),
             levelRequired = 10,
             value = 200,
         ),
