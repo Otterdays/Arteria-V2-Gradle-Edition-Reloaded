@@ -35,6 +35,10 @@ object SkillDataRegistry {
         putAll(EnchantingData.actionRegistry)
         putAll(DivinationData.actionRegistry)
         putAll(BardingData.actionRegistry)
+        putAll(TrappingData.actionRegistry)
+        putAll(SiphoningData.actionRegistry)
+        putAll(ExplorationData.actionRegistry)
+        putAll(AstrologyData.actionRegistry)
     }
 
     /** All known item definitions across every implemented skill, keyed by item id. */
@@ -62,6 +66,10 @@ object SkillDataRegistry {
         putAll(EnchantingData.items)
         putAll(DivinationData.items)
         putAll(BardingData.items)
+        putAll(TrappingData.items)
+        putAll(SiphoningData.items)
+        putAll(ExplorationData.items)
+        putAll(AstrologyData.items)
     }
 
     /** Actions available for a given skill, in display order. */
@@ -89,6 +97,10 @@ object SkillDataRegistry {
         SkillId.ENCHANTING   -> EnchantingData.actions
         SkillId.DIVINATION   -> DivinationData.actions
         SkillId.BARDING      -> BardingData.actions
+        SkillId.TRAPPING     -> TrappingData.actions
+        SkillId.SIPHONING    -> SiphoningData.actions
+        SkillId.EXPLORATION  -> ExplorationData.actions
+        SkillId.ASTROLOGY    -> AstrologyData.actions
         else                 -> emptyList()
     }
 

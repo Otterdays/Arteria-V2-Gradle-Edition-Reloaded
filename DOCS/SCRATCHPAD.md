@@ -4,6 +4,8 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `ExplorationData` and `AstrologyData` in `:core` with full action/item registries and inter-skill progression dependencies; wired both in `SkillDataRegistry` (`EXPLORATION`, `ASTROLOGY`) so both skills now expose playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `TrappingData` and `SiphoningData` in `:core` with full action/item registries and cross-skill input dependencies; wired both in `SkillDataRegistry` (`TRAPPING`, `SIPHONING`) so both skills now provide playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `DivinationData` and `BardingData` in `:core` with full action/item registries and deep cross-skill input chains; wired both in `SkillDataRegistry` (`DIVINATION`, `BARDING`) so both skills now expose playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `TinkeringData` and `EnchantingData` in `:core` with item/action registries and cross-skill bank input chains; wired both in `SkillDataRegistry` (`TINKERING`, `ENCHANTING`) so both skills are now trainable. Verified with `:app:compileDebugKotlin` (green, no tests run). |
 | 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `AlchemyData` and `ConstructionData` in `:core` with full action/item registries and bank input chains; wired both in `SkillDataRegistry` so `ALCHEMY` and `CONSTRUCTION` now open playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
@@ -132,6 +134,10 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **More skills shipped again (Cursor):** Implemented **Exploration** and **Astrology** as trainable skills (`ExplorationData.kt`, `AstrologyData.kt`) and wired both in `SkillDataRegistry`. Added world-progression and celestial loops that consume/produce support resources and bridge into late-tier content. Build check: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **More skills shipped again (Cursor):** Implemented **Trapping** and **Siphoning** as trainable skills (`TrappingData.kt`, `SiphoningData.kt`) and wired both in `SkillDataRegistry`. Added gather+arcane loops connecting tailoring materials, scavenged artifacts, runes, and endgame support resources. Build check: `:app:compileDebugKotlin` green.
 
 **2026-04-29:** **More skills shipped again (Cursor):** Implemented **Divination** and **Barding** as trainable skills (`DivinationData.kt`, `BardingData.kt`) and wired both in `SkillDataRegistry`. Added advanced cross-skill chains linking runes, support artifacts, tinkering outputs, and music-performance progression items. Build check: `:app:compileDebugKotlin` green.
 
