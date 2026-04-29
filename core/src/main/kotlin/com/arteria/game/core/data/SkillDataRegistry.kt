@@ -27,6 +27,14 @@ object SkillDataRegistry {
         putAll(ForgingData.actionRegistry)
         putAll(JewelcraftingData.actionRegistry)
         putAll(FiremakingData.actionRegistry)
+        putAll(RunecraftingData.actionRegistry)
+        putAll(FletchingData.actionRegistry)
+        putAll(AlchemyData.actionRegistry)
+        putAll(ConstructionData.actionRegistry)
+        putAll(TinkeringData.actionRegistry)
+        putAll(EnchantingData.actionRegistry)
+        putAll(DivinationData.actionRegistry)
+        putAll(BardingData.actionRegistry)
     }
 
     /** All known item definitions across every implemented skill, keyed by item id. */
@@ -46,6 +54,14 @@ object SkillDataRegistry {
         putAll(ForgingData.items)
         putAll(JewelcraftingData.items)
         putAll(FiremakingData.items)
+        putAll(RunecraftingData.items)
+        putAll(FletchingData.items)
+        putAll(AlchemyData.items)
+        putAll(ConstructionData.items)
+        putAll(TinkeringData.items)
+        putAll(EnchantingData.items)
+        putAll(DivinationData.items)
+        putAll(BardingData.items)
     }
 
     /** Actions available for a given skill, in display order. */
@@ -65,6 +81,14 @@ object SkillDataRegistry {
         SkillId.FORGING      -> ForgingData.actions
         SkillId.JEWELCRAFTING-> JewelcraftingData.actions
         SkillId.FIREMAKING   -> FiremakingData.actions
+        SkillId.RUNECRAFTING -> RunecraftingData.actions
+        SkillId.FLETCHING    -> FletchingData.actions
+        SkillId.ALCHEMY      -> AlchemyData.actions
+        SkillId.CONSTRUCTION -> ConstructionData.actions
+        SkillId.TINKERING    -> TinkeringData.actions
+        SkillId.ENCHANTING   -> EnchantingData.actions
+        SkillId.DIVINATION   -> DivinationData.actions
+        SkillId.BARDING      -> BardingData.actions
         else                 -> emptyList()
     }
 

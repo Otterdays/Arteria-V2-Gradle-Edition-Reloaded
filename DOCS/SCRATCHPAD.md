@@ -4,6 +4,10 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `TinkeringData` and `EnchantingData` in `:core` with item/action registries and cross-skill bank input chains; wired both in `SkillDataRegistry` (`TINKERING`, `ENCHANTING`) so both skills are now trainable. Verified with `:app:compileDebugKotlin` (green, no tests run). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 more trainables):** Added `AlchemyData` and `ConstructionData` in `:core` with full action/item registries and bank input chains; wired both in `SkillDataRegistry` so `ALCHEMY` and `CONSTRUCTION` now open playable actions. Verified with `:app:compileDebugKotlin` (green, no tests run). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Skill expansion (2 new trainables):** Added `RunecraftingData` and `FletchingData` in `:core` with full action + item registries, then wired both into `SkillDataRegistry` (`actionRegistry`, `itemRegistry`, `actionsForSkill`) so both skills are now playable instead of "Coming Soon". Verified with `:app:compileDebugKotlin` (green, no tests run). |
+| 2026-04-29 | Cursor Agent | GPT-5.3 Codex (Cursor) | **Offline report overflow UX fix:** `OfflineReportDialog` now uses bounded-height + vertical scroll content and condensed per-skill level-up ranges (`from -> to (+N)`) to prevent long offline sessions from overflowing off-screen. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc + UX sync:** `SKILLS_EXPANSION_NATIVE.md` glossary §0 (4 skills), §5→§5b, §7.1/7.4 callouts; `ROADMAP` v1.5.0 row; `SkillsScreen` crossovers for Farming/Thieving/Woodworking/Tailoring + chip labels. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 — 4 new skills + Equipment/Companions integration:** `FarmingData`, `ThievingData`, `WoodworkingData`, `TailoringData` added to `:core`; all 4 registered in `SkillDataRegistry`; `GameState` + `TickEngine` wired with gear/companion XP multipliers; `GameDatabase` migration v2→v3 (5 new `game_meta` columns); `GameRepository` load/save maps equippedGear + activeCompanionId; `GameViewModel` gains `equip`, `unequip`, `equipCompanion`, `dismissCompanion` + `companions` StateFlow; `GameScreen` routes ⚔️/🐾 TopAppBar buttons to `EquipmentScreen`/`CompanionsScreen` overlays with full BackHandler; `versionCode` 7→8, `versionName` 1.4.5→1.5.0; README badge + `APP_CHANGELOG` top card updated. `:app:compileDebugKotlin` green. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.4.5 release hygiene:** `versionName` **1.4.5** / `versionCode` **7**; prepended `APP_CHANGELOG` (tablet Skills, PanelBackHeader, crossover chips, Chronicle note, doc parity); README shield; `ROADMAP` + `SKILLS_EXPANSION_NATIVE.md` amended with canonical app version line. |
@@ -127,6 +131,14 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **More skills shipped again (Cursor):** Implemented **Tinkering** and **Enchanting** as trainable skills (`TinkeringData.kt`, `EnchantingData.kt`) and wired both in `SkillDataRegistry`. New actions consume existing outputs from Scavenging, Runecrafting, Alchemy, Forging, Fletching, and Woodworking to strengthen cross-skill economy loops. Build check: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **More skills shipped again (Cursor):** Implemented **Alchemy** and **Construction** as trainable skills (`AlchemyData.kt`, `ConstructionData.kt`) and wired them in `SkillDataRegistry`. New loops consume existing bank economy inputs (runes, herbs, planks, bars, crafted intermediates) and output progression items. Build check: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **More skills shipped (Cursor):** Implemented **Runecrafting** and **Fletching** training data in `:core` (`RunecraftingData.kt`, `FletchingData.kt`) with level-scaling actions, bank input requirements, and item outputs; wired both into `SkillDataRegistry` so taps now open trainable actions instead of `SkillComingSoonDialog` for these two skills. Build check: `:app:compileDebugKotlin` green.
+
+**2026-04-29:** **Offline report dialog overflow fix (Cursor):** Updated `OfflineReportDialog.kt` for long offline sessions: modal now has bounded height (`heightIn`), scrollable body (`verticalScroll`) for report sections, and level-up output is condensed into per-skill ranges (`old -> new (+levels)`) instead of one row per level increment. Prevents content clipping/overflow on smaller screens and large AFK gains.
 
 **2026-04-01:** **What's New / version UI (Cursor):** `ChangelogScreen` opens on **current build only** (matches `BuildConfig.VERSION_NAME`); header `vX.Y.Z (build N)` + **Earlier releases** / **Current release only**; **1.5.0** changelog bullets expanded. Docking Station badge uses `BuildConfig` (removed hardcoded version). `:app:compileDebugKotlin` green.
 
