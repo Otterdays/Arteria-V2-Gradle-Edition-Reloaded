@@ -72,7 +72,8 @@ class GameViewModel(
     val achievements: StateFlow<List<AchievementProgress>> = _achievements.asStateFlow()
 
     /** Newly unlocked achievements this session (for notifications). */
-    private val _newlyUnlocked = MutableSharedFlow<AchievementProgress>(extraBufferCapacity = 8)
+    private val _newlyUnlocked =
+        MutableSharedFlow<AchievementProgress>(extraBufferCapacity = 64)
     val newlyUnlockedAchievements: SharedFlow<AchievementProgress> = _newlyUnlocked.asSharedFlow()
 
     private var tickJob: Job? = null
@@ -465,9 +466,8 @@ class GameViewModel(
                     requiredProgress = required,
                     unlockedAt = System.currentTimeMillis(),
                 )
-                viewModelScope.launch {
-                    _newlyUnlocked.tryEmit(progress)
-                }
+                // Same-thread emit keeps burst order aligned with `AchievementRegistry.all`.
+                _newlyUnlocked.tryEmit(progress)
                 progress
             } else {
                 existing?.copy(

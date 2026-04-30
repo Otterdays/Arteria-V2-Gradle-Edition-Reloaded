@@ -58,30 +58,11 @@ import com.arteria.game.core.model.Achievement
 import com.arteria.game.core.model.AchievementCategory
 import com.arteria.game.core.model.AchievementProgress
 import com.arteria.game.core.model.AchievementRarity
+import com.arteria.game.ui.theme.AchievementDecor
 import com.arteria.game.ui.theme.ArteriaPalette
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-// ─── Palette helpers ────────────────────────────────────────────────────────
-
-private fun categoryAccent(cat: AchievementCategory): Color = when (cat) {
-    AchievementCategory.MILESTONE   -> ArteriaPalette.Gold
-    AchievementCategory.GATHERING   -> ArteriaPalette.BalancedEnd
-    AchievementCategory.CRAFTING    -> ArteriaPalette.AccentPrimary
-    AchievementCategory.BANKING     -> ArteriaPalette.GoldDim
-    AchievementCategory.COMBAT      -> ArteriaPalette.CombatAccent
-    AchievementCategory.EXPLORATION -> ArteriaPalette.LuminarEnd
-    AchievementCategory.RESONANCE   -> ArteriaPalette.VoidAccent
-}
-
-private fun rarityColor(rarity: AchievementRarity): Color = when (rarity) {
-    AchievementRarity.COMMON    -> Color(0xFF9CA3AF)
-    AchievementRarity.UNCOMMON  -> ArteriaPalette.BalancedEnd
-    AchievementRarity.RARE      -> ArteriaPalette.AccentPrimary
-    AchievementRarity.EPIC      -> ArteriaPalette.AccentWeb
-    AchievementRarity.LEGENDARY -> ArteriaPalette.Gold
-}
 
 private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
@@ -281,7 +262,7 @@ private fun CategoryFilterRow(
         AchievementCategory.entries.forEach { cat ->
             FilterChip(
                 label = cat.displayName,
-                color = categoryAccent(cat),
+                color = AchievementDecor.categoryAccent(cat),
                 isSelected = selected == cat,
             ) { onSelect(cat) }
         }
@@ -327,8 +308,8 @@ private fun AchievementCard(
     progress: AchievementProgress,
     modifier: Modifier = Modifier,
 ) {
-    val categoryAccent = categoryAccent(achievement.category)
-    val rarityColor = rarityColor(achievement.rarity)
+    val categoryTint = AchievementDecor.categoryAccent(achievement.category)
+    val rarityTint = AchievementDecor.rarityAccent(achievement.rarity)
     val cardShape = RoundedCornerShape(12.dp)
     val isUnlocked = progress.isUnlocked
 
@@ -348,7 +329,7 @@ private fun AchievementCard(
             .border(
                 width = if (isUnlocked) 1.dp else 0.5.dp,
                 brush = if (isUnlocked) {
-                    Brush.horizontalGradient(listOf(categoryAccent.copy(alpha = 0.5f), Color.Transparent))
+                    Brush.horizontalGradient(listOf(categoryTint.copy(alpha = 0.5f), Color.Transparent))
                 } else {
                     Brush.horizontalGradient(listOf(ArteriaPalette.Border, ArteriaPalette.Border))
                 },
@@ -366,12 +347,12 @@ private fun AchievementCard(
                         .size(44.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(
-                            if (isUnlocked) categoryAccent.copy(alpha = 0.15f)
+                            if (isUnlocked) categoryTint.copy(alpha = 0.15f)
                             else ArteriaPalette.Border.copy(alpha = 0.3f)
                         )
                         .border(
                             width = 1.dp,
-                            color = if (isUnlocked) categoryAccent.copy(alpha = 0.4f)
+                            color = if (isUnlocked) categoryTint.copy(alpha = 0.4f)
                             else ArteriaPalette.Border.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(10.dp),
                         ),
@@ -403,7 +384,7 @@ private fun AchievementCard(
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
-                                    .background(rarityColor, CircleShape),
+                                    .background(rarityTint, CircleShape),
                             )
                         }
                     }
@@ -420,7 +401,7 @@ private fun AchievementCard(
                         Text(
                             text = "✓",
                             style = MaterialTheme.typography.titleMedium,
-                            color = categoryAccent,
+                            color = categoryTint,
                             fontWeight = FontWeight.Bold,
                         )
                     }
@@ -442,7 +423,7 @@ private fun AchievementCard(
                             .weight(1f)
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp)),
-                        color = if (isUnlocked) categoryAccent else categoryAccent.copy(alpha = 0.5f),
+                        color = if (isUnlocked) categoryTint else categoryTint.copy(alpha = 0.5f),
                         trackColor = ArteriaPalette.Border.copy(alpha = 0.4f),
                     )
                     Spacer(Modifier.width(8.dp))
@@ -453,7 +434,7 @@ private fun AchievementCard(
                             "${progress.currentProgress} / ${progress.requiredProgress}"
                         },
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        color = if (isUnlocked) categoryAccent else ArteriaPalette.TextMuted,
+                        color = if (isUnlocked) categoryTint else ArteriaPalette.TextMuted,
                     )
                 }
             }
@@ -475,7 +456,7 @@ private fun AchievementCard(
 
 @Composable
 private fun RarityBadge(rarity: AchievementRarity, modifier: Modifier = Modifier) {
-    val color = rarityColor(rarity)
+    val color = AchievementDecor.rarityAccent(rarity)
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))

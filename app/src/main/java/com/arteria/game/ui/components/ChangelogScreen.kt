@@ -60,6 +60,20 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.10.2",
+        date = "2026-04-29",
+        tag = "CHRONICLE",
+        tagEmoji = "🏆",
+        tagColor = ArteriaPalette.Gold,
+        changes = listOf(
+            "Achievement unlocks use a top banner toast (rarity border, icon, title, description) " +
+                "instead of a generic snackbar — bursts queue so nothing is dropped",
+            "Tap the banner to jump straight to the Chronicle; display time scales slightly with rarity",
+            "Level-up snackbars share the same card-style surfaces (Arteria palette)",
+            "Hub strip renamed to “Recent level-ups” so it is not confused with Chronicle trophies",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.10.1",
         date = "2026-04-29",
         tag = "RESONANCE",

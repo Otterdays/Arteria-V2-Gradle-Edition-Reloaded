@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle unlock UX:** `AchievementUnlockBanner` + `AchievementDecor` (shared Chronicle/banner tints); `GameScreen` Channel queue for burst unlocks; verification snapshot line; Hub vs Chronicle copy clarified in `SUMMARY.md`. |
 | 2026-04-01 | Cursor Agent | Composer | **`DOCS/SKILLS_EXPANSION_NATIVE.md`:** V1→V2 skill expansion playbook; verification snapshot amended (`:core` JVM path, Hub 4-tab, link to new doc). |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: DataStore `UserPreferencesRepository`, `MainActivity` `ArteriaRoot` (theme/system + reduce motion locals), light `ArteriaTheme` + space brush; `GameViewModel` + `UserPreferencesProvider`, offline cap/report prefs; `GameRepository` reset/delete; profile `deleteById`; OSS/Credits overlays; danger zone; verification snapshot amended. |
 | 2026-04-01 | Cursor Agent | Composer | Settings V1 parity slice: profile rename (`ProfileDao.updateDisplayName`, `AccountViewModel`), `AccountSessionInfo` + `GameScreen`/`ArteriaApp` wiring; `SettingsScreen` About (`BuildConfig`), tick/save cadence copy, test sound; verification snapshot line amended. |
@@ -22,6 +23,7 @@
 # Arteria V2 Gradle Edition Reloaded — Architecture
 
 > Last updated: 2026-04-01
+> **`[AMENDED 2026-04-29]:`** Chronicle achievement unlock UX (`AchievementUnlockBanner`, `AchievementDecor`) — see Verification Snapshot bullet.
 > Status: Active native Android implementation (Kotlin + Compose + Room) with full Docking Station animation system
 > Scope: This file documents the architecture that exists today and the planned next architecture.
 
@@ -38,6 +40,7 @@
 - **`[AMENDED 2026-04-01]:`** **Settings expansion:** `user_preferences` DataStore (`ThemePreference`, motion, haptics, sound, offline report, soundscapes stub, DEBUG offline-cap bypass); `LocalUserPreferencesRepository`, `LocalArteriaDarkSpace`, `LocalReduceMotion`; `GameRepository.resetProgressForProfile` / `deleteAllGameDataForProfile`; `ProfileDao.deleteById`; nested **Open source notices** (`ARTERIA_OSS_NOTICES`) + **Credits** screens; danger dialogs (reset progress, delete profile).
 - **Doc canon reference:** `DOCS/SUMMARY.md` section `Doc Canon (single source rules)`.
 - **`[AMENDED 2026-03-31]:`** `GameDatabase` is **version 2** (`MIGRATION_1_2`); `game_meta` carries `lastOfflineTickAppliedAt` for offline catch-up audit. See `DOCS/SBOM.md` Android Targets table.
+- **`[AMENDED 2026-04-29]:`** **Chronicle / achievements feedback:** `GameViewModel.newlyUnlockedAchievements` emits `AchievementProgress` when a registry trophy flips to unlocked (inline `tryEmit` in `checkAchievements` preserves **`AchievementRegistry.all` order** within a single evaluation; `MutableSharedFlow` buffer **64** to avoid drops in large bursts); `GameScreen` funnels events through a `Channel` so simultaneous unlocks **queue** (no drops). UI: `ui/components/AchievementUnlockBanner.kt` (top-of-shell toast, rarity-accent border, optional tap → Chronicle overlay) + `ui/theme/AchievementDecor.kt` (category + rarity tints consumed by `ChronicleScreen` and the banner — **ArteriaPalette only**). **Level-up** lines remain **Material `Snackbar`** with card-style `ArteriaPalette` colors. Hub “recent” strip = **skill level-ups**, not Chronicle trophies.
 
 ---
 

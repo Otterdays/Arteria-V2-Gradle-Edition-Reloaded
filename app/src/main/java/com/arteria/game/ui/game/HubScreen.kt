@@ -205,7 +205,7 @@ fun HubScreen(
         if (recentLevelUps.isNotEmpty()) {
             item(key = "levelups_header") {
                 Text(
-                    text = "RECENT ACHIEVEMENTS",
+                    text = "RECENT LEVEL-UPS",
                     style = MaterialTheme.typography.labelSmall,
                     color = ArteriaPalette.Gold,
                     modifier = Modifier.padding(start = 4.dp, top = 6.dp),

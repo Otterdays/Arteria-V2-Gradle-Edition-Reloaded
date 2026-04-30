@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle / achievement unlock UX:** `AchievementUnlockBanner` (queued top toast, rarity styling, tap → Chronicle) + `AchievementDecor` for shared Chronicle/banner tints; themed level-up snackbars; Hub “Recent level-ups” label; **`DOCS/SUMMARY.md`** + **`ARCHITECTURE.md`** amended; **v1.10.2 (15)** + README. `:app:compileDebugKotlin` green. |
 | 2026-04-29 | Cursor Agent | GPT-5.5 | **Agent research brief:** Expanded `DOCS/agent_prompt_report_for_research.md` into a structured handoff covering native V2 architecture, idle/clicker loop, Resonance design, system inventory, gaps, improvement priorities, research questions, and verification pointers. |
 | 2026-04-29 | Composer | GPT-5.2 | **Resonance clicker QoL:** Flow Rhythm chain multiplier (`ResonanceData` + `GameViewModel`), `ResonancePulseOutcome` UI payloads, lifetime stats + floating pulse readout + `baseTapHintsLine` on `ResonanceScreen`; unlock row Lv1 Flow Rhythm; **v1.10.1 (14)** changelog + README + SCRATCHPAD. `:app:compileDebugKotlin` + `:core:test` green. |
 | 2026-04-29 | Composer | GPT-5.2 | **Equipment loadout expansion (7 slots):** `EquippedGear` gains **Head** + **dual ring pockets** (`ring`, `ring2`); **`EquipmentSlots.paperDollOrder`** silhouette for UI; `normalizeEquippedGearFromColumns()` on load; **`MIGRATION_5_6`** + `GameDatabase` **v6**; `TickEngine`/`CombatEngine` aggregate all worn XP/combat modifiers; **`EquipmentRegistry`** head + standalone ring gear, **Ring of Fortune** reslot to finger jewelry; **`EquipmentScreen`** rework; **`APP_CHANGELOG`** + **1.10.0 (13)** + README badge; **`DOCS/SBOM.md`** Room v6 notes. Verified `:app:compileDebugKotlin` + `:core:test` green. |
@@ -108,7 +109,7 @@ Use this section as the live handoff source. Older repeated status/next-action b
 
 - Native Android V2 stack is active (`Kotlin + Compose + Room + Gradle/AGP`).
 - Core gameplay routing is live: `account_select` -> `account_create` -> `game/{profileId}`.
-- Game shell is live with 4 tabs (`Hub`, `Skills`, `Bank`, `Combat`) and settings/changelog overlays. **`[AMENDED 2026-03-31]:`** Hub is default landing; older “3 tabs” mentions superseded.
+- Game shell is live with 4 tabs (`Hub`, `Skills`, `Bank`, `Combat`) and settings/changelog overlays. **`[AMENDED 2026-03-31]:`** Hub is default landing; older “3 tabs” mentions superseded. **`[AMENDED 2026-04-29]:`** Chronicle **trophy** unlock toasts (`AchievementUnlockBanner`, queued); Hub ticker = **recent skill level-ups** (not Chronicle).
 - **`[AMENDED 2026-03-31]:`** Tapping a skill with no actions in `SkillDataRegistry` shows `SkillComingSoonDialog` instead of `SkillDetailScreen` (implemented skills unchanged).
 - **`[AMENDED 2026-04-01]:`** **Harvesting** is playable: `HarvestingData` registered in `SkillDataRegistry` (gathering pillar).
 - **`[AMENDED 2026-04-01]:`** **Settings** includes V1-style **display name edit** (persisted on `profiles`), **last played** line, **About** version from `BuildConfig`, **tick/save cadence** copy, and **Test sound**; see `master_settings_suggestions_doc.md` checklist updates.
@@ -154,6 +155,8 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-04-29:** **Chronicle achievement toasts (Cursor):** Replaced generic achievement snackbars with **`AchievementUnlockBanner`** (top slot, `ArteriaPalette` + rarity border, description line, optional **tap → Chronicle**) and **`Channel`** queue so burst unlocks serialize. **`GameViewModel`** now **`tryEmit`s** unlocks inline (deterministic **`AchievementRegistry.all`** order) with SharedFlow **`extraBufferCapacity = 64`** vs nested `launch` + tiny buffer drops. **`AchievementDecor`** dedupes Chronicle card / toast colors (removed stray hex for common rarity). **Level-up** feedback uses themed **`Snackbar`**. Hub header copy **“Recent level-ups”**. Shipped **`v1.10.2` (15)** + What’s New + README; amended **`SUMMARY`** + **`ARCHITECTURE`** verification. `:app:compileDebugKotlin` green.
 
 **2026-04-29:** **Resonance clicker QoL pass (Composer):** Added **Flow Rhythm** — rhythmic taps within **`FLOW_CHAIN_GAP_MS`** stack a **capped** XP/momentum multiplier (`ResonanceData.flowMultiplier`, non-persisted chain depth in **`GameViewModel`**); normal/heavy pulses now return **`ResonancePulseOutcome`** for UI; **`ResonanceScreen`** shows lifetime pulse/heavy/peak stats, design-aligned **base tap hint** line, and a short-lived **floating pulse readout** (respects reduce-motion on vertical travel); new **Lv 1 Flow Rhythm** unlock explainer. Shipped **v1.10.1 (14)** + What's New + README badge. Build `:app:compileDebugKotlin`, `:core:test` green.
 

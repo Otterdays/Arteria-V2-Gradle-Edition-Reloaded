@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle unlock UX:** `AchievementUnlockBanner` (queued top toast, rarity border, tap → Chronicle) + `AchievementDecor` (palette-only tints for banner + Chronicle); themed level-up snackbars; Hub strip copy fix (“Recent level-ups”); **`DOCS/ARCHITECTURE.md`** verification line; **`v1.10.2` (15)** What’s New + README. |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented 3 new crafting skills bridging the gear gap; updated Mining gems; Phase 5 near-complete. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 doc sync:** ROADMAP Phase 5/7/9 done-markers; "Immediate Next Point" rewritten; SCRATCHPAD Last Actions + Next Action aligned; SUMMARY credits row. |
 | 2026-04-01 | Cursor Agent | Composer | Added **[SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md)** (V1 DOCU → V2 skill playbook); doc index + read-order row. |
@@ -61,6 +62,8 @@
 **Bundled copy (offline / historical):** [ARTERIA-V1-DOCS/DOCU/](ARTERIA-V1-DOCS/DOCU/) — same filenames. If **root `DOCU/`** and the copy disagree, **root wins**.
 
 **Detailed content audit:** [DESIGN_TRANSLATION_AUDIT.md](DESIGN_TRANSLATION_AUDIT.md).
+
+**`[AMENDED 2026-04-29]:`** **Achievements vs hub copy:** Chronicle **trophy** unlocks toast at the game shell top (`AchievementUnlockBanner`, queued bursts); tint math is shared via `AchievementDecor` with `ChronicleScreen`. The Hub ticker is **recent level-ups** (skill level gains), not Chronicle entries — see `ARCHITECTURE.md` verification snapshot.
 
 ---
 

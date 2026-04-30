@@ -12,15 +12,17 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -37,11 +39,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arteria.game.data.preferences.UserPreferences
 import com.arteria.game.data.preferences.asProvider
@@ -50,15 +54,22 @@ import com.arteria.game.ui.theme.ArteriaPalette
 import com.arteria.game.ui.theme.LocalArteriaDarkSpace
 import com.arteria.game.ui.theme.LocalUserPreferencesRepository
 import com.arteria.game.ui.theme.rememberArteriaSpaceBackgroundBrush
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arteria.game.core.data.AchievementRegistry
 import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.data.game.GameRepository
+import com.arteria.game.core.model.Achievement
+import com.arteria.game.core.model.AchievementProgress
 import com.arteria.game.ui.account.AccountSessionInfo
 import com.arteria.game.ui.audio.IdleSoundscapePlayer
+import com.arteria.game.ui.components.AchievementUnlockBanner
+import com.arteria.game.ui.theme.AchievementDecor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +112,11 @@ fun GameScreen(
     val recentLevelUps = remember { mutableStateListOf<Pair<SkillId, Int>>() }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val achievementNotifyChannel =
+        remember { Channel<AchievementProgress>(Channel.UNLIMITED) }
+
+    /** Queued Chronicle unlock payloads — surfaced as top banner toast (serializes bursts). */
+    var bannerAchievement by remember { mutableStateOf<Achievement?>(null) }
 
     // ── Derived state for the bottom bar ─────────────────────────────────────
     val hasTrainingActive by remember {
@@ -152,12 +168,18 @@ fun GameScreen(
             if (userPrefsRepository.userPreferences.first().hapticsEnabled) {
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             }
-            val achievement = com.arteria.game.core.data.AchievementRegistry.getById(progress.achievementId)
-            if (achievement != null) {
-                snackbarHostState.showSnackbar(
-                    "Achievement unlocked: ${achievement.title}",
-                )
-            }
+            achievementNotifyChannel.send(progress)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val progress = achievementNotifyChannel.receive()
+            val def = AchievementRegistry.getById(progress.achievementId) ?: continue
+            bannerAchievement = def
+            delay(AchievementDecor.rarityToastMillis(def.rarity))
+            bannerAchievement = null
+            delay(280)
         }
     }
 
@@ -252,26 +274,28 @@ fun GameScreen(
         )
     }
 
-    AnimatedContent(
-        targetState = expandedSkillId,
-        transitionSpec = {
-            if (targetState != null) {
-                // Push into detail — slide in from right, old content slides left
-                (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it } +
-                    fadeIn(tween(200))).togetherWith(
-                    slideOutHorizontally(tween(250)) { -it / 4 } + fadeOut(tween(150)),
-                )
-            } else {
-                // Pop back — slide in from left, old content slides right
-                (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 4 } +
-                    fadeIn(tween(200))).togetherWith(
-                    slideOutHorizontally(tween(250)) { it } + fadeOut(tween(150)),
-                )
-            }
-        },
-        label = "skill_nav",
-    ) { expandedId ->
-        val currentGameState = gameState
+    Box(modifier.fillMaxSize()) {
+        AnimatedContent(
+            modifier = Modifier.fillMaxSize(),
+            targetState = expandedSkillId,
+            transitionSpec = {
+                if (targetState != null) {
+                    // Push into detail — slide in from right, old content slides left
+                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it } +
+                        fadeIn(tween(200))).togetherWith(
+                        slideOutHorizontally(tween(250)) { -it / 4 } + fadeOut(tween(150)),
+                    )
+                } else {
+                    // Pop back — slide in from left, old content slides right
+                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 4 } +
+                        fadeIn(tween(200))).togetherWith(
+                        slideOutHorizontally(tween(250)) { it } + fadeOut(tween(150)),
+                    )
+                }
+            },
+            label = "skill_nav",
+        ) { expandedId ->
+            val currentGameState = gameState
         val skillState = if (expandedId != null && currentGameState != null) {
             currentGameState.skills[expandedId]
         } else null
@@ -291,7 +315,18 @@ fun GameScreen(
                     .fillMaxSize()
                     .background(bgBrush),
                 containerColor = scaffoldBg,
-                snackbarHost = { SnackbarHost(snackbarHostState) },
+                snackbarHost = {
+                    SnackbarHost(snackbarHostState) { data ->
+                        Snackbar(
+                            snackbarData = data,
+                            containerColor = ArteriaPalette.BgCard,
+                            contentColor = ArteriaPalette.TextPrimary,
+                            actionContentColor = ArteriaPalette.AccentPrimary,
+                            dismissActionContentColor = ArteriaPalette.TextSecondary,
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                    }
+                },
                 topBar = {
                     TopAppBar(
                         title = {
@@ -426,5 +461,15 @@ fun GameScreen(
                 }
             }
         } // else (scaffold)
-    } // AnimatedContent (skill_nav)
+        } // AnimatedContent (skill_nav)
+
+        AchievementUnlockBanner(
+            achievement = bannerAchievement,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 12.dp)
+                .fillMaxWidth(),
+            onOpenChronicle = { showChronicle = true },
+        )
+    }
 }
