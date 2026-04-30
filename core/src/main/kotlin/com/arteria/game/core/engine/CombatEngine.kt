@@ -8,6 +8,7 @@ import com.arteria.game.core.model.CombatLogType
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.SkillState
+import com.arteria.game.core.model.combatItemIds
 import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
 import kotlin.random.Random
@@ -34,25 +35,14 @@ object CombatEngine {
         val defLv = XPTable.levelForXp(state.skills[SkillId.DEFENCE]?.xp ?: 0.0)
         val hpLv = XPTable.levelForXp(state.skills[SkillId.HITPOINTS]?.xp ?: 0.0)
 
-        val weapon = state.equippedGear.weapon?.let { EquipmentRegistry.getById(it) }
-        val armor = state.equippedGear.armor?.let { EquipmentRegistry.getById(it) }
-        val accessory = state.equippedGear.accessory?.let { EquipmentRegistry.getById(it) }
-        val gearAccuracy =
-            (weapon?.combatStats?.accuracy ?: 0) +
-                (armor?.combatStats?.accuracy ?: 0) +
-                (accessory?.combatStats?.accuracy ?: 0)
-        val gearMaxHit =
-            (weapon?.combatStats?.maxHit ?: 0) +
-                (armor?.combatStats?.maxHit ?: 0) +
-                (accessory?.combatStats?.maxHit ?: 0)
-        val gearMeleeDef =
-            (weapon?.combatStats?.meleeDefence ?: 0) +
-                (armor?.combatStats?.meleeDefence ?: 0) +
-                (accessory?.combatStats?.meleeDefence ?: 0)
+        val wornCombat = state.equippedGear.combatItemIds().mapNotNull {
+            EquipmentRegistry.getById(it)
+        }
+        val gearAccuracy = wornCombat.sumOf { it.combatStats.accuracy }
+        val gearMaxHit = wornCombat.sumOf { it.combatStats.maxHit }
+        val gearMeleeDef = wornCombat.sumOf { it.combatStats.meleeDefence }
         val gearSpeedBonusMs =
-            (weapon?.combatStats?.attackSpeedBonusMs ?: 0L) +
-                (armor?.combatStats?.attackSpeedBonusMs ?: 0L) +
-                (accessory?.combatStats?.attackSpeedBonusMs ?: 0L)
+            wornCombat.sumOf { it.combatStats.attackSpeedBonusMs }
 
         val playerAccuracy = 5 + atkLv * 3 + gearAccuracy
         val playerMaxHit = (1 + strLv / 2 + gearMaxHit).coerceAtLeast(1)

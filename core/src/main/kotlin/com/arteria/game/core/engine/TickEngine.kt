@@ -5,6 +5,7 @@ import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.data.ResonanceData
 import com.arteria.game.core.model.CompanionBonus
 import com.arteria.game.core.model.EquippedGear
+import com.arteria.game.core.model.allEquippedIdsForGameplay
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.SkillAction
@@ -34,7 +35,7 @@ object TickEngine {
      */
     private fun gearXpMultiplier(gear: EquippedGear, skillId: SkillId): Double {
         var multiplier = 1.0
-        listOfNotNull(gear.weapon, gear.tool, gear.armor, gear.accessory).forEach { itemId ->
+        gear.allEquippedIdsForGameplay().forEach { itemId ->
             val equip = EquipmentRegistry.getById(itemId) ?: return@forEach
             multiplier *= equip.globalXpMultiplier
             val boost = equip.skillBoosts[skillId] ?: 0.0

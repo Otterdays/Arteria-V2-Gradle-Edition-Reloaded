@@ -19,6 +19,7 @@ import com.arteria.game.core.model.EquippedGear
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.LevelUp
 import com.arteria.game.core.model.RandomEventRegistry
+import com.arteria.game.core.model.ResonancePulseOutcome
 import com.arteria.game.core.model.SkillAction
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.model.TickResult
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 class GameViewModel(
     private val profileId: String,
@@ -81,6 +83,10 @@ class GameViewModel(
     /** Random event trigger probability per tick (1 in N). */
     private val randomEventChance = 200
     private var lastRandomEventTick = 0
+
+    /** Resonance Rhythm chain depth (0 = no chain yet); not persisted — resets on VM death. */
+    private var resonanceRhythmDepth = 0
+    private var lastResonanceRhythmTapWallMs = 0L
 
     private val actionRegistry: Map<String, SkillAction> = SkillDataRegistry.actionRegistry
 
@@ -204,9 +210,17 @@ class GameViewModel(
                 val gear = it.equippedGear
                 val updated = when (equipment.slot) {
                     EquipmentSlots.WEAPON.id -> gear.copy(weapon = itemId)
+                    EquipmentSlots.HEAD.id -> gear.copy(head = itemId)
                     EquipmentSlots.TOOL.id -> gear.copy(tool = itemId)
                     EquipmentSlots.ARMOR.id -> gear.copy(armor = itemId)
                     EquipmentSlots.ACCESSORY.id -> gear.copy(accessory = itemId)
+                    EquipmentSlots.RING.id ->
+                        when {
+                            gear.ring == itemId || gear.ring2 == itemId -> gear
+                            gear.ring == null -> gear.copy(ring = itemId)
+                            gear.ring2 == null -> gear.copy(ring2 = itemId)
+                            else -> gear.copy(ring = itemId)
+                        }
                     else -> gear
                 }
                 it.copy(equippedGear = updated)
@@ -220,9 +234,12 @@ class GameViewModel(
                 val gear = it.equippedGear
                 val updated = when (slotId) {
                     EquipmentSlots.WEAPON.id -> gear.copy(weapon = null)
+                    EquipmentSlots.HEAD.id -> gear.copy(head = null)
                     EquipmentSlots.TOOL.id -> gear.copy(tool = null)
                     EquipmentSlots.ARMOR.id -> gear.copy(armor = null)
                     EquipmentSlots.ACCESSORY.id -> gear.copy(accessory = null)
+                    EquipmentSlots.RING.id -> gear.copy(ring = null)
+                    EquipmentSlots.RING2.id -> gear.copy(ring2 = null)
                     else -> gear
                 }
                 it.copy(equippedGear = updated)
@@ -244,61 +261,97 @@ class GameViewModel(
         _gameState.update { state -> state?.let { CombatEngine.fleeCombat(it) } }
     }
 
-    /** Normal orb tap — Resonance XP + Momentum (see `ResonanceData`). */
-    fun pulseResonance() {
+    /** Normal orb tap — Resonance XP + Momentum; rewards rhythmic taps via Rhythm multiplier. */
+    fun pulseResonance(): ResonancePulseOutcome? {
+        val now = nowProvider()
+        if (lastResonanceRhythmTapWallMs > 0L &&
+            now - lastResonanceRhythmTapWallMs > ResonanceData.FLOW_CHAIN_GAP_MS
+        ) {
+            resonanceRhythmDepth = 0
+        }
+
+        val prior = resonanceRhythmDepth.coerceAtMost(ResonanceData.FLOW_CHAIN_CAP)
+        val flowMult = ResonanceData.flowMultiplier(prior)
+
+        var outcome: ResonancePulseOutcome? = null
         _gameState.update { state ->
-            state?.let { s ->
-                val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
-                val level = XPTable.levelForXp(res.xp)
-                val xpAdd = ResonanceData.resonanceXpPerTap(level)
-                val momAdd = ResonanceData.momentumPerTap(level)
-                val newXp = res.xp + xpAdd
-                val newMom = (s.momentum + momAdd).coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
-                val oldLevel = XPTable.levelForXp(res.xp)
-                val newLevel = XPTable.levelForXp(newXp)
-                val skills = s.skills.toMutableMap()
-                skills[SkillId.RESONANCE] = res.copy(xp = newXp)
-                if (newLevel > oldLevel) {
-                    _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
-                }
-                s.copy(
-                    skills = skills,
-                    momentum = newMom,
-                    peakMomentum = maxOf(s.peakMomentum, newMom),
-                    totalResonancePulses = s.totalResonancePulses + 1L,
-                )
+            val s = state ?: return@update state
+            val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
+            val level = XPTable.levelForXp(res.xp)
+            val baseXp = ResonanceData.resonanceXpPerTap(level)
+            val baseMom = ResonanceData.momentumPerTap(level)
+            val xpAdd = baseXp * flowMult
+            val momAdd = baseMom * flowMult
+            val newXp = res.xp + xpAdd
+            val newMom = (s.momentum + momAdd).coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
+            val oldLevel = XPTable.levelForXp(res.xp)
+            val newLevel = XPTable.levelForXp(newXp)
+            val skills = s.skills.toMutableMap()
+            skills[SkillId.RESONANCE] = res.copy(xp = newXp)
+            if (newLevel > oldLevel) {
+                _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
             }
+            resonanceRhythmDepth =
+                (resonanceRhythmDepth + 1).coerceAtMost(ResonanceData.FLOW_CHAIN_CAP + 1)
+            lastResonanceRhythmTapWallMs = now
+            outcome = ResonancePulseOutcome(
+                xpAdded = xpAdd,
+                momentumAdded = momAdd,
+                rhythmDepthAfter = resonanceRhythmDepth,
+                rhythmBonusPercentApplied = ((flowMult - 1.0) * 100.0).roundToInt().coerceAtLeast(0),
+                heavySurge = false,
+                pulseId = now,
+            )
+            s.copy(
+                skills = skills,
+                momentum = newMom,
+                peakMomentum = maxOf(s.peakMomentum, newMom),
+                totalResonancePulses = s.totalResonancePulses + 1L,
+            )
         }
         _gameState.value?.let { _achievements.value = checkAchievements(it) }
+        return outcome
     }
 
     /** Lv 60+ Soul Cranking — consumes Anchor Energy for a surge (no-op if requirements unmet). */
-    fun heavyPulseResonance() {
+    fun heavyPulseResonance(): ResonancePulseOutcome? {
+        val now = nowProvider()
+        var outcome: ResonancePulseOutcome? = null
         _gameState.update { state ->
-            state?.let { s ->
-                val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
-                val level = XPTable.levelForXp(res.xp)
-                if (!ResonanceData.canHeavyPulse(level, s.anchorEnergy)) return@let s
-                val newXp = res.xp + ResonanceData.HEAVY_PULSE_XP
-                val newMom = (s.momentum + ResonanceData.HEAVY_PULSE_MOMENTUM)
-                    .coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
-                val oldLevel = XPTable.levelForXp(res.xp)
-                val newLevel = XPTable.levelForXp(newXp)
-                val skills = s.skills.toMutableMap()
-                skills[SkillId.RESONANCE] = res.copy(xp = newXp)
-                if (newLevel > oldLevel) {
-                    _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
-                }
-                s.copy(
-                    skills = skills,
-                    momentum = newMom,
-                    anchorEnergy = s.anchorEnergy - ResonanceData.HEAVY_PULSE_ENERGY_COST,
-                    peakMomentum = maxOf(s.peakMomentum, newMom),
-                    totalHeavyPulses = s.totalHeavyPulses + 1L,
-                )
+            val s = state ?: return@update state
+            val res = s.skills[SkillId.RESONANCE] ?: SkillState(skillId = SkillId.RESONANCE)
+            val level = XPTable.levelForXp(res.xp)
+            if (!ResonanceData.canHeavyPulse(level, s.anchorEnergy)) return@update s
+            resonanceRhythmDepth = 0
+            lastResonanceRhythmTapWallMs = now
+            val newXp = res.xp + ResonanceData.HEAVY_PULSE_XP
+            val newMom = (s.momentum + ResonanceData.HEAVY_PULSE_MOMENTUM)
+                .coerceIn(0.0, ResonanceData.MOMENTUM_CAP)
+            val oldLevel = XPTable.levelForXp(res.xp)
+            val newLevel = XPTable.levelForXp(newXp)
+            val skills = s.skills.toMutableMap()
+            skills[SkillId.RESONANCE] = res.copy(xp = newXp)
+            if (newLevel > oldLevel) {
+                _levelUpEvents.tryEmit(LevelUp(SkillId.RESONANCE, oldLevel, newLevel))
             }
+            outcome = ResonancePulseOutcome(
+                xpAdded = ResonanceData.HEAVY_PULSE_XP,
+                momentumAdded = ResonanceData.HEAVY_PULSE_MOMENTUM,
+                rhythmDepthAfter = 0,
+                rhythmBonusPercentApplied = 0,
+                heavySurge = true,
+                pulseId = now,
+            )
+            s.copy(
+                skills = skills,
+                momentum = newMom,
+                anchorEnergy = s.anchorEnergy - ResonanceData.HEAVY_PULSE_ENERGY_COST,
+                peakMomentum = maxOf(s.peakMomentum, newMom),
+                totalHeavyPulses = s.totalHeavyPulses + 1L,
+            )
         }
         _gameState.value?.let { _achievements.value = checkAchievements(it) }
+        return outcome
     }
 
     private fun startTickLoop() {

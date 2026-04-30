@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [SkillStateEntity::class, BankItemEntity::class, GameMetaEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class GameDatabase : RoomDatabase() {
@@ -69,6 +69,15 @@ abstract class GameDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE game_meta ADD COLUMN combatKillCount INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE game_meta ADD COLUMN combatXpPerKill REAL NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE game_meta ADD COLUMN combatLogText TEXT")
+            }
+        }
+
+        /** Expanded equipment: head slot + twin ring pockets. */
+        val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE game_meta ADD COLUMN equippedHead TEXT")
+                db.execSQL("ALTER TABLE game_meta ADD COLUMN equippedRing TEXT")
+                db.execSQL("ALTER TABLE game_meta ADD COLUMN equippedRing2 TEXT")
             }
         }
     }

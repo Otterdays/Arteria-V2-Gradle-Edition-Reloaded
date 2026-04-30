@@ -27,9 +27,13 @@ data class GameMetaEntity(
     val lastOfflineTickAppliedAt: Long = 0L,
     // Equipped gear slots (null = nothing equipped in that slot)
     val equippedWeapon: String? = null,
+    val equippedHead: String? = null,
     val equippedTool: String? = null,
     val equippedArmor: String? = null,
     val equippedAccessory: String? = null,
+    /** First finger-jewelry pocket (distinct from accessory amulets). */
+    val equippedRing: String? = null,
+    val equippedRing2: String? = null,
     /** Active companion id (null = no companion summoned). */
     val activeCompanionId: String? = null,
     /** Resonance clicker momentum 0–100 (Room REAL). */

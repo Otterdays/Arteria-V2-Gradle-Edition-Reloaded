@@ -1,7 +1,10 @@
 package com.arteria.game.ui.game
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,24 +28,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arteria.game.core.data.ResonanceData
 import com.arteria.game.core.model.GameState
+import com.arteria.game.core.model.ResonancePulseOutcome
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.skill.SkillId
 import com.arteria.game.core.skill.XPTable
 import com.arteria.game.ui.theme.ArteriaPalette
 import com.arteria.game.ui.theme.LocalReduceMotion
+import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 // [TRACE: DOCS/ARTERIA-V1-DOCS/DOCU/CLICKER_DESIGN.md — Resonance tab UX]
 
@@ -50,8 +61,8 @@ import kotlin.math.roundToInt
 @Composable
 fun ResonanceScreen(
     gameState: GameState,
-    onPulse: () -> Unit,
-    onHeavyPulse: () -> Unit,
+    onPulse: () -> ResonancePulseOutcome?,
+    onHeavyPulse: () -> ResonancePulseOutcome?,
     hapticsEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -71,6 +82,14 @@ fun ResonanceScreen(
         animationSpec = tween(180),
         label = "orb_scale",
     )
+
+    var floater by remember { mutableStateOf<ResonancePulseOutcome?>(null) }
+
+    LaunchedEffect(floater?.pulseId) {
+        val id = floater?.pulseId ?: return@LaunchedEffect
+        delay(780)
+        if (floater?.pulseId == id) floater = null
+    }
 
     fun feedbackHeavy() {
         if (hapticsEnabled) {
@@ -104,6 +123,32 @@ fun ResonanceScreen(
             color = ArteriaPalette.TextMuted,
         )
 
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = ArteriaPalette.BgCard,
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Lifetime",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ArteriaPalette.TextMuted,
+                )
+                Text(
+                    text = "${gameState.totalResonancePulses} pulses · ${gameState.totalHeavyPulses} heavy · " +
+                        "peak ${gameState.peakMomentum.roundToInt()}% momentum",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ArteriaPalette.TextSecondary,
+                )
+            }
+        }
+
+        Text(
+            text = ResonanceData.baseTapHintsLine(level),
+            style = MaterialTheme.typography.bodySmall,
+            color = ArteriaPalette.TextSecondary,
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -122,11 +167,13 @@ fun ResonanceScreen(
                         indication = null,
                         onClick = {
                             feedbackTap()
-                            onPulse()
+                            val r = onPulse()
+                            if (r != null) floater = r
                         },
                         onLongClick = {
                             feedbackHeavy()
-                            onHeavyPulse()
+                            val r = onHeavyPulse()
+                            if (r != null) floater = r
                         },
                     ),
                 contentAlignment = Alignment.Center,
@@ -137,10 +184,19 @@ fun ResonanceScreen(
                     color = accent,
                 )
             }
+
+            PulseFloater(
+                outcome = floater,
+                accent = accent,
+                reduceMotion = reduceMotion,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp),
+            )
         }
 
         Text(
-            text = "Tap to build Momentum · Long-press Heavy Pulse (Lv 60+, 5 Anchor)",
+            text = "Tap orb · Long-press Heavy Pulse (Lv 60+, 5 Anchor)",
             style = MaterialTheme.typography.bodySmall,
             color = ArteriaPalette.TextSecondary,
         )
@@ -207,5 +263,48 @@ fun ResonanceScreen(
             }
         }
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun PulseFloater(
+    outcome: ResonancePulseOutcome?,
+    accent: Color,
+    reduceMotion: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = outcome != null,
+        modifier = modifier.fillMaxWidth(),
+        enter = fadeIn(tween(140)) + slideInVertically(
+            tween(220),
+        ) { if (reduceMotion) 0 else it / 5 },
+        exit = fadeOut(tween(320)),
+    ) {
+        val o = outcome ?: return@AnimatedVisibility
+        val xpStr = String.format(Locale.US, "%.1f", o.xpAdded)
+        val momStr = String.format(Locale.US, "%.1f", o.momentumAdded)
+        val rhythmLine =
+            if (!o.heavySurge && o.rhythmBonusPercentApplied > 0) {
+                " · Rhythm +${o.rhythmBonusPercentApplied}% (depth ×${o.rhythmDepthAfter})"
+            } else {
+                ""
+            }
+        val heavyTag = if (o.heavySurge) " HEAVY SURGE" else ""
+        Surface(
+            color = ArteriaPalette.BgCard.copy(alpha = 0.92f),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Column(
+                Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "+$xpStr XP · +$momStr momentum$rhythmLine$heavyTag",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (o.heavySurge) ArteriaPalette.Gold else accent,
+                )
+            }
+        }
     }
 }

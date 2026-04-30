@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-04-29 | Composer | GPT-5.2 | **Equipment expansion (SBOM bump):** `GameDatabase` **v6** + `MIGRATION_5_6` (`equippedHead`, `equippedRing`, `equippedRing2`); changelog + SCRATCHPAD handoff appended; no Maven coordinate edits. |
 | 2026-04-29 | Codex | GPT-5 | **SBOM audit/sync:** Reconciled `DOCS/SBOM.md` with live Gradle + `GameDatabase.kt`: AGP **9.2.0** (was stale 9.1.0); toolchain “Next available” for AGP amended; `GameDatabase` **v5** + `MIGRATION_2_3`–`MIGRATION_4_5` documented; release `isMinifyEnabled` noted; appended security snapshot row. |
 | 2026-04-01 | Cursor Agent | Composer | **Phase 2 close:** `:core` converted to JVM Kotlin (`kotlin("jvm")` 2.3.20); engine moved from `app/.../core` to `core/src/main/kotlin`; `TickEngineTest` + `XPTableTest`; `app` → `implementation(project(":core"))`; root `org.jetbrains.kotlin.jvm` apply false; `:core:test` + `:app:testDebugUnitTest` green. |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: `androidx.datastore:datastore-preferences:1.2.0`; app prefs + theme/motion/audio/haptics/offline-report; OSS/Credits screens; reset/delete profile + `GameDao` deletes; `TickEngine.DEFAULT_MAX_OFFLINE_MS`; `:app:compileDebugKotlin` + `:app:testDebugUnitTest` green. |
@@ -21,7 +22,7 @@
 
 # SBOM (Software Bill of Materials) — Arteria V2 Gradle Edition Reloaded
 
-> Last updated: 2026-04-29 (SBOM reconciliation vs live Gradle + Room schema)
+> Last updated: 2026-04-29 (equipment loadout — Room **`game_meta`** v6 append via **`MIGRATION_5_6`**)
 > Source of truth: `settings.gradle.kts`, root `build.gradle.kts`, `app/build.gradle.kts`, `core/build.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties`, `gradle/gradle-daemon-jvm.properties`
 > Scope: Declared build/runtime/test dependencies and bundled non-Maven assets.
 
@@ -84,13 +85,17 @@
 | `targetSdk` | `36` | `app/build.gradle.kts` |
 | `minSdk` | `26` | `app/build.gradle.kts` only **`[AMENDED 2026-04-01]:`** `:core` is not an Android module. |
 | `GameDatabase` (Room) | `version = 2`; `MIGRATION_1_2` adds `lastOfflineTickAppliedAt` on `game_meta` | `app/.../data/game/GameDatabase.kt` |
-| `GameDatabase` (Room) — **current** | `version = 5`; `MIGRATION_1_2` … `MIGRATION_4_5` (equipment/companion, resonance, encounter combat columns on `game_meta`) | `app/.../data/game/GameDatabase.kt` |
+| `GameDatabase` (Room) — **current** | **`[AMENDED 2026-04-29]:`** `version = 6`; **`MIGRATION_1_2` … `MIGRATION_5_6`** (adds **`equippedHead` / `equippedRing` / `equippedRing2`** on **`game_meta`**; prior migrations cover offline audit + equipment/companion + resonance + encounter combat columns) | `app/.../data/game/GameDatabase.kt`; `ArteriaApp.kt` |
 | `ProfileDatabase` (Room) | `version = 1` | `app/.../data/profile/ProfileDatabase.kt` |
 | `buildTypes.release` | `isMinifyEnabled = true` (R8/minify + `proguard-android-optimize.txt` + `proguard-rules.pro`) | `app/build.gradle.kts` |
 
 **`[AMENDED 2026-03-31]:`** Game persistence schema bumped to **v2** for Phase 4 (offline audit column). Existing installs migrate on upgrade via `addMigrations(GameDatabase.MIGRATION_1_2)` in `ArteriaApp`.
 
-**`[AMENDED 2026-04-29]:`** `GameDatabase` is **version 5** in the current tree; `ArteriaApp` registers **`MIGRATION_1_2`**, **`MIGRATION_2_3`**, **`MIGRATION_3_4`**, and **`MIGRATION_4_5`** (see `ArteriaApp.kt`). The v2 paragraph above is **historical milestone** text only — the **GameDatabase (Room) — current** table row is authoritative for schema level.
+**`[AMENDED 2026-04-29 — equipment loadout expansion]:`** `GameDatabase` is now **version 6** (`GameDatabase.kt`); `ArteriaApp.kt` additionally registers **`MIGRATION_5_6`** which adds **`equippedHead`**, **`equippedRing`**, **`equippedRing2`** nullable columns on `game_meta`.
+
+**`[SUPERSEDED 2026-04-29 — ROOM NOW v6]:`** The paragraph claiming **`GameDatabase` version 5** only described the pre-expansion milestone; **`MIGRATION_5_6`** + version **6** are now live (`GameDatabase.kt`, `ArteriaApp.kt`). Preserve this line as migration-history context only — authoritative level is the **Android Targets** **`GameDatabase` (Room) — current** row.
+
+**`[AMENDED 2026-04-29 — historical milestone text]:`** `GameDatabase` reached **version 5** when **`MIGRATION_4_5`** landed (`ArteriaApp.kt` registrations through **`MIGRATION_4_5`** covered equipment/companion, resonance, and encounter combat persistence). The v2 isolated paragraph remains the **offline-audit milestone** narrative.
 
 **`[AMENDED 2026-04-01]:`** `:app` enables **`buildConfig = true`** (`app/build.gradle.kts`) so UI can read `com.arteria.game.BuildConfig` for version labels.
 
@@ -166,6 +171,9 @@
 | 2026-03-31 | Coordinate-level review after Kotlin/dependency bump | Updated to Kotlin Compose `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`; no new non-AndroidX third-party dependencies introduced |
 | 2026-03-30 | Coordinate-level review of declared deps | No known high-risk third-party dependencies introduced; stack is AndroidX/Google/Kotlin ecosystem plus JUnit |
 | 2026-04-29 | SBOM doc vs live Gradle + Room | Reconciled stale **AGP 9.1.0** / **GameDatabase v2-only** narrative: **AGP 9.2.0**, **Room v5** + migration chain, release minify row; dependency coordinates unchanged vs `app/build.gradle.kts` |
+| 2026-04-29 | Schema touchpoint — expanded equipment persistence | Verified **`game_meta`** expands via **`MIGRATION_5_6`** (Room **`GameDatabase` version 6**); no Maven coordinate changes bundled with this schema bump |
+
+**`[AMENDED 2026-04-29 — supersession note]:`** The **SBOM doc vs live Gradle + Room** row predates **`MIGRATION_5_6`** / **`equippedHead` / `equippedRing` / `equippedRing2`**. Treat the **`Schema touchpoint`** row + **Android Targets** **`GameDatabase` (Room) — current** cell as authoritative for **`GameDatabase` version 6**; keep chronological rows unmigrated for audit readability.
 
 ---
 

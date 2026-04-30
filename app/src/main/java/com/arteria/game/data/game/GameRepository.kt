@@ -3,10 +3,10 @@ package com.arteria.game.data.game
 import com.arteria.game.core.model.ActiveCombat
 import com.arteria.game.core.model.CombatLogEntry
 import com.arteria.game.core.model.CombatLogType
-import com.arteria.game.core.model.EquippedGear
-import com.arteria.game.core.model.GameState
 import com.arteria.game.core.model.SkillState
 import com.arteria.game.core.skill.SkillId
+import com.arteria.game.core.model.normalizeEquippedGearFromColumns
+import com.arteria.game.core.model.GameState
 
 class GameRepository(
     private val dao: GameDao,
@@ -37,11 +37,14 @@ class GameRepository(
 
         val bank = bankEntities.associate { it.itemId to it.quantity }
 
-        val equippedGear = EquippedGear(
+        val equippedGear = normalizeEquippedGearFromColumns(
             weapon = meta?.equippedWeapon,
-            tool = meta?.equippedTool,
+            head = meta?.equippedHead,
             armor = meta?.equippedArmor,
             accessory = meta?.equippedAccessory,
+            ring = meta?.equippedRing,
+            ring2Col = meta?.equippedRing2,
+            tool = meta?.equippedTool,
         )
 
         return GameState(
@@ -97,9 +100,12 @@ class GameRepository(
                     lastSaveTimestamp = System.currentTimeMillis(),
                     lastOfflineTickAppliedAt = state.lastOfflineTickAppliedAt,
                     equippedWeapon = state.equippedGear.weapon,
+                    equippedHead = state.equippedGear.head,
                     equippedTool = state.equippedGear.tool,
                     equippedArmor = state.equippedGear.armor,
                     equippedAccessory = state.equippedGear.accessory,
+                    equippedRing = state.equippedGear.ring,
+                    equippedRing2 = state.equippedGear.ring2,
                     activeCompanionId = state.activeCompanionId,
                     momentum = state.momentum,
                     anchorEnergy = state.anchorEnergy,

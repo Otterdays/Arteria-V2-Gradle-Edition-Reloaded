@@ -2,6 +2,8 @@ package com.arteria.game.core.data
 
 import com.arteria.game.core.model.GameState
 import com.arteria.game.core.skill.SkillId
+import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Resonance clicker tuning aligned with `DOCS/ARTERIA-V1-DOCS/DOCU/CLICKER_DESIGN.md`.
@@ -31,6 +33,41 @@ object ResonanceData {
     const val HEAVY_PULSE_ENERGY_COST: Int = 5
     const val HEAVY_PULSE_MOMENTUM: Double = 20.0
     const val HEAVY_PULSE_XP: Double = 40.0
+
+    /**
+     * Taps farther apart than this break the Rhythm chain (QoL pacing similar to Cookie-style combos).
+     */
+    const val FLOW_CHAIN_GAP_MS: Long = 900L
+    /** Max chain depth counted for bonus — keeps tap-spam humane. */
+    const val FLOW_CHAIN_CAP: Int = 14
+    /** Per chained tap before this pulse, additive XP/Momentum multiplier (cap via [FLOW_CHAIN_CAP]). */
+    const val FLOW_BONUS_PER_PRIOR_TAP: Double = 0.017
+
+    /**
+     * `priorChain` = rhythm streak **before** this tap (number of taps since last chain break − 1 semantics:
+     * first tap uses 0).
+     */
+    fun flowMultiplier(priorChain: Int): Double {
+        val c = priorChain.coerceIn(0, FLOW_CHAIN_CAP)
+        return 1.0 + FLOW_BONUS_PER_PRIOR_TAP * c
+    }
+
+    fun baseTapHintsLine(resonanceLevel: Int): String {
+        val xp = resonanceXpPerTap(resonanceLevel)
+        val mom = momentumPerTap(resonanceLevel)
+        return String.format(
+            Locale.US,
+            "Base pulse ~+%s XP · +%s momentum — Rhythm boosts chained taps (<%ds). ",
+            formatHint(xp),
+            formatMom(mom),
+            FLOW_CHAIN_GAP_MS / 1000L,
+        ) + "Long-press Heavy when Soul Cranking is live."
+    }
+
+    private fun formatHint(x: Double): String =
+        if (x >= 100) x.roundToInt().toString() else String.format(Locale.US, "%.1f", x)
+
+    private fun formatMom(x: Double): String = String.format(Locale.US, "%.1f", x)
 
     private const val BASE_XP_PER_TAP: Double = 12.0
     private const val BASE_MOMENTUM_PER_TAP: Double = 4.0
@@ -91,6 +128,7 @@ object ResonanceData {
     )
 
     val unlockRows: List<UnlockRow> = listOf(
+        UnlockRow(1, "flow_rhythm", "Flow Rhythm", "Keep pulses under ~1s apart to stack Rhythm — bigger XP + momentum."),
         UnlockRow(UNLOCK_MULTI_PULSE, "multi_pulse", "Multi-Pulse", "Faster pulses — bonus tap efficiency."),
         UnlockRow(UNLOCK_RESONANT_ECHO, "echo", "Resonant Echo", "+50% Resonance XP and Momentum per tap."),
         UnlockRow(

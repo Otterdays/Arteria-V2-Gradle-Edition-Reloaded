@@ -52,6 +52,7 @@ fun ArteriaApp(modifier: Modifier = Modifier) {
             GameDatabase.MIGRATION_2_3,
             GameDatabase.MIGRATION_3_4,
             GameDatabase.MIGRATION_4_5,
+            GameDatabase.MIGRATION_5_6,
         )
             .build()
     }

@@ -41,7 +41,7 @@ object JewelcraftingData {
             inputItems = mapOf("raw_diamond" to 1),
         ),
 
-        // Jewelry (Accessories from EquipmentRegistry)
+        // Jewelry (rings + accessories backed by EquipmentRegistry equip ids)
         SkillAction(
             id = "craft_sapphire_ring", skillId = SkillId.JEWELCRAFTING, name = "Sapphire Ring",
             levelRequired = 20, xpPerAction = 40.0, actionTimeMs = 3000L,

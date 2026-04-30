@@ -60,6 +60,38 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.10.1",
+        date = "2026-04-29",
+        tag = "RESONANCE",
+        tagEmoji = "◉",
+        tagColor = ArteriaPalette.VoidAccent,
+        changes = listOf(
+            "Flow Rhythm: pulses inside ~1s stack a capped XP + momentum bonus — rewards steady tapping " +
+                "without turning the orb into endless multiplier creep",
+            "On-screen pulse readout: floating totals after each tap/heavy surge so “numbers go up” " +
+                "feedback stays crisp",
+            "Lifetime stats card (total pulses, heavies, peak momentum) plus clearer base tap hints " +
+                "per clicker design notes",
+            "Lv 1 Flow Rhythm unlock row documents the mechanic alongside existing milestone gates",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.10.0",
+        date = "2026-04-29",
+        tag = "LOADOUT",
+        tagEmoji = "⚔️",
+        tagColor = ArteriaPalette.LuminarEnd,
+        changes = listOf(
+            "Seven-slot silhouette: Head + dual ring pockets alongside weapon, armor, accessory, " +
+                "and tool — RPG-standard layout that stays thumb-friendly",
+            "New head armor and standalone ring items; Ring of Fortune is now correctly a finger " +
+                "jewelry equip (migration keeps saves honest via normalization on load)",
+            "Combat and XP boosts now tally every worn piece automatically in the engines, " +
+                "so stacking helms/rings/power tools always affects ticks and encounters",
+            "Room saves grow three optional columns on profile meta (auto-migrates)",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.9.0",
         date = "2026-04-29",
         tag = "COMBAT",

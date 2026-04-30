@@ -28,9 +28,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.model.EquippedGear
+import com.arteria.game.core.model.allEquippedIdsForGameplay
 import com.arteria.game.core.model.Equipment
+import com.arteria.game.core.model.EquipmentSlot
 import com.arteria.game.core.model.EquipmentSlots
 import com.arteria.game.ui.theme.ArteriaPalette
+
+// [TRACE: DOCS/SCRATCHPAD.md — expanded equipment silhouette + persistence v6]
 
 @Composable
 fun EquipmentScreen(
@@ -41,28 +45,13 @@ fun EquipmentScreen(
     onUnequip: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val slots = listOf(
+    val slots = EquipmentSlots.paperDollOrder.map { slot ->
         SlotView(
-            slotId = EquipmentSlots.WEAPON.id,
-            slotName = EquipmentSlots.WEAPON.displayName,
-            equippedId = equippedGear.weapon,
-        ),
-        SlotView(
-            slotId = EquipmentSlots.ARMOR.id,
-            slotName = EquipmentSlots.ARMOR.displayName,
-            equippedId = equippedGear.armor,
-        ),
-        SlotView(
-            slotId = EquipmentSlots.ACCESSORY.id,
-            slotName = EquipmentSlots.ACCESSORY.displayName,
-            equippedId = equippedGear.accessory,
-        ),
-        SlotView(
-            slotId = EquipmentSlots.TOOL.id,
-            slotName = EquipmentSlots.TOOL.displayName,
-            equippedId = equippedGear.tool,
-        ),
-    )
+            slotId = slot.id,
+            slotName = slot.displayName,
+            equippedId = equippedGear.equippedInUiSlot(slot),
+        )
+    }
     val equipped = slots.mapNotNull { it.equippedId?.let(EquipmentRegistry::getById) }
     val aggregate = aggregateCombatStats(equipped)
 
@@ -82,7 +71,7 @@ fun EquipmentScreen(
             color = ArteriaPalette.Gold,
         )
         Text(
-            text = "Player level $playerLevel",
+            text = "Seven-slot silhouette · player level $playerLevel · twin ring pockets.",
             style = MaterialTheme.typography.bodySmall,
             color = ArteriaPalette.TextMuted,
         )
@@ -105,11 +94,15 @@ fun EquipmentScreen(
         Spacer(Modifier.height(6.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            EquipmentSlots.all.forEach { slot ->
+            EquipmentSlots.allItemKinds.forEach { slot ->
                 val owned = groupedOwned[slot.id].orEmpty().sortedBy { it.levelRequired }
                 item(key = "header_${slot.id}") {
+                    val headerTitle = when (slot.id) {
+                        EquipmentSlots.RING.id -> "RINGS — dual sockets"
+                        else -> slot.displayName.uppercase()
+                    }
                     Text(
-                        text = slot.displayName.uppercase(),
+                        text = headerTitle,
                         style = MaterialTheme.typography.labelSmall,
                         color = ArteriaPalette.AccentWeb,
                         modifier = Modifier.padding(start = 2.dp, top = 4.dp),
@@ -127,7 +120,7 @@ fun EquipmentScreen(
                 } else {
                     items(owned, key = { it.id }) { gear ->
                         val qty = bank[gear.id] ?: 0
-                        val isEquipped = slots.any { it.equippedId == gear.id }
+                        val isEquipped = gear.id in equippedGear.allEquippedIdsForGameplay()
                         val canEquip = playerLevel >= gear.levelRequired
                         GearCard(
                             gear = gear,
@@ -169,7 +162,7 @@ private fun PaperDollLite(
     ) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "PAPER DOLL LITE",
+                text = "SILHOUETTE (PAPER DOLL)",
                 style = MaterialTheme.typography.labelSmall,
                 color = ArteriaPalette.Gold,
             )
@@ -397,6 +390,18 @@ private fun GearCard(
         }
     }
 }
+
+private fun EquippedGear.equippedInUiSlot(slot: EquipmentSlot): String? =
+    when (slot.id) {
+        EquipmentSlots.WEAPON.id -> weapon
+        EquipmentSlots.HEAD.id -> head
+        EquipmentSlots.TOOL.id -> tool
+        EquipmentSlots.ARMOR.id -> armor
+        EquipmentSlots.ACCESSORY.id -> accessory
+        EquipmentSlots.RING.id -> ring
+        EquipmentSlots.RING2.id -> ring2
+        else -> null
+    }
 
 private fun aggregateCombatStats(equipped: List<Equipment>): AggregateStats {
     var acc = 0

@@ -200,7 +200,56 @@ object EquipmentRegistry {
             value = 100,
         ),
 
-        // Accessories
+        // Head
+        Equipment(
+            id = "cloth_hood",
+            name = "Cloth Hood",
+            slot = EquipmentSlots.HEAD.id,
+            description = "Keeps glare off rituals and scrolls",
+            icon = "🎓",
+            skillBoosts = mapOf(SkillId.WIZARDRY to 0.03),
+            combatStats = EquipmentCombatStats(meleeDefence = 1),
+            levelRequired = 1,
+            value = 12,
+        ),
+        Equipment(
+            id = "leather_coif",
+            name = "Leather Coif",
+            slot = EquipmentSlots.HEAD.id,
+            description = "Flexible protection for scouts and scavengers",
+            icon = "🧢",
+            skillBoosts = mapOf(SkillId.DEFENCE to 0.04),
+            combatStats = EquipmentCombatStats(meleeDefence = 2),
+            levelRequired = 5,
+            value = 35,
+        ),
+        Equipment(
+            id = "iron_helm",
+            name = "Iron Helm",
+            slot = EquipmentSlots.HEAD.id,
+            description = "Heavy steel that turns glancing blows",
+            icon = "⛑️",
+            skillBoosts = mapOf(SkillId.DEFENCE to 0.06),
+            combatStats = EquipmentCombatStats(
+                meleeDefence = 3,
+                accuracy = 1,
+            ),
+            levelRequired = 10,
+            value = 90,
+        ),
+        Equipment(
+            id = "circlet_echo",
+            name = "Circlet of Echoes",
+            slot = EquipmentSlots.HEAD.id,
+            description = "Focuses kinetic rhythm into cleaner pulses",
+            icon = "📯",
+            skillBoosts = mapOf(SkillId.RESONANCE to 0.06),
+            combatStats = EquipmentCombatStats(meleeDefence = 1),
+            levelRequired = 15,
+            value = 180,
+        ),
+
+        // Accessories (non-ring)
         Equipment(
             id = "amulet_of_accuracy",
             name = "Amulet of Accuracy",
@@ -217,22 +266,6 @@ object EquipmentRegistry {
             value = 100,
         ),
         Equipment(
-            id = "ring_of_fortune",
-            name = "Ring of Fortune",
-            slot = EquipmentSlots.ACCESSORY.id,
-            description = "Increases chance of rare drops",
-            icon = "💍",
-            skillBoosts = emptyMap(),
-            combatStats = EquipmentCombatStats(
-                accuracy = 2,
-                maxHit = 1,
-                meleeDefence = 1,
-            ),
-            globalXpMultiplier = 1.05,
-            levelRequired = 20,
-            value = 500,
-        ),
-        Equipment(
             id = "explorer_compass",
             name = "Explorer's Compass",
             slot = EquipmentSlots.ACCESSORY.id,
@@ -245,6 +278,52 @@ object EquipmentRegistry {
             ),
             levelRequired = 10,
             value = 200,
+        ),
+
+        // Rings — UI exposes two ring pockets referencing this shared item slot kind
+        Equipment(
+            id = "signet_ring_bronze",
+            name = "Bronze Signet",
+            slot = EquipmentSlots.RING.id,
+            description = "A stamped seal worn on the sword hand",
+            icon = "🔶",
+            skillBoosts = emptyMap(),
+            combatStats = EquipmentCombatStats(
+                accuracy = 1,
+            ),
+            globalXpMultiplier = 1.02,
+            levelRequired = 1,
+            value = 25,
+        ),
+        Equipment(
+            id = "lapis_twist_band",
+            name = "Lapis Twist Band",
+            slot = EquipmentSlots.RING.id,
+            description = "Blue chips catch starlight — odd comfort in melee",
+            icon = "💠",
+            skillBoosts = mapOf(SkillId.ASTROLOGY to 0.04),
+            combatStats = EquipmentCombatStats(
+                accuracy = 3,
+                maxHit = 1,
+            ),
+            levelRequired = 12,
+            value = 220,
+        ),
+        Equipment(
+            id = "ring_of_fortune",
+            name = "Ring of Fortune",
+            slot = EquipmentSlots.RING.id,
+            description = "Gamblers swear it bends rare outcomes your way",
+            icon = "💍",
+            skillBoosts = emptyMap(),
+            combatStats = EquipmentCombatStats(
+                accuracy = 2,
+                maxHit = 1,
+                meleeDefence = 1,
+            ),
+            globalXpMultiplier = 1.05,
+            levelRequired = 20,
+            value = 500,
         ),
     )
 
