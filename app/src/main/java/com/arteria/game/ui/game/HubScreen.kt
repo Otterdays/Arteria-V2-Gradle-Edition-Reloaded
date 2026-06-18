@@ -67,7 +67,7 @@ import java.text.NumberFormat
  * welcome-back card (offline gains), active training panel, quick stats,
  * next milestone nudge, smart suggestions, and recent level-ups.
  *
- * [TRACE: DOCS/claudes_checklist_by_ryan.md — Section 1: Hub Screen]
+ * [TRACE: DOCS/FUTURE UPDATES/claudes_checklist_by_ryan.md — Section 1: Hub Screen]
  */
 @Composable
 fun HubScreen(

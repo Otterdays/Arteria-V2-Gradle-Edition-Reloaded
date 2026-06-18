@@ -63,6 +63,10 @@ class GameViewModel(
     private val _offlineReport = MutableStateFlow<TickResult?>(null)
     val offlineReport: StateFlow<TickResult?> = _offlineReport.asStateFlow()
 
+    /** Wall-clock ms simulated for the last offline catch-up (capped). Used by offline report UX. */
+    private val _offlineSimulatedMs = MutableStateFlow(0L)
+    val offlineSimulatedMs: StateFlow<Long> = _offlineSimulatedMs.asStateFlow()
+
     /** Active random event currently shown to the player. */
     private val _activeRandomEvent = MutableStateFlow<ActiveRandomEvent?>(null)
     val activeRandomEvent: StateFlow<ActiveRandomEvent?> = _activeRandomEvent.asStateFlow()
@@ -110,6 +114,7 @@ class GameViewModel(
             val elapsed = now - loaded.lastSaveTimestamp
             if (elapsed > TICK_INTERVAL_MS * 2) {
                 val maxOffline = offlineCapMs(prefs)
+                val simulatedMs = elapsed.coerceAtMost(maxOffline)
                 val offlineResult = withContext(Dispatchers.Default) {
                     TickEngine.processOffline(
                         state = loaded,
@@ -126,6 +131,7 @@ class GameViewModel(
                 if (showReport &&
                     (offlineResult.xpGained.isNotEmpty() || offlineResult.resourcesGained.isNotEmpty())
                 ) {
+                    _offlineSimulatedMs.value = simulatedMs
                     _offlineReport.value = offlineResult
                 }
             } else {
@@ -147,6 +153,7 @@ class GameViewModel(
 
     fun dismissOfflineReport() {
         _offlineReport.value = null
+        _offlineSimulatedMs.value = 0L
     }
 
     /** Reload persisted state after settings “reset progress” (same profile id). */

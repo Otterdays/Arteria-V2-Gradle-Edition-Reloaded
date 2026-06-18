@@ -9,7 +9,7 @@
 - **Canonical local root:** `Arteria-V2-Gradle-Edition-Reloaded/`
 - **Legacy alias:** `Arteria-Gradle-Edition-V2/` (same project identity in older docs)
 - **Stack truth:** Native Android only (`Kotlin + Compose + Room + Gradle/AGP`)
-- **Source-of-truth docs:** `DOCS/SUMMARY.md` → `DOCS/SBOM.md` → `DOCS/SCRATCHPAD.md` → `DOCS/ARCHITECTURE.md` → `DOCS/ROADMAP.md`
+- **Source-of-truth docs:** `DOCS/SUMMARY.md` → `DOCS/SBOM.md` → `DOCS/SCRATCHPAD.md` → **`DOCS/FUTURE UPDATES/README.md`** (backlogs) → `DOCS/ARCHITECTURE.md` → `DOCS/ROADMAP.md`
 
 <div align="center">
 
@@ -46,7 +46,7 @@
 
 **Product · status**
 
-[![App version](https://img.shields.io/badge/release-1.10.2-FF6B35?style=for-the-badge)](app/build.gradle.kts)
+[![App version](https://img.shields.io/badge/release-1.10.4-FF6B35?style=for-the-badge)](app/build.gradle.kts)
 [![Platform](https://img.shields.io/badge/Android-16_%28API_36%29-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
 [![Material 3](https://img.shields.io/badge/UI-Material_3-6750A4?style=for-the-badge)](https://m3.material.io/)
 [![Status](https://img.shields.io/badge/Status-Phase_5_slice-FF6B35?style=for-the-badge)](DOCS/ROADMAP.md)
@@ -64,7 +64,7 @@
 - **Idle Mechanics** — Offline progression, skill ticks, and resource generation
 - **Skills UX** — Implemented skills open training (`SkillDetailScreen`); skills without registry actions show a **Coming Soon** dialog (`SkillComingSoonDialog`). **Herblore** uses herbs from **Harvesting** (bank `inputItems`); **Scavenging** adds salvage gathering tiers.
 - **Game hub** — Five bottom tabs: **Hub** (command center), **Skills**, **Bank**, **Combat** (encounter v1 — Barn Rat), **Resonance** (clicker / momentum). Settings + Chronicle via `TopAppBar` overlays.
-- **Combat** — `CombatEngine` encounter loop with flee, loot to bank, XP split; more enemies/areas backlog in `DOCS/claudes_checklist_by_ryan.md` §8.
+- **Combat** — `CombatEngine` encounter loop with flee, loot to bank, XP split; more enemies/areas backlog in `DOCS/FUTURE UPDATES/claudes_checklist_by_ryan.md` §8.
 - **Settings & prefs** — DataStore-backed `UserPreferences` (theme, motion, haptics, sound, offline report); About uses `BuildConfig`; OSS **Credits / Licenses** screens.
 - **Account & Profile Persistence** — Room-based save/load with session management
 - **🎬 Docking Station UI** — Beautiful character selection with **animated glitch effects**, timeline visualizations, and skill badge showcases
@@ -248,6 +248,12 @@ Arteria-V2-Gradle-Edition-Reloaded/
 │   ├── SBOM.md                    # Software bill of materials
 │   ├── ROADMAP.md                 # Phases 0–10 delivery plan
 │   ├── SCRATCHPAD.md              # Live handoff + agent notes
+│   ├── FUTURE UPDATES/            # **All future suggestions & backlogs** (canonical)
+│   │   ├── README.md              # Hub — release plan, checklists, top-100
+│   │   ├── RELEASE_PLAN.md
+│   │   ├── claudes_checklist_by_ryan.md
+│   │   ├── master_settings_suggestions_doc.md
+│   │   └── top-100-next-todo.md
 │   └── ...
 │
 └── www/                           # Local landing page
@@ -307,6 +313,7 @@ Arteria-V2-Gradle-Edition-Reloaded/
 - **[SBOM.md](DOCS/SBOM.md)** — Dependency inventory, upgrade roadmap
 - **[ROADMAP.md](DOCS/ROADMAP.md)** — Delivery phases 0–10
 - **[SCRATCHPAD.md](DOCS/SCRATCHPAD.md)** — Live handoff notes & agent credits
+- **[FUTURE UPDATES/README.md](DOCS/FUTURE%20UPDATES/README.md)** — **Future work hub** (release plan, agent checklist, settings backlog, top-100)
 
 **Game Design Truth:** Main repo `../DOCU/` (monorepo context) or bundled copy at `DOCS/ARTERIA-V1-DOCS/DOCU/`
 
@@ -314,8 +321,8 @@ Arteria-V2-Gradle-Edition-Reloaded/
 
 ## 🤝 Contributing
 
-1. **Read** [DOCS/SUMMARY.md](DOCS/SUMMARY.md) → [DOCS/ROADMAP.md](DOCS/ROADMAP.md) for context
-2. **Pick a phase** or feature from [DOCS/ROADMAP.md](DOCS/ROADMAP.md) (Phases 2–10 are open)
+1. **Read** [DOCS/SUMMARY.md](DOCS/SUMMARY.md) → [DOCS/FUTURE UPDATES/README.md](DOCS/FUTURE%20UPDATES/README.md) → [DOCS/ROADMAP.md](DOCS/ROADMAP.md) for context
+2. **Pick a slice** from [FUTURE UPDATES/RELEASE_PLAN.md](DOCS/FUTURE%20UPDATES/RELEASE_PLAN.md) or an item from [top-100-next-todo.md](DOCS/FUTURE%20UPDATES/top-100-next-todo.md)
 3. **Create a branch** from `main` (no force-pushes unless coordinated)
 4. **Follow conventions** in [DOCS/ARCHITECTURE.md](DOCS/ARCHITECTURE.md) (KISS/YAGNI/DRY/Fail Fast)
 5. **Test locally**: `:app:testDebugUnitTest` and `:app:connectedAndroidTest` must pass

@@ -42,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,6 +122,13 @@ fun SkillDetailScreen(
                 onBack = onBack,
             )
 
+            Text(
+                text = skillId.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = ArteriaPalette.TextMuted,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+            )
+
         // ── Stats strip ───────────────────────────────────────────────────────
         Row(
             modifier = Modifier
@@ -165,6 +173,15 @@ fun SkillDetailScreen(
 
         // ── Action list ───────────────────────────────────────────────────────
         if (actions.isNotEmpty()) {
+            val bestActionId = remember(actions, level, bank) {
+                actions
+                    .filter { action ->
+                        level >= action.levelRequired &&
+                            action.inputItems.all { (id, req) -> (bank[id] ?: 0) >= req }
+                    }
+                    .maxByOrNull { it.xpPerAction / it.actionTimeMs }
+                    ?.id
+            }
             Text(
                 text = "AVAILABLE ACTIONS",
                 style = MaterialTheme.typography.labelSmall,
@@ -184,6 +201,7 @@ fun SkillDetailScreen(
                         action = action,
                         currentLevel = level,
                         isCurrentAction = isCurrent,
+                        isBestXpRate = action.id == bestActionId,
                         actionProgress = if (isCurrent) trainingProgress else null,
                         bank = bank,
                         pillarColor = accent,
@@ -405,6 +423,7 @@ private fun ActionCard(
     action: SkillAction,
     currentLevel: Int,
     isCurrentAction: Boolean,
+    isBestXpRate: Boolean,
     actionProgress: Float?,
     bank: Map<String, Int>,
     pillarColor: Color,
@@ -469,26 +488,41 @@ private fun ActionCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = action.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (meetsLevel && canAfford) {
-                            ArteriaPalette.TextPrimary
-                        } else {
-                            ArteriaPalette.TextMuted
-                        },
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = action.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (meetsLevel && canAfford) {
+                                ArteriaPalette.TextPrimary
+                            } else {
+                                ArteriaPalette.TextMuted
+                            },
+                        )
+                        if (isBestXpRate && meetsLevel && canAfford) {
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "Best XP/hr",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = ArteriaPalette.Gold,
+                            )
+                        }
+                    }
                     Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = "Lv ${action.levelRequired}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (meetsLevel) ArteriaPalette.TextSecondary else Color(0xFFE74C3C),
+                            color = if (meetsLevel) ArteriaPalette.TextSecondary else ArteriaPalette.CombatAccent,
                         )
                         Text(
                             text = "${nf.format(action.xpPerAction.toLong())} XP",
                             style = MaterialTheme.typography.bodySmall,
                             color = ArteriaPalette.TextSecondary,
+                        )
+                        Text(
+                            text = formatXpPerHour(action),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isBestXpRate && meetsLevel) ArteriaPalette.GoldDim else ArteriaPalette.TextSecondary,
                         )
                         Text(
                             text = "${action.actionTimeMs / 1000.0}s",
@@ -543,5 +577,15 @@ private fun ActionCard(
                 }
             }
         }
+    }
+}
+
+private fun formatXpPerHour(action: com.arteria.game.core.model.SkillAction): String {
+    if (action.actionTimeMs <= 0L) return "— XP/hr"
+    val xpPerHour = action.xpPerAction * 3_600_000.0 / action.actionTimeMs
+    return when {
+        xpPerHour >= 10_000 -> "~${(xpPerHour / 1000).toInt()}K XP/hr"
+        xpPerHour >= 1_000 -> "~${String.format("%.1fK", xpPerHour / 1000)} XP/hr"
+        else -> "~${xpPerHour.toInt()} XP/hr"
     }
 }

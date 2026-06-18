@@ -1,6 +1,7 @@
 package com.arteria.game.core.engine
 
 import com.arteria.game.core.data.EncounterData
+import com.arteria.game.core.data.SkillDataRegistry
 import com.arteria.game.core.data.EquipmentRegistry
 import com.arteria.game.core.model.ActiveCombat
 import com.arteria.game.core.model.CombatLogEntry
@@ -190,9 +191,15 @@ object CombatEngine {
         random: Random,
     ): Pair<GameState, ActiveCombat> {
         val def = EncounterData.enemy(combat.enemyId) ?: return state to combat
-        newLog.add(CombatLogEntry(CombatLogType.KILL, "${def.name} is defeated."))
-
         val split = combat.xpPerKill / 4.0
+        newLog.add(CombatLogEntry(CombatLogType.KILL, "${def.name} is defeated."))
+        val xpEach = split.toInt()
+        newLog.add(
+            CombatLogEntry(
+                CombatLogType.KILL,
+                "+$xpEach XP → Attack, Strength, Defence, Hitpoints",
+            ),
+        )
         val meleeSkills = listOf(
             SkillId.ATTACK,
             SkillId.STRENGTH,
@@ -216,7 +223,12 @@ object CombatEngine {
                 val qty = random.nextInt(drop.minQty, drop.maxQty + 1)
                 bank[drop.itemId] = (bank[drop.itemId] ?: 0) + qty
                 resGained[drop.itemId] = (resGained[drop.itemId] ?: 0) + qty
-                newLog.add(CombatLogEntry(CombatLogType.LOOT, "Loot: ${drop.itemId} x$qty"))
+                newLog.add(
+                    CombatLogEntry(
+                        CombatLogType.LOOT,
+                        "+$qty ${SkillDataRegistry.itemName(drop.itemId)}",
+                    ),
+                )
             }
         }
 

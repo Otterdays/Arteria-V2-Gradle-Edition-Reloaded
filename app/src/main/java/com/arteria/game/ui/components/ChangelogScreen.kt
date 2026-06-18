@@ -60,6 +60,36 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.10.4",
+        date = "2026-06-18",
+        tag = "DISCOVERY",
+        tagEmoji = "🔍",
+        tagColor = ArteriaPalette.LuminarEnd,
+        changes = listOf(
+            "Bank items show a Craft now badge when they are inputs to a recipe you can start immediately",
+            "Tap any bank stack for a detail sheet — item description, Produced by, and Used in skill actions",
+            "Skill detail pages show lore blurbs from each skill's design description",
+            "Combat kills log XP split to Attack/Strength/Defence/Hitpoints; loot uses readable item names",
+            "Recent drops strip on the combat panel surfaces loot without digging through the log",
+            "Offline gains report shows approximate XP/hr over time away when you return",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.10.3",
+        date = "2026-06-18",
+        tag = "QoL",
+        tagEmoji = "⚙️",
+        tagColor = ArteriaPalette.AccentPrimary,
+        changes = listOf(
+            "Settings reorganized into clear sections — Account, Journey, Experience, Simulation, " +
+                "About — with live stats (total level, bank, Chronicle progress) and a Chronicle shortcut",
+            "Sound & haptics merged into one card; planned notifications/economy tucked in a collapsible block",
+            "Bank groups items by category (ores, logs, fish, herbs, …) with Grouped/Flat toggle and " +
+                "collapsible section headers",
+            "Skill actions show XP/hr estimates and a Best XP/hr badge on the top unlocked action",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.10.2",
         date = "2026-04-29",
         tag = "CHRONICLE",

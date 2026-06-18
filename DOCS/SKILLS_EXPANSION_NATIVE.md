@@ -4,7 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-06-18 | Cursor Agent | Composer | **Audit sync:** §0 glossary refreshed (**28** trainables, **v1.10.2**); moved-doc paths; cross-ref `SUMMARY.md` Live Product Snapshot. |
+| 2026-06-18 | Cursor Agent | Composer | **FUTURE UPDATES cross-ref:** agent task backlog → `DOCS/FUTURE UPDATES/claudes_checklist_by_ryan.md`; release spine → `FUTURE UPDATES/RELEASE_PLAN.md`. |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented data for Forging, Jewelcrafting, and Firemaking; updated Mining with Gem Rocks; bridged the economy gap to make `EquipmentRegistry` items craftable via bars/gems. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc sync:** Glossary §0 — Farming, Thieving, Woodworking, Tailoring marked trainable; duplicate §5 → **§5b**; §7.1 counts + Phase 2 callouts amended; intro version parity **1.5.0** / `versionCode` **8**. |
 | 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). **`[AMENDED 2026-04-01]:`** Superseded by **1.5.0** row above for canonical version. |
@@ -24,7 +24,9 @@
 > **Audience:** Implementers, designers, and AI agents extending trainable skills.  
 > **Last updated:** 2026-06-18
 
-**`[AMENDED 2026-06-18]:`** **Canonical release:** **1.10.2** (`versionCode` **15**) — `app/build.gradle.kts`, first `APP_CHANGELOG` card, README shield. **Trainable idle skills:** **28** (`SkillDataRegistry.isSkillImplemented`). **Resonance** = clicker tab, not registry idle actions.
+**`[AMENDED 2026-06-18]:`** **Task backlog & QoL ideas:** **`DOCS/FUTURE UPDATES/`** — not this file. See [`FUTURE UPDATES/README.md`](FUTURE%20UPDATES/README.md), [`claudes_checklist_by_ryan.md`](FUTURE%20UPDATES/claudes_checklist_by_ryan.md), [`top-100-next-todo.md`](FUTURE%20UPDATES/top-100-next-todo.md).
+
+**`[AMENDED 2026-06-18]:`** **Canonical release:** **1.10.4** (`versionCode` **17**) — `app/build.gradle.kts`, first `APP_CHANGELOG` card, README shield. **Trainable idle skills:** **28** (`SkillDataRegistry.isSkillImplemented`). **Resonance** = clicker tab, not registry idle actions.
 
 **`[AMENDED 2026-04-01]:`** **Shipped app version** for player-facing parity is **1.4.5** — keep in sync with `app/build.gradle.kts` (`versionName` / `versionCode`), the top entry in `ChangelogScreen.kt` → `APP_CHANGELOG`, and the README release badge.
 
@@ -510,7 +512,7 @@ The mastery system is **Phase 7+** — it layers on TOP of the existing skill lo
 
 ### 9.5 Checklist Status Audit
 
-Cross-referencing `DOCS/claudes_checklist_by_ryan.md` against current state:
+Cross-referencing `DOCS/FUTURE UPDATES/claudes_checklist_by_ryan.md` against current state:
 
 | Section | Status | Notes |
 |---------|--------|-------|

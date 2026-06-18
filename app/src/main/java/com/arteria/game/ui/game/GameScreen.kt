@@ -227,12 +227,26 @@ fun GameScreen(
     // Settings overlay — full-screen, sits above game content
     if (showSettings) {
         val scope = rememberCoroutineScope()
+        val settingsSnapshot = gameState?.let { state ->
+            SettingsGameSnapshot(
+                totalLevel = state.skills.values.sumOf { XPTable.levelForXp(it.xp) },
+                bankItemTypes = state.bank.count { it.value > 0 },
+                bankTotalStacks = state.bank.values.filter { it > 0 }.sum(),
+                achievementsUnlocked = achievements.count { it.isUnlocked },
+                achievementsTotal = AchievementRegistry.all.size,
+            )
+        }
         SettingsScreen(
             accountSession = accountSession,
+            gameSnapshot = settingsSnapshot,
             tickIntervalMs = GameViewModel.TICK_INTERVAL_MS,
             saveIntervalMs = GameViewModel.SAVE_INTERVAL_MS,
             onBack = { showSettings = false },
             onBackToAccounts = onBackToAccounts,
+            onOpenChronicle = {
+                showSettings = false
+                showChronicle = true
+            },
             onRenameDisplayName = onRenameDisplayName,
             onRenameSuccess = {
                 scope.launch { onRefreshAccountSession() }
@@ -251,8 +265,10 @@ fun GameScreen(
 
     val report = offlineReport
     if (report != null && (report.xpGained.isNotEmpty() || report.resourcesGained.isNotEmpty())) {
+        val offlineMs by gameViewModel.offlineSimulatedMs.collectAsStateWithLifecycle()
         OfflineReportDialog(
             report = report,
+            simulatedDurationMs = offlineMs,
             onDismiss = gameViewModel::dismissOfflineReport,
         )
     }
@@ -434,7 +450,10 @@ fun GameScreen(
                                     }
                                 },
                             )
-                            2 -> BankScreen(bank = currentState?.bank ?: emptyMap())
+                            2 -> BankScreen(
+                                bank = currentState?.bank ?: emptyMap(),
+                                skills = currentState?.skills ?: emptyMap(),
+                            )
                             3 -> {
                                 if (currentState != null) {
                                     CombatScreen(

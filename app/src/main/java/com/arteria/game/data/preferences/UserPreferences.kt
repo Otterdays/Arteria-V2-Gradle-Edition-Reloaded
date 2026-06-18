@@ -2,7 +2,7 @@ package com.arteria.game.data.preferences
 
 import kotlinx.coroutines.flow.first
 
-// [TRACE: DOCS/master_settings_suggestions_doc.md — DataStore app prefs]
+// [TRACE: DOCS/FUTURE UPDATES/master_settings_suggestions_doc.md — DataStore app prefs]
 
 enum class ThemePreference {
     DARK,

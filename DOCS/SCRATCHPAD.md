@@ -4,7 +4,10 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-06-18 | Cursor Agent | Composer | **Deep audit + organize:** Root clutter → `DOCS/` (`claudes_checklist_by_ryan.md`, `master_settings_suggestions_doc.md`, `reference-images/`); untracked `core/bin/`; **Live Product Snapshot** in `SUMMARY.md`; synced stale docs (5 tabs, v1.10.2, 49/28 skills, DB v6, AGP 9.2). |
+| 2026-06-18 | Cursor Agent | Composer | **FUTURE UPDATES doc canon:** `DOCS/FUTURE UPDATES/README.md` hub; redirect stubs; agent docs (SUMMARY/AGENTS/CLAUDE/SCRATCHPAD/README/SKILLS_EXPANSION) + Kotlin TRACE paths; top-100 shipped markers. |
+| 2026-06-18 | Cursor Agent | Composer | **v1.10.4 Discovery layer:** `ItemUsageIndex`, bank craft badges + detail sheet, skill lore, combat loot strip + XP split log, offline XP/hr; **`DOCS/FUTURE UPDATES/RELEASE_PLAN.md`** (1.10.5 carve). `:app:compileDebugKotlin` green. |
+| 2026-06-18 | Cursor Agent | Composer | **v1.10.3 QoL:** Settings reorganized (`SettingsComponents.kt`, Journey + Chronicle link); bank categories (`BankCategory.kt`); skill XP/hr + Best badge; changelog/README. `:app:compileDebugKotlin` green. |
+| 2026-06-18 | Cursor Agent | Composer | **Deep audit + organize:** Root clutter → `DOCS/`; untracked `core/bin/`; Live Product Snapshot; doc sync. |
 | 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle / achievement unlock UX:** `AchievementUnlockBanner` (queued top toast, rarity styling, tap → Chronicle) + `AchievementDecor` for shared Chronicle/banner tints; themed level-up snackbars; Hub “Recent level-ups” label; **`DOCS/SUMMARY.md`** + **`ARCHITECTURE.md`** amended; **v1.10.2 (15)** + README. `:app:compileDebugKotlin` green. |
 | 2026-04-29 | Cursor Agent | GPT-5.5 | **Agent research brief:** Expanded `DOCS/agent_prompt_report_for_research.md` into a structured handoff covering native V2 architecture, idle/clicker loop, Resonance design, system inventory, gaps, improvement priorities, research questions, and verification pointers. |
 | 2026-04-29 | Composer | GPT-5.2 | **Resonance clicker QoL:** Flow Rhythm chain multiplier (`ResonanceData` + `GameViewModel`), `ResonancePulseOutcome` UI payloads, lifetime stats + floating pulse readout + `baseTapHintsLine` on `ResonanceScreen`; unlock row Lv1 Flow Rhythm; **v1.10.1 (14)** changelog + README + SCRATCHPAD. `:app:compileDebugKotlin` + `:core:test` green. |
@@ -108,22 +111,22 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 
 ### Active Status
 
-- **Release:** **v1.10.2** (`versionCode` **15**).
+- **Release:** **v1.10.4** (`versionCode` **17**).
 - **Game shell:** **5 tabs** — Hub · Skills · Bank · Combat · **Resonance** (`ResonanceScreen` clicker; not idle `SkillDetailScreen`).
 - **Skills:** **49** in `SkillId`; **28** idle-trainable via `SkillDataRegistry`; unwired → `SkillComingSoonDialog`.
 - **Combat:** Encounter v1 (Barn Rat / Sunny Meadow) — `CombatEngine` + `CombatScreen`.
 - **Room:** `GameDatabase` **v6** (gear head + dual rings, companion, resonance, combat columns).
 - **Toolchain:** Gradle 9.6 nightly, **AGP 9.2.0**, Kotlin 2.3.20, JVM **21**.
-- **Repo layout:** Planning docs live under **`DOCS/`** — `claudes_checklist_by_ryan.md`, `master_settings_suggestions_doc.md`, `reference-images/`. **`core/bin/`** is build output (gitignored; do not commit).
+- **Repo layout:** **Future work** → **`DOCS/FUTURE UPDATES/`** (hub: `README.md`). Operational docs → `DOCS/SCRATCHPAD`, `SUMMARY`, `ARCHITECTURE`, etc. **`core/bin/`** is build output (gitignored; do not commit).
 
 ### Active Next Actions
 
-0. **Research handoff:** `DOCS/agent_prompt_report_for_research.md`
+0. **Release plan:** `DOCS/FUTURE UPDATES/RELEASE_PLAN.md` — **1.10.5** = combat tempo + session timer + equipment strip on combat panel.
 1. **Summoning smoke:** Barn Rat drops → Summoning pouch list scroll + first train
 2. **Combat baseline:** Attack/Strength melee training loop (beyond encounter v1)
-3. **XP/hr display:** `SkillDetailScreen` live efficiency
+3. ~~**XP/hr display**~~ — shipped 1.10.3
 4. **Equipment loop verify:** gems → Jewelcrafting → equip in `EquipmentScreen`
-5. **Bank §6 backlog:** category grouping + craftable badges (`DOCS/claudes_checklist_by_ryan.md`)
+5. **Bank §6b:** category icons on bank cards
 
 ### Supersession Note
 
@@ -391,10 +394,11 @@ Also fixed reviewer findings:
 
 ## Next Action (for the next agent)
 
+**`[AMENDED 2026-06-18]:`** Backlog picker: **`DOCS/FUTURE UPDATES/top-100-next-todo.md`**. Release spine: **`DOCS/FUTURE UPDATES/RELEASE_PLAN.md`**. Hub: **`DOCS/FUTURE UPDATES/README.md`**. Legacy root `top-100-next-todo.md` is a redirect stub.
 **`[AMENDED 2026-06-18]:`** **Authoritative list:** see **Consolidated Current State (2026-06-18)** at top of this file + `DOCS/SUMMARY.md` Live Product Snapshot. Immediate picks:
-1. Summoning smoke (Barn Rat materials → pouch train)
-2. Combat melee baseline (Attack/Strength beyond encounter v1)
-3. Bank §6a–c category grouping + craftable badges (`DOCS/claudes_checklist_by_ryan.md`)
+1. **1.10.5 slice** — combat tempo indicator, Hub session timer, combat equipment strip (`FUTURE UPDATES/RELEASE_PLAN.md`)
+2. Summoning smoke (Barn Rat materials → pouch train)
+3. Bank §6b category icons (`FUTURE UPDATES/claudes_checklist_by_ryan.md`)
 4. Equipment craft loop verify (gems → Jewelcrafting → equip)
 
 **`[AMENDED 2026-04-01]:`** **v1.5.0 standing** — 12 skills live, equipment + companions integrated, docs aligned. Next priorities:

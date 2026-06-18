@@ -23,7 +23,8 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 1. `DOCS/SUMMARY.md` — status overview
 2. `DOCS/SBOM.md` — current dependency versions
 3. `DOCS/SCRATCHPAD.md` — live blockers and last actions
-4. `DOCS/ARTERIA-V1-DOCS/DOCU/STYLE_GUIDE.md` — conventions
+4. `DOCS/FUTURE UPDATES/README.md` — **future suggestions & backlogs** (release plan, checklists)
+5. `DOCS/ARTERIA-V1-DOCS/DOCU/STYLE_GUIDE.md` — conventions
 
 **During work:** Update `SCRATCHPAD.md` as you go — not just at the end. Checkpoint after every 3–5 tool calls or after each subtask.
 
@@ -304,6 +305,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
   ```
 - **Update order:** New entries go to the **top** of their section (most-recent-first).
 - **Status docs** (`SCRATCHPAD.md`, `SBOM.md`) — update proactively as part of normal work.
+- **Future suggestions & backlogs:** **`DOCS/FUTURE UPDATES/`** only — see `FUTURE UPDATES/README.md`. Do not create new planning docs at repo root or loose under `DOCS/`. Mark items done in-place; legacy paths are redirect stubs.
 - **Content docs** (`ARCHITECTURE.md`, `README.md`, `STYLE_GUIDE.md`) — only amend when explicitly instructed.
 - **SCRATCHPAD.md:** Compact at 500 lines. Always update Agent Credits + Last Actions + Next Action at session end.
 - **SBOM.md:** Update immediately when any package is added or removed.
@@ -383,6 +385,7 @@ Before considering any task complete:
 | `data/game/GameRepository.kt` | Safe game state load/save (transactional) |
 | `data/profile/ProfileRepository.kt` | Profile persistence interface |
 | `DOCS/SCRATCHPAD.md` | **Read this first** — live session state |
+| `DOCS/FUTURE UPDATES/README.md` | **All future suggestions & backlogs** — release plan, checklists, top-100 |
 | `DOCS/SBOM.md` | Canonical dependency versions |
 | `.Codex/cursor.rules` | Agent behavior rules (source of this doc's philosophy) |
 
@@ -394,3 +397,4 @@ Before considering any task complete:
 - **TS → Kotlin port guide:** `DOCS/MIGRATION_SPEC.md`
 - **UI/UX audit notes:** `DOCS/ARTERIA-V1-DOCS/DOCU/debugs/ui-audit-2026-03-08.md`
 - **Roadmap:** `DOCS/ROADMAP.md` (Phases 0–10)
+- **Future work hub:** `DOCS/FUTURE UPDATES/README.md` (release plan, agent checklist, settings backlog, top-100)

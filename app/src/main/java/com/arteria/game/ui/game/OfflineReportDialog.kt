@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,11 +33,16 @@ import java.text.NumberFormat
 @Composable
 fun OfflineReportDialog(
     report: TickResult,
+    simulatedDurationMs: Long = 0L,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val nf = NumberFormat.getIntegerInstance()
     val levelUpRanges = compressLevelUps(report)
+    val totalXp = report.xpGained.values.sum()
+    val efficiencyLine = remember(report, simulatedDurationMs) {
+        formatOfflineEfficiency(totalXp, simulatedDurationMs)
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -62,6 +68,15 @@ fun OfflineReportDialog(
                 )
 
                 Spacer(Modifier.height(16.dp))
+
+                efficiencyLine?.let { line ->
+                    Text(
+                        text = line,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ArteriaPalette.AccentPrimary,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
 
                 Column(
                     modifier = Modifier
@@ -162,6 +177,21 @@ fun OfflineReportDialog(
                 }
             }
         }
+    }
+}
+
+private fun formatOfflineEfficiency(totalXp: Double, simulatedMs: Long): String? {
+    if (simulatedMs < 60_000L || totalXp <= 0.0) return null
+    val hours = simulatedMs / 3_600_000.0
+    val xpPerHour = totalXp / hours
+    val hoursLabel = when {
+        hours >= 1.0 -> String.format("%.1f h", hours)
+        else -> "${(simulatedMs / 60_000).toInt()} min"
+    }
+    return when {
+        xpPerHour >= 10_000 -> "~${(xpPerHour / 1000).toInt()}K XP/hr over $hoursLabel away"
+        xpPerHour >= 1_000 -> String.format("~%.1fK XP/hr over %s away", xpPerHour / 1000, hoursLabel)
+        else -> "~${xpPerHour.toInt()} XP/hr over $hoursLabel away"
     }
 }
 

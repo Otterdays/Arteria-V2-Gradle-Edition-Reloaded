@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -202,6 +203,8 @@ private fun ActiveCombatPanel(
             color = ArteriaPalette.TextSecondary,
         )
 
+        CombatLootStrip(log = log)
+
         Text("Combat log", style = MaterialTheme.typography.titleSmall, color = ArteriaPalette.TextPrimary)
         Surface(
             modifier = Modifier
@@ -225,6 +228,38 @@ private fun ActiveCombatPanel(
             }
         }
         Spacer(Modifier.height(4.dp))
+    }
+}
+
+@Composable
+private fun CombatLootStrip(log: List<CombatLogEntry>, modifier: Modifier = Modifier) {
+    val recentLoot = log.filter { it.type == CombatLogType.LOOT }.takeLast(8).reversed()
+    if (recentLoot.isEmpty()) return
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            "Recent drops",
+            style = MaterialTheme.typography.labelSmall,
+            color = ArteriaPalette.GoldDim,
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(top = 6.dp, bottom = 4.dp),
+        ) {
+            items(recentLoot, key = { it.message }) { entry ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = ArteriaPalette.BgCard,
+                ) {
+                    Text(
+                        entry.message.removePrefix("+"),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ArteriaPalette.Gold,
+                    )
+                }
+            }
+        }
     }
 }
 

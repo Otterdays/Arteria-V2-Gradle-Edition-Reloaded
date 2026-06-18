@@ -4,7 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-06-18 | Cursor Agent | Composer | **Repo + doc audit:** Moved root planning docs/images into `DOCS/`; untracked `core/bin/` build artifacts; added **Live Product Snapshot** to `SUMMARY.md`; synced `ARCHITECTURE`/`README`/`CLAUDE`/`SCRATCHPAD`/`SKILLS_EXPANSION_NATIVE` with **v1.10.2**, **5-tab** shell, **49** `SkillId` / **28** registry trainables, **`GameDatabase` v6**, **AGP 9.2.0**. |
+| 2026-06-18 | Cursor Agent | Composer | **FUTURE UPDATES doc canon:** `DOCS/FUTURE UPDATES/` hub + README; redirect stubs at legacy paths; SUMMARY/AGENTS/CLAUDE/SCRATCHPAD/README/SKILLS_EXPANSION + Kotlin TRACE paths updated; top-100 shipped markers (13–16, combat baseline). |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented 3 new crafting skills bridging the gear gap; updated Mining gems; Phase 5 near-complete. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 doc sync:** ROADMAP Phase 5/7/9 done-markers; "Immediate Next Point" rewritten; SCRATCHPAD Last Actions + Next Action aligned; SUMMARY credits row. |
 | 2026-04-01 | Cursor Agent | Composer | Added **[SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md)** (V1 DOCU → V2 skill playbook); doc index + read-order row. |
@@ -35,12 +35,13 @@
 - **Stack truth for this repo:** native Android only (`Kotlin + Compose + Room + Gradle/AGP`).
 - **Design truth precedence:** monorepo `../DOCU/` first, bundled `DOCS/ARTERIA-V1-DOCS/DOCU/` second.
 - **Operational doc precedence:** `SBOM.md` (versions), `ARCHITECTURE.md` (runtime shape), `ROADMAP.md` (phase status), `SCRATCHPAD.md` (live handoff).
+- **Future work / suggestions precedence:** **`DOCS/FUTURE UPDATES/`** — all new backlogs, release carve proposals, and QoL idea docs go here. Start at [`FUTURE UPDATES/README.md`](FUTURE%20UPDATES/README.md). Legacy paths (`DOCS/claudes_checklist_by_ryan.md`, repo root `top-100-next-todo.md`, etc.) are redirect stubs only.
 
 ## [AMENDED 2026-06-18] Live Product Snapshot (verify in code)
 
 | Surface | Truth (this checkout) |
 |---------|------------------------|
-| App release | **1.10.2** (`versionCode` **15**) — `app/build.gradle.kts`; player copy in `ChangelogScreen.kt` → `APP_CHANGELOG` |
+| App release | **1.10.4** (`versionCode` **17**) — `app/build.gradle.kts`; player copy in `ChangelogScreen.kt` → `APP_CHANGELOG` |
 | Game shell tabs | **5:** Hub · Skills · Bank · Combat · **Resonance** (`GameScreen.kt` + `ArteriaBottomBar.kt`) |
 | Skill roster | **49** entries in `SkillId.kt` (5 pillars incl. `COSMIC`, incl. `MARTIAL_ARTS`) |
 | Idle trainables | **28** skills with `SkillDataRegistry.actionsForSkill` non-empty |
@@ -49,7 +50,7 @@
 | Room game DB | **`GameDatabase` v6** — gear slots, companion, resonance, combat, head + dual rings |
 | Toolchain | Gradle **9.6** nightly, **AGP 9.2.0**, Kotlin **2.3.20**, JVM target **21** |
 
-**Planning docs (moved from repo root 2026-06-18):** `DOCS/claudes_checklist_by_ryan.md` (agent task backlog), `DOCS/master_settings_suggestions_doc.md` (settings checklist), `DOCS/reference-images/` (UI mood-board JPGs).
+**Planning & future work (canonical 2026-06-18):** **`DOCS/FUTURE UPDATES/`** — [`README.md`](FUTURE%20UPDATES/README.md) (hub), [`RELEASE_PLAN.md`](FUTURE%20UPDATES/RELEASE_PLAN.md), [`claudes_checklist_by_ryan.md`](FUTURE%20UPDATES/claudes_checklist_by_ryan.md), [`master_settings_suggestions_doc.md`](FUTURE%20UPDATES/master_settings_suggestions_doc.md), [`top-100-next-todo.md`](FUTURE%20UPDATES/top-100-next-todo.md). UI mood boards: `DOCS/reference-images/`.
 
 ---
 
@@ -58,6 +59,7 @@
 | Order | Doc | Why |
 |-------|-----|-----|
 | 1 | [SCRATCHPAD.md](SCRATCHPAD.md) | Current phase, blockers, last actions, **next action**. |
+| 1b | [FUTURE UPDATES/README.md](FUTURE%20UPDATES/README.md) | **All future suggestions & backlogs** — release plan, agent checklist, settings ideas, top-100. **`[AMENDED 2026-06-18]:`** |
 | 2 | [ROADMAP.md](ROADMAP.md) | Phased delivery including **platform (0–6)** and **features / QoL / UI (7+)**. |
 | 3 | [ARCHITECTURE.md](ARCHITECTURE.md) | Stack decisions, RN vs native split, module layout. |
 | 4 | [MIGRATION_SPEC.md](MIGRATION_SPEC.md) | How to translate RN + TypeScript engine patterns → Kotlin / Compose. |
@@ -85,9 +87,10 @@
 ## Aligning multiple AIs on the same work
 
 1. **Claim a slice:** Add or update a line in `SCRATCHPAD.md` (Last Actions + Next Action) so parallel sessions do not collide.
-2. **Track delivery:** Mark items in `ROADMAP.md` with `[DONE YYYY-MM-DD]:` or `[IN PROGRESS …]:` per preservation rules — never delete old text.
-3. **Design parity:** Before UI work, open the matching RN screen under monorepo `apps/mobile/app/` and the relevant `DOCU/` spec.
-4. **After dependency changes:** Update `SBOM.md` the same session.
+2. **Track delivery:** Mark items in `ROADMAP.md` with `[DONE YYYY-MM-DD]:` or `[IN PROGRESS …]:` per preservation rules — never delete old text. Mark shipped backlog items in **`DOCS/FUTURE UPDATES/`** checklists (same rules).
+3. **New suggestions:** Append to an existing file under **`DOCS/FUTURE UPDATES/`** or add a new file there + index row in `FUTURE UPDATES/README.md` — not at repo root.
+4. **Design parity:** Before UI work, open the matching RN screen under monorepo `apps/mobile/app/` and the relevant `DOCU/` spec.
+5. **After dependency changes:** Update `SBOM.md` the same session.
 
 ---
 
@@ -107,13 +110,25 @@
 
 ## Documentation index (this `DOCS/` folder)
 
+### Future work (canonical — edit here)
+
 | Doc | Role |
 |-----|------|
-| **SKILLS_EXPANSION_NATIVE.md** | V1-informed playbook for expanding **trainable** skills on native V2 (`SkillId` vs `SkillDataRegistry`, `TickEngine`, checklist). **`[AMENDED 2026-04-01]:`** |
-| **claudes_checklist_by_ryan.md** | Agent task synthesis backlog (sections 6+ open work). **`[AMENDED 2026-06-18]:`** Moved from repo root. |
-| **master_settings_suggestions_doc.md** | Settings design + rollout checklist. **`[AMENDED 2026-06-18]:`** Moved from repo root. |
+| **[FUTURE UPDATES/README.md](FUTURE%20UPDATES/README.md)** | Hub — routing rules; **all new suggestions go in this folder**. **`[AMENDED 2026-06-18]:`** |
+| **FUTURE UPDATES/RELEASE_PLAN.md** | Carved 1.10.x release spine + next-slice proposals. |
+| **FUTURE UPDATES/claudes_checklist_by_ryan.md** | Agent task synthesis backlog (sections 6+ open work). |
+| **FUTURE UPDATES/master_settings_suggestions_doc.md** | Settings design + rollout checklist. |
+| **FUTURE UPDATES/top-100-next-todo.md** | 100-item checkbox brainstorm / picker. |
+
+Legacy redirect stubs (do not edit): `DOCS/claudes_checklist_by_ryan.md`, `DOCS/master_settings_suggestions_doc.md`, `DOCS/RELEASE_PLAN.md`, repo root `top-100-next-todo.md`.
+
+### Operational & design
+
+| Doc | Role |
+|-----|------|
+| **SKILLS_EXPANSION_NATIVE.md** | V1-informed playbook for expanding **trainable** skills on native V2. **`[AMENDED 2026-04-01]:`** |
 | **reference-images/** | UI reference JPGs (Melvor / Cherry Tree mood boards). **`[AMENDED 2026-06-18]:`** |
-| **debugs/README.md** | Where session debug logs go (`debug_[timestamp].md`). **`[AMENDED 2026-06-18]:`** |
+| **agent_prompt_report_for_research.md** | Deep architecture research handoff (not a backlog). |
 | **SUMMARY.md** | This hub — paths, reading order, AI alignment. |
 | **SCRATCHPAD.md** | Live handoff. |
 | **ROADMAP.md** | Full phased plan. |
