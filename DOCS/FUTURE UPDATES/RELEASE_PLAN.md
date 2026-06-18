@@ -37,10 +37,10 @@ Living carve path for near-term player-visible slices. **Canonical path:** `DOCS
 | Priority | Item | Source |
 |----------|------|--------|
 | P0 | Combat **attack tempo** indicator (player/enemy swing interval progress) | top-100 #9 |
-| P0 | Hub **session timer** (“this session: 14m”) — lightweight, no Room yet | checklist §9b |
+| P0 | Hub **session timer** (“this session: 14m”) — lightweight, no Room yet **`[DONE 2026-06-18]`** | checklist §9b |
 | P1 | Combat **equipment strip** snapshot on encounter panel | top-100 #10 |
 | P1 | Bank **category icons** / emoji placeholders (§6b) | checklist |
-| P1 | Skill detail **locked actions** always visible with greyed train | checklist §7a |
+| P1 | Skill detail **locked actions** always visible with greyed train **`[DONE 2026-06-18]`** | checklist §7a |
 | P2 | Hub offline card **efficiency** mirror (same math as dialog) | checklist §9d |
 | P2 | Prestige multipliers wired into `TickEngine` | top-100 #5 |
 

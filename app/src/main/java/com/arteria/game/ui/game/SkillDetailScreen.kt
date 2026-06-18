@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -568,12 +569,36 @@ private fun ActionCard(
                         )
                     }
                 } else {
-                    Text(
-                        text = "Locked",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ArteriaPalette.TextMuted,
+                    // Locked action: show lock icon, level requirement, and unlock progress
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(horizontal = 8.dp),
-                    )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Lock,
+                            contentDescription = "Locked",
+                            tint = ArteriaPalette.TextMuted,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "Lv ${action.levelRequired}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ArteriaPalette.CombatAccent,
+                        )
+                        val unlockProgress =
+                            (currentLevel.toFloat() / action.levelRequired).coerceIn(0f, 1f)
+                        Spacer(Modifier.height(3.dp))
+                        LinearProgressIndicator(
+                            progress = { unlockProgress },
+                            modifier = Modifier
+                                .width(48.dp)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = ArteriaPalette.CombatAccent.copy(alpha = 0.7f),
+                            trackColor = ArteriaPalette.Border.copy(alpha = 0.3f),
+                        )
+                    }
                 }
             }
         }

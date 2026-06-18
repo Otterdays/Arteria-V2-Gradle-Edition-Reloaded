@@ -33,7 +33,7 @@ All 30 items shipped. Details in SCRATCHPAD.md Agent Credits.
 
 ## 7. Skill Detail Screen Polish
 
-- [ ] **7a.** Show locked actions greyed out with level requirement visible — player can see the full action list from day one
+- [x] **7a.** Show locked actions greyed out with level requirement visible — player can see the full action list from day one **`[DONE 2026-06-18]:`** lock icon + level + unlock progress bar on locked actions
 - [ ] **7b.** XP/hr estimate label on each action card — calculated from `xpPerAction / actionTimeMs * 3600000` **`[DONE 2026-06-18]:`** `SkillDetailScreen` + Best XP/hr badge
 - [ ] **7c.** "Best action" highlight — auto-badge the highest-XP-per-hour unlocked action **`[DONE 2026-06-18]:`** gold “Best XP/hr” chip
 - [ ] **7d.** Input item availability indicator on crafting actions — green/red tint based on whether bank has enough materials
@@ -56,7 +56,7 @@ All 30 items shipped. Details in SCRATCHPAD.md Agent Credits.
 ## 9. Playtime & Session Tracking
 
 - [ ] **9a.** Track total playtime in `GameState` (increment per tick, persist to Room)
-- [ ] **9b.** Session start time — show "this session: 14m" on the Hub quick-stats row
+- [x] **9b.** Session start time — show "this session: 14m" on the Hub quick-stats row **`[DONE 2026-06-18]:`** `sessionElapsedMs` StateFlow + Session StatChip with clock icon on Hub
 - [ ] **9c.** Playtime stat visible in Settings (total time played, avg session length)
 - [ ] **9d.** Offline efficiency score — "you earned X XP/hr while away" shown in the offline gains card
 - [ ] **9e.** Lifetime stats screen (stretch) — total XP earned, items banked, actions completed across all time

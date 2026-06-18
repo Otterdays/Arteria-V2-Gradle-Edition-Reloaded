@@ -29,24 +29,24 @@
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.6.0--snapshot-02303A?style=for-the-badge&logo=gradle&logoColor=white)](https://gradle.org/)
-[![AGP](https://img.shields.io/badge/AGP-9.2.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/build/releases/gradle-plugin)
-[![Compose BOM](https://img.shields.io/badge/Compose_BOM-2026.03.01-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose/bom)
-[![KSP](https://img.shields.io/badge/KSP-2.3.6-7F52FF?style=for-the-badge)](https://github.com/google/ksp)
+[![AGP](https://img.shields.io/badge/AGP-9.2.1-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/build/releases/gradle-plugin)
+[![Compose BOM](https://img.shields.io/badge/Compose_BOM-2026.05.01-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose/bom)
+[![KSP](https://img.shields.io/badge/KSP-2.3.9-7F52FF?style=for-the-badge)](https://github.com/google/ksp)
 [![Room](https://img.shields.io/badge/Room-2.8.4-0EA5E9?style=for-the-badge&logo=sqlite&logoColor=white)](https://developer.android.com/training/data-storage/room)
 
 **JDK · Android targets · libraries**
 
 [![Build JDK](https://img.shields.io/badge/Build-JDK_26-FF6B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-quick-start)
 [![JVM target](https://img.shields.io/badge/JVM_target-21-437291?style=for-the-badge&logo=openjdk&logoColor=white)](app/build.gradle.kts)
-[![Compile SDK](https://img.shields.io/badge/compileSdk-36.1-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
+[![Compile SDK](https://img.shields.io/badge/compileSdk-37-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
 [![minSdk](https://img.shields.io/badge/minSdk-26-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
-[![Navigation](https://img.shields.io/badge/Navigation-2.9.7-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/navigation)
-[![Lifecycle](https://img.shields.io/badge/Lifecycle-2.10.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/lifecycle)
-[![Coroutines](https://img.shields.io/badge/Coroutines-1.10.2-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://github.com/Kotlin/kotlinx.coroutines)
+[![Navigation](https://img.shields.io/badge/Navigation-2.9.8-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/navigation)
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-2.11.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+[![Coroutines](https://img.shields.io/badge/Coroutines-1.11.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://github.com/Kotlin/kotlinx.coroutines)
 
 **Product · status**
 
-[![App version](https://img.shields.io/badge/release-1.10.4-FF6B35?style=for-the-badge)](app/build.gradle.kts)
+[![App version](https://img.shields.io/badge/release-1.10.5-FF6B35?style=for-the-badge)](app/build.gradle.kts)
 [![Platform](https://img.shields.io/badge/Android-16_%28API_36%29-3DDC84?style=for-the-badge&logo=android&logoColor=white)](app/build.gradle.kts)
 [![Material 3](https://img.shields.io/badge/UI-Material_3-6750A4?style=for-the-badge)](https://m3.material.io/)
 [![Status](https://img.shields.io/badge/Status-Phase_5_slice-FF6B35?style=for-the-badge)](DOCS/ROADMAP.md)
@@ -84,7 +84,7 @@
 | **JDK (build)** | **26** (recommended) | Primary maintainer path; Windows helper: `build-with-jdk26.bat` |
 | **JDK (daemon pin)** | **21** (ADOPTIUM) | Checked into `gradle/gradle-daemon-jvm.properties` + Foojay resolver for clean clones |
 | **JVM bytecode** | **21** | `sourceCompatibility` / `targetCompatibility` in `:app` and `:core` |
-| **Android SDK** | 36.1 (API 36 · Android 16) | Installed via Android Studio / `sdkmanager` |
+| **Android SDK** | **37** compile / **36** target (API 36 runtime) | Installed via Android Studio / `sdkmanager` **`[AMENDED 2026-06-18]:`** |
 | **Gradle** | **9.6.0** snapshot | Pinned in `gradle/wrapper/gradle-wrapper.properties` |
 
 ### Build & Run
@@ -164,22 +164,25 @@ For full technical details, use `DOCS/ARCHITECTURE.md` and `CLAUDE.md` instead o
 
 ### Toolchain Snapshot
 
+**`[AMENDED 2026-06-18]:`** Stable dependency bump pass — see `DOCS/SBOM.md` for full inventory.
+
 | Component | Version | Scope |
 |-----------|---------|-------|
-| **Gradle** | `9.6.0-20260331012943+0000` | Build orchestration (snapshot) |
-| **AGP** | `9.1.0` | Android Gradle Plugin (stable) |
+| **Gradle** | `9.6.0-20260617124657+0000` | Build orchestration (nightly snapshot) |
+| **AGP** | `9.2.1` | Android Gradle Plugin (stable) |
 | **Kotlin Compose plugin** | `2.3.20` | Compose compiler plugin pin |
-| **KSP** | `2.3.6` | Room and codegen hook |
-| **Compose BOM** | `2026.03.01` | Material 3, icons, layout, animation |
-| **Navigation** | `2.9.7` | Type-safe route encoding |
+| **KSP** | `2.3.9` | Room and codegen hook |
+| **Compose BOM** | `2026.05.01` | Material 3, icons, layout, animation |
+| **Navigation** | `2.9.8` | Type-safe route encoding |
 | **Room** | `2.8.4` | Reactive persistence with KSP codegen |
-| **Lifecycle** | `2.10.0` | StateFlow, ViewModel lifecycle |
-| **kotlinx-coroutines** | `1.10.2` | Test + structured concurrency helpers |
+| **Lifecycle** | `2.11.0` | StateFlow, ViewModel lifecycle |
+| **kotlinx-coroutines** | `1.11.0` | Test + structured concurrency helpers |
 | **JDK (Gradle JVM)** | **26** (local) / **21** (pinned daemon) | Run Gradle on 26 when you want; repo still documents Foojay **21** for reproducible daemons |
 | **JVM bytecode** | **21** | `compileOptions` / Kotlin jvmTarget alignment |
 
 ### Dependency Sweep (2026-03-31)
 
+- **`[AMENDED 2026-06-18]:`** Stable bump pass applied — AGP **9.2.1**, KSP **2.3.9**, Compose BOM **2026.05.01**, Lifecycle **2.11.0**, Navigation **2.9.8**, `core-ktx` **1.19.0**, Datastore **1.2.1**, coroutines-test **1.11.0**, Gradle nightly **9.6.0-20260617**. Kotlin **2.4.0** and Room **3.0** held back.
 - No dependency bumps were applied in this sweep.
 - Current pins remain intentionally stable for active feature work (`AGP 9.1.0`, Compose plugin `2.3.20`, KSP `2.3.6`, Compose BOM `2026.03.01`, Room `2.8.4`).
 - Newer options observed in the ecosystem are primarily alpha/nightly lines; we keep those out until there is a concrete feature or compatibility need.
@@ -342,6 +345,15 @@ Your machine is using a **JRE** instead of a **JDK**. Point Gradle at a full JDK
 # Example: user-level only (~/.gradle/gradle.properties on Unix)
 org.gradle.java.home=C:/Program Files/Java/jdk-21
 ```
+
+### `jlink.exe does not exist` under `.cursor\extensions\redhat.java\...`
+Cursor / VS Code sets **JAVA_HOME** to a **JRE** (no `jlink`). AGP needs a full JDK for `androidJdkImage` (especially with **compileSdk 37**).
+
+1. Copy `local.properties.example` → `local.properties` and set **`jdk.dir`** to your JDK (must contain `bin\jlink.exe`), e.g. `C:\Program Files\Java\jdk-21`.
+2. Stop stale daemons: `gradlew.bat --stop`
+3. Rebuild: `gradlew.bat :app:assembleDebug` (wrapper forces `-Dorg.gradle.java.home` from a resolved JDK).
+
+Or use `build-apk-for-transfer.ps1` / `build-with-jdk26.bat` — both pin a full JDK before Gradle runs.
 
 ### Gradle wrapper stuck on nightly snapshot
 Clear Gradle cache and re-download:

@@ -1,0 +1,4 @@
+## Copy to local.properties (gitignored). Do not commit local.properties.
+sdk.dir=C\:\\Users\\YOUR_USER\\AppData\\Local\\Android\\Sdk
+# Full JDK 21+ with bin\\jlink.exe — required for AGP androidJdkImage (not a JRE).
+jdk.dir=C\:\\Program Files\\Java\\jdk-21

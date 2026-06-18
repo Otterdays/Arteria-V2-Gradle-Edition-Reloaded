@@ -74,7 +74,7 @@ if ($Clean) {
 
 Write-Host "Gradle: gradlew.bat $($gradleArgs -join ' ')" -ForegroundColor Cyan
 & $gradlew --stop 2>$null
-& $gradlew @gradleArgs
+& $gradlew "-Dorg.gradle.java.home=$resolved" @gradleArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Gradle failed with exit code $LASTEXITCODE"
 }

@@ -41,14 +41,14 @@
 
 | Surface | Truth (this checkout) |
 |---------|------------------------|
-| App release | **1.10.4** (`versionCode` **17**) — `app/build.gradle.kts`; player copy in `ChangelogScreen.kt` → `APP_CHANGELOG` |
+| App release | **1.10.5** (`versionCode` **18**) — `app/build.gradle.kts`; player copy in `ChangelogScreen.kt` → `APP_CHANGELOG` **`[AMENDED 2026-06-18]:`** |
 | Game shell tabs | **5:** Hub · Skills · Bank · Combat · **Resonance** (`GameScreen.kt` + `ArteriaBottomBar.kt`) |
 | Skill roster | **49** entries in `SkillId.kt` (5 pillars incl. `COSMIC`, incl. `MARTIAL_ARTS`) |
 | Idle trainables | **28** skills with `SkillDataRegistry.actionsForSkill` non-empty |
 | Resonance | Dedicated **clicker tab** + `ResonanceData` / pulse UX — **not** idle `SkillDetailScreen` training |
 | Combat | **Encounter v1** — Barn Rat in Sunny Meadow (`CombatEngine`, `CombatScreen`) |
 | Room game DB | **`GameDatabase` v6** — gear slots, companion, resonance, combat, head + dual rings |
-| Toolchain | Gradle **9.6** nightly, **AGP 9.2.0**, Kotlin **2.3.20**, JVM target **21** |
+| Toolchain | Gradle **9.6** nightly (`20260617`), **AGP 9.2.1**, Kotlin **2.3.20**, KSP **2.3.9**, Compose BOM **2026.05.01**, JVM target **21** **`[AMENDED 2026-06-18]:`** |
 
 **Planning & future work (canonical 2026-06-18):** **`DOCS/FUTURE UPDATES/`** — [`README.md`](FUTURE%20UPDATES/README.md) (hub), [`RELEASE_PLAN.md`](FUTURE%20UPDATES/RELEASE_PLAN.md), [`claudes_checklist_by_ryan.md`](FUTURE%20UPDATES/claudes_checklist_by_ryan.md), [`master_settings_suggestions_doc.md`](FUTURE%20UPDATES/master_settings_suggestions_doc.md), [`top-100-next-todo.md`](FUTURE%20UPDATES/top-100-next-todo.md). UI mood boards: `DOCS/reference-images/`.
 

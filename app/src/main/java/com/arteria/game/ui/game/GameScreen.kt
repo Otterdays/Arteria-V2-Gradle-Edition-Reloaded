@@ -100,6 +100,7 @@ fun GameScreen(
     val offlineReport by gameViewModel.offlineReport.collectAsStateWithLifecycle()
     val activeRandomEvent by gameViewModel.activeRandomEvent.collectAsStateWithLifecycle()
     val achievements by gameViewModel.achievements.collectAsStateWithLifecycle()
+    val sessionElapsedMs by gameViewModel.sessionElapsedMs.collectAsStateWithLifecycle()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var expandedSkillId by remember { mutableStateOf<SkillId?>(null) }
@@ -421,6 +422,7 @@ fun GameScreen(
                                     HubScreen(
                                         gameState = currentState,
                                         offlineReport = offlineReport,
+                                        sessionElapsedMs = sessionElapsedMs,
                                         recentLevelUps = recentLevelUps.toList(),
                                         onDismissOffline = gameViewModel::dismissOfflineReport,
                                         onSkillTap = { skillId ->

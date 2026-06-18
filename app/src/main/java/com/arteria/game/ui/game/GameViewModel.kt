@@ -67,6 +67,10 @@ class GameViewModel(
     private val _offlineSimulatedMs = MutableStateFlow(0L)
     val offlineSimulatedMs: StateFlow<Long> = _offlineSimulatedMs.asStateFlow()
 
+    /** Wall-clock ms elapsed since this session started. Ticks every second. */
+    private val _sessionElapsedMs = MutableStateFlow(0L)
+    val sessionElapsedMs: StateFlow<Long> = _sessionElapsedMs.asStateFlow()
+
     /** Active random event currently shown to the player. */
     private val _activeRandomEvent = MutableStateFlow<ActiveRandomEvent?>(null)
     val activeRandomEvent: StateFlow<ActiveRandomEvent?> = _activeRandomEvent.asStateFlow()
@@ -109,6 +113,15 @@ class GameViewModel(
         viewModelScope.launch {
             val prefs = userPreferencesProvider.current()
             val loaded = repository.loadGameState(profileId)
+
+            // Session timer: record start wall-clock and tick every second
+            val sessionStart = nowProvider()
+            launch {
+                while (isActive) {
+                    _sessionElapsedMs.value = nowProvider() - sessionStart
+                    delay(1_000L)
+                }
+            }
 
             val now = nowProvider()
             val elapsed = now - loaded.lastSaveTimestamp

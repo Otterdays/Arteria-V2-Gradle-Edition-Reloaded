@@ -4,7 +4,10 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-06-18 | Qoder | AI | **1.10.5 QoL (2 features):** Hub session timer (`sessionElapsedMs` StateFlow + clock-icon StatChip); Skill detail locked actions enhanced (lock icon + level label + unlock progress bar). `:app:compileDebugKotlin` green. |
 | 2026-06-18 | Cursor Agent | Composer | **FUTURE UPDATES doc canon:** `DOCS/FUTURE UPDATES/README.md` hub; redirect stubs; agent docs (SUMMARY/AGENTS/CLAUDE/SCRATCHPAD/README/SKILLS_EXPANSION) + Kotlin TRACE paths; top-100 shipped markers. |
+| 2026-06-18 | Cursor Agent | Composer | **Stable dependency bump pass:** AGP **9.2.1**, KSP **2.3.9**, Gradle nightly, Compose BOM **2026.05.01**, Lifecycle **2.11.0**, Navigation **2.9.8**, AndroidX minors; **v1.10.5 (18)**. |
+| 2026-06-18 | Cursor Agent | Composer | **SBOM June 2026 review:** Live version check vs Maven/JetBrains/Gradle; refreshed Next available + review cadence; no dependency bumps. |
 | 2026-06-18 | Cursor Agent | Composer | **v1.10.4 Discovery layer:** `ItemUsageIndex`, bank craft badges + detail sheet, skill lore, combat loot strip + XP split log, offline XP/hr; **`DOCS/FUTURE UPDATES/RELEASE_PLAN.md`** (1.10.5 carve). `:app:compileDebugKotlin` green. |
 | 2026-06-18 | Cursor Agent | Composer | **v1.10.3 QoL:** Settings reorganized (`SettingsComponents.kt`, Journey + Chronicle link); bank categories (`BankCategory.kt`); skill XP/hr + Best badge; changelog/README. `:app:compileDebugKotlin` green. |
 | 2026-06-18 | Cursor Agent | Composer | **Deep audit + organize:** Root clutter → `DOCS/`; untracked `core/bin/`; Live Product Snapshot; doc sync. |
@@ -188,6 +191,16 @@ Use this section as the live handoff source. Older repeated status/next-action b
 ---
 
 ## Last Actions (most recent first)
+
+**2026-06-18:** **1.10.5 session timer + locked actions (Qoder):** Added `sessionElapsedMs` StateFlow to `GameViewModel` (ticking every second from session start via `nowProvider()`); piped through `GameScreen` → `HubScreen` → new **Session StatChip** with Canvas clock icon in `QuickStatsRow` + `formatSessionDuration()` helper. Enhanced locked actions in `SkillDetailScreen`: replaced plain "Locked" text with `Icons.Filled.Lock` icon + red level label + thin `LinearProgressIndicator` showing unlock progress. Both marked done in `RELEASE_PLAN.md` + `claudes_checklist_by_ryan.md`. `:app:compileDebugKotlin` green; `assembleDebug` blocked by pre-existing JDK jlink issue (Cursor JRE, not our code).
+
+**2026-06-18:** **jlink / Cursor JRE fix (Composer):** AGP `androidJdkImage` failed when `JAVA_HOME` pointed at Cursor Red Hat JRE (no `jlink.exe`). `gradlew.bat` now exports full JDK + `-Dorg.gradle.java.home`; `settings.gradle.kts` reads `jdk.dir` from gitignored `local.properties`; `local.properties.example` added; `build-apk-for-transfer.ps1` passes `-Dorg.gradle.java.home`. **Action:** `gradlew --stop` then rebuild. Machine `jdk.dir` → `C:\Program Files\Java\jdk-21`.
+
+**2026-06-18:** **compileSdk 37 fix (Composer):** `core-ktx` **1.19.0** + Lifecycle **2.11.0** failed `:app:checkDebugAarMetadata` on **36.1**; bumped `compileSdk` → **release(37)** in `app/build.gradle.kts`, kept `targetSdk` **36**. `:app:assembleDebug` green; SBOM/README amended.
+
+**2026-06-18:** **Stable dependency bump (Composer):** Applied full June review set — AGP **9.2.1**, KSP **2.3.9**, Gradle **9.6.0-20260617124657+0000**, Compose BOM **2026.05.01**, Lifecycle **2.11.0**, Navigation **2.9.8**, `core-ktx` **1.19.0**, Datastore **1.2.1**, coroutines-test **1.11.0**. Shipped **v1.10.5 (18)** + What's New + README/SBOM. Held Kotlin **2.4.0** + Room **3.0**. `:app:compileDebugKotlin` green.
+
+**2026-06-18:** **SBOM June review (Composer):** Live Gradle pins verified vs Google Maven / JetBrains / Gradle services; refreshed **`DOCS/SBOM.md`** **Next available** columns + update-channel map (next review **2026-07-18**). **Installed unchanged** — app **1.10.4 (17)**. Stable upgrades available: AGP **9.2.1**, KSP **2.3.9**, Compose BOM **2026.05.01**, Lifecycle **2.11.0**, Navigation **2.9.8**, `core-ktx` **1.19.0**, Datastore **1.2.1**, coroutines-test **1.11.0**. Hold/verify: Kotlin **2.4.0**, Room **3.0.0-rc01**. No coordinate bumps; no tests run.
 
 **2026-04-29:** **Chronicle achievement toasts (Cursor):** Replaced generic achievement snackbars with **`AchievementUnlockBanner`** (top slot, `ArteriaPalette` + rarity border, description line, optional **tap → Chronicle**) and **`Channel`** queue so burst unlocks serialize. **`GameViewModel`** now **`tryEmit`s** unlocks inline (deterministic **`AchievementRegistry.all`** order) with SharedFlow **`extraBufferCapacity = 64`** vs nested `launch` + tiny buffer drops. **`AchievementDecor`** dedupes Chronicle card / toast colors (removed stray hex for common rarity). **Level-up** feedback uses themed **`Snackbar`**. Hub header copy **“Recent level-ups”**. Shipped **`v1.10.2` (15)** + What’s New + README; amended **`SUMMARY`** + **`ARCHITECTURE`** verification. `:app:compileDebugKotlin` green.
 
@@ -396,7 +409,7 @@ Also fixed reviewer findings:
 
 **`[AMENDED 2026-06-18]:`** Backlog picker: **`DOCS/FUTURE UPDATES/top-100-next-todo.md`**. Release spine: **`DOCS/FUTURE UPDATES/RELEASE_PLAN.md`**. Hub: **`DOCS/FUTURE UPDATES/README.md`**. Legacy root `top-100-next-todo.md` is a redirect stub.
 **`[AMENDED 2026-06-18]:`** **Authoritative list:** see **Consolidated Current State (2026-06-18)** at top of this file + `DOCS/SUMMARY.md` Live Product Snapshot. Immediate picks:
-1. **1.10.5 slice** — combat tempo indicator, Hub session timer, combat equipment strip (`FUTURE UPDATES/RELEASE_PLAN.md`)
+1. **1.10.5 slice remaining** — combat tempo indicator, combat equipment strip (`FUTURE UPDATES/RELEASE_PLAN.md`)
 2. Summoning smoke (Barn Rat materials → pouch train)
 3. Bank §6b category icons (`FUTURE UPDATES/claudes_checklist_by_ryan.md`)
 4. Equipment craft loop verify (gems → Jewelcrafting → equip)

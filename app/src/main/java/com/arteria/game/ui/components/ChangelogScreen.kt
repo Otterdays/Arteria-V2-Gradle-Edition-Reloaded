@@ -60,6 +60,29 @@ data class ChangelogEntry(
 
 val APP_CHANGELOG: List<ChangelogEntry> = listOf(
     ChangelogEntry(
+        version = "1.10.6",
+        date = "2026-06-18",
+        tag = "QoL",
+        tagEmoji = "\uD83D\uDD52",
+        tagColor = ArteriaPalette.VoidAccent,
+        changes = listOf(
+            "Hub quick-stats now shows a live Session timer — how long you've been playing this session",
+            "Locked skill actions show a lock icon, level requirement, and unlock progress bar so you can see what's coming",
+        ),
+    ),
+    ChangelogEntry(
+        version = "1.10.5",
+        date = "2026-06-18",
+        tag = "ENGINE",
+        tagEmoji = "⚙️",
+        tagColor = ArteriaPalette.BalancedEnd,
+        changes = listOf(
+            "Dependency refresh: AGP 9.2.1, KSP 2.3.9, Compose BOM 2026.05.01",
+            "AndroidX bumps: Lifecycle 2.11.0, Navigation 2.9.8, core-ktx 1.19.0, Datastore 1.2.1",
+            "Gradle wrapper nightly 9.6.0-20260617; kotlinx-coroutines-test 1.11.0",
+        ),
+    ),
+    ChangelogEntry(
         version = "1.10.4",
         date = "2026-06-18",
         tag = "DISCOVERY",

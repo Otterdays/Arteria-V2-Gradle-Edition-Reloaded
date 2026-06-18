@@ -73,6 +73,7 @@ import java.text.NumberFormat
 fun HubScreen(
     gameState: GameState,
     offlineReport: TickResult?,
+    sessionElapsedMs: Long,
     recentLevelUps: List<Pair<SkillId, Int>>,
     onDismissOffline: () -> Unit,
     onSkillTap: (SkillId) -> Unit,
@@ -158,6 +159,7 @@ fun HubScreen(
                 implementedCount = skills.keys.count {
                     SkillDataRegistry.isSkillImplemented(it)
                 },
+                sessionElapsedMs = sessionElapsedMs,
             )
         }
 
@@ -501,6 +503,17 @@ private fun ResonanceHubCard(
 
 // ─── 1d. Quick Stats Row ────────────────────────────────────────────────────
 
+private fun formatSessionDuration(ms: Long): String {
+    val totalSec = ms / 1_000
+    val hours = totalSec / 3_600
+    val minutes = (totalSec % 3_600) / 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m"
+        else -> "<1m"
+    }
+}
+
 @Composable
 private fun QuickStatsRow(
     totalLevel: Int,
@@ -508,11 +521,12 @@ private fun QuickStatsRow(
     highestSkillId: SkillId?,
     highestLevel: Int?,
     implementedCount: Int,
+    sessionElapsedMs: Long,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         StatChip(
             label = "Total Level",
@@ -534,6 +548,12 @@ private fun QuickStatsRow(
                 "—"
             },
             color = ArteriaPalette.BalancedEnd,
+            modifier = Modifier.weight(1f),
+        )
+        StatChip(
+            label = "Session",
+            value = formatSessionDuration(sessionElapsedMs),
+            color = ArteriaPalette.VoidAccent,
             modifier = Modifier.weight(1f),
         )
     }
@@ -571,6 +591,12 @@ private fun StatChip(
                         // Small vault circle
                         drawCircle(color, radius = w * 0.35f, center = Offset(w * 0.5f, h * 0.5f), style = stroke)
                         drawCircle(color, radius = w * 0.10f, center = Offset(w * 0.5f, h * 0.5f))
+                    }
+                    "Session" -> {
+                        // Clock icon
+                        drawCircle(color, radius = w * 0.38f, center = Offset(w * 0.5f, h * 0.5f), style = stroke)
+                        drawLine(color, Offset(w * 0.5f, h * 0.5f), Offset(w * 0.5f, h * 0.2f), w * 0.10f, cap = StrokeCap.Round)
+                        drawLine(color, Offset(w * 0.5f, h * 0.5f), Offset(w * 0.72f, h * 0.5f), w * 0.10f, cap = StrokeCap.Round)
                     }
                     else -> {
                         // Star icon
