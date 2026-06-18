@@ -4,7 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
-| 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle unlock UX:** `AchievementUnlockBanner` (queued top toast, rarity border, tap → Chronicle) + `AchievementDecor` (palette-only tints for banner + Chronicle); themed level-up snackbars; Hub strip copy fix (“Recent level-ups”); **`DOCS/ARCHITECTURE.md`** verification line; **`v1.10.2` (15)** What’s New + README. |
+| 2026-06-18 | Cursor Agent | Composer | **Repo + doc audit:** Moved root planning docs/images into `DOCS/`; untracked `core/bin/` build artifacts; added **Live Product Snapshot** to `SUMMARY.md`; synced `ARCHITECTURE`/`README`/`CLAUDE`/`SCRATCHPAD`/`SKILLS_EXPANSION_NATIVE` with **v1.10.2**, **5-tab** shell, **49** `SkillId` / **28** registry trainables, **`GameDatabase` v6**, **AGP 9.2.0**. |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented 3 new crafting skills bridging the gear gap; updated Mining gems; Phase 5 near-complete. |
 | 2026-04-01 | Claude Haiku 4.5 | Anthropic Claude | **v1.5.0 doc sync:** ROADMAP Phase 5/7/9 done-markers; "Immediate Next Point" rewritten; SCRATCHPAD Last Actions + Next Action aligned; SUMMARY credits row. |
 | 2026-04-01 | Cursor Agent | Composer | Added **[SKILLS_EXPANSION_NATIVE.md](SKILLS_EXPANSION_NATIVE.md)** (V1 DOCU → V2 skill playbook); doc index + read-order row. |
@@ -35,6 +35,21 @@
 - **Stack truth for this repo:** native Android only (`Kotlin + Compose + Room + Gradle/AGP`).
 - **Design truth precedence:** monorepo `../DOCU/` first, bundled `DOCS/ARTERIA-V1-DOCS/DOCU/` second.
 - **Operational doc precedence:** `SBOM.md` (versions), `ARCHITECTURE.md` (runtime shape), `ROADMAP.md` (phase status), `SCRATCHPAD.md` (live handoff).
+
+## [AMENDED 2026-06-18] Live Product Snapshot (verify in code)
+
+| Surface | Truth (this checkout) |
+|---------|------------------------|
+| App release | **1.10.2** (`versionCode` **15**) — `app/build.gradle.kts`; player copy in `ChangelogScreen.kt` → `APP_CHANGELOG` |
+| Game shell tabs | **5:** Hub · Skills · Bank · Combat · **Resonance** (`GameScreen.kt` + `ArteriaBottomBar.kt`) |
+| Skill roster | **49** entries in `SkillId.kt` (5 pillars incl. `COSMIC`, incl. `MARTIAL_ARTS`) |
+| Idle trainables | **28** skills with `SkillDataRegistry.actionsForSkill` non-empty |
+| Resonance | Dedicated **clicker tab** + `ResonanceData` / pulse UX — **not** idle `SkillDetailScreen` training |
+| Combat | **Encounter v1** — Barn Rat in Sunny Meadow (`CombatEngine`, `CombatScreen`) |
+| Room game DB | **`GameDatabase` v6** — gear slots, companion, resonance, combat, head + dual rings |
+| Toolchain | Gradle **9.6** nightly, **AGP 9.2.0**, Kotlin **2.3.20**, JVM target **21** |
+
+**Planning docs (moved from repo root 2026-06-18):** `DOCS/claudes_checklist_by_ryan.md` (agent task backlog), `DOCS/master_settings_suggestions_doc.md` (settings checklist), `DOCS/reference-images/` (UI mood-board JPGs).
 
 ---
 
@@ -95,6 +110,10 @@
 | Doc | Role |
 |-----|------|
 | **SKILLS_EXPANSION_NATIVE.md** | V1-informed playbook for expanding **trainable** skills on native V2 (`SkillId` vs `SkillDataRegistry`, `TickEngine`, checklist). **`[AMENDED 2026-04-01]:`** |
+| **claudes_checklist_by_ryan.md** | Agent task synthesis backlog (sections 6+ open work). **`[AMENDED 2026-06-18]:`** Moved from repo root. |
+| **master_settings_suggestions_doc.md** | Settings design + rollout checklist. **`[AMENDED 2026-06-18]:`** Moved from repo root. |
+| **reference-images/** | UI reference JPGs (Melvor / Cherry Tree mood boards). **`[AMENDED 2026-06-18]:`** |
+| **debugs/README.md** | Where session debug logs go (`debug_[timestamp].md`). **`[AMENDED 2026-06-18]:`** |
 | **SUMMARY.md** | This hub — paths, reading order, AI alignment. |
 | **SCRATCHPAD.md** | Live handoff. |
 | **ROADMAP.md** | Full phased plan. |

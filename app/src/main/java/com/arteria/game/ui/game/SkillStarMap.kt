@@ -37,7 +37,7 @@ import kotlin.math.sqrt
  * Crossover edges connect skills whose outputs feed other skills (dashed lines).
  * Tap radius: 28dp around a node centre triggers [onSkillClick].
  *
- * [TRACE: claudes_checklist_by_ryan.md — 3g Star map layout]
+ * [TRACE: DOCS/claudes_checklist_by_ryan.md — 3g Star map layout]
  */
 @Composable
 fun SkillStarMap(

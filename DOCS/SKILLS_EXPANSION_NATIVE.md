@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-06-18 | Cursor Agent | Composer | **Audit sync:** §0 glossary refreshed (**28** trainables, **v1.10.2**); moved-doc paths; cross-ref `SUMMARY.md` Live Product Snapshot. |
 | 2026-04-21 | Antigravity | Claude Sonnet 4.6 (Thinking) | **Forging/Jewelcrafting/Firemaking Expansion:** Implemented data for Forging, Jewelcrafting, and Firemaking; updated Mining with Gem Rocks; bridged the economy gap to make `EquipmentRegistry` items craftable via bars/gems. |
 | 2026-04-01 | Cursor Agent | Composer | **v1.5.0 doc sync:** Glossary §0 — Farming, Thieving, Woodworking, Tailoring marked trainable; duplicate §5 → **§5b**; §7.1 counts + Phase 2 callouts amended; intro version parity **1.5.0** / `versionCode` **8**. |
 | 2026-04-01 | Cursor Agent | Composer | **Version cross-ref:** Amended intro with shipped app **1.4.5** parity note (`build.gradle.kts`, `APP_CHANGELOG`, README badge). **`[AMENDED 2026-04-01]:`** Superseded by **1.5.0** row above for canonical version. |
@@ -21,7 +22,9 @@
 
 > **Purpose:** Give contributors a single place to understand how **skill roster expansion** works in **Gradle V2 (Kotlin / `:core` / Room)** and how to use **bundled V1 docs** for *content and UX intent* without copying RN/Expo implementation detail literally.  
 > **Audience:** Implementers, designers, and AI agents extending trainable skills.  
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-06-18
+
+**`[AMENDED 2026-06-18]:`** **Canonical release:** **1.10.2** (`versionCode` **15**) — `app/build.gradle.kts`, first `APP_CHANGELOG` card, README shield. **Trainable idle skills:** **28** (`SkillDataRegistry.isSkillImplemented`). **Resonance** = clicker tab, not registry idle actions.
 
 **`[AMENDED 2026-04-01]:`** **Shipped app version** for player-facing parity is **1.4.5** — keep in sync with `app/build.gradle.kts` (`versionName` / `versionCode`), the top entry in `ChangelogScreen.kt` → `APP_CHANGELOG`, and the README release badge.
 
@@ -31,7 +34,19 @@
 
 ## 0) Skill Glossary — Current Status
 
-### ✅ Implemented (Trainable)
+### ✅ Implemented (Trainable — idle `SkillDetailScreen`)
+
+**`[AMENDED 2026-06-18]:`** **28** skills — verify with `SkillDataRegistry.isSkillImplemented` / `actionsForSkill`. Listed below by pillar (historical one-by-one notes retained above this block).
+
+| Pillar | Skills with `*Data.kt` + registry wiring |
+|--------|------------------------------------------|
+| Gathering | Mining, Logging, Fishing, Harvesting, Scavenging, Farming, Thieving, Trapping, Siphoning |
+| Crafting | Smithing, Cooking, Runecrafting, Herblore, Forging, Firemaking, Woodworking, Tailoring, Fletching, Construction, Alchemy, Jewelcrafting, Tinkering, Enchanting |
+| Support | Exploration, Astrology, Summoning, Divination, Barding |
+
+**Not idle-trainable via registry (separate UX or Coming Soon):** all **Combat** pillar skills, **Resonance** (5th tab clicker — `ResonanceData`), Agility, Wizardry, Cleansing, Barter, Research, Leadership, all **Cosmic** skills, Martial Arts.
+
+### ✅ Implemented (Trainable) — historical line items
 These skills have active data in `:core` and are fully playable in the current build.
 - **Mining** (Gathering): Base ores and gems.
 - **Logging** (Gathering): Wood types for crafting.
@@ -495,7 +510,7 @@ The mastery system is **Phase 7+** — it layers on TOP of the existing skill lo
 
 ### 9.5 Checklist Status Audit
 
-Cross-referencing `claudes_checklist_by_ryan.md` against current state:
+Cross-referencing `DOCS/claudes_checklist_by_ryan.md` against current state:
 
 | Section | Status | Notes |
 |---------|--------|-------|

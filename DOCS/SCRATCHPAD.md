@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-06-18 | Cursor Agent | Composer | **Deep audit + organize:** Root clutter → `DOCS/` (`claudes_checklist_by_ryan.md`, `master_settings_suggestions_doc.md`, `reference-images/`); untracked `core/bin/`; **Live Product Snapshot** in `SUMMARY.md`; synced stale docs (5 tabs, v1.10.2, 49/28 skills, DB v6, AGP 9.2). |
 | 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle / achievement unlock UX:** `AchievementUnlockBanner` (queued top toast, rarity styling, tap → Chronicle) + `AchievementDecor` for shared Chronicle/banner tints; themed level-up snackbars; Hub “Recent level-ups” label; **`DOCS/SUMMARY.md`** + **`ARCHITECTURE.md`** amended; **v1.10.2 (15)** + README. `:app:compileDebugKotlin` green. |
 | 2026-04-29 | Cursor Agent | GPT-5.5 | **Agent research brief:** Expanded `DOCS/agent_prompt_report_for_research.md` into a structured handoff covering native V2 architecture, idle/clicker loop, Resonance design, system inventory, gaps, improvement priorities, research questions, and verification pointers. |
 | 2026-04-29 | Composer | GPT-5.2 | **Resonance clicker QoL:** Flow Rhythm chain multiplier (`ResonanceData` + `GameViewModel`), `ResonancePulseOutcome` UI payloads, lifetime stats + floating pulse readout + `baseTapHintsLine` on `ResonanceScreen`; unlock row Lv1 Flow Rhythm; **v1.10.1 (14)** changelog + README + SCRATCHPAD. `:app:compileDebugKotlin` + `:core:test` green. |
@@ -100,6 +101,35 @@ Active state for **native Android** track. Game design truth stays in monorepo r
 **`[AMENDED 2026-03-30]:`** This repo may be checked out as **`Arteria-V2-Gradle-Edition-Reloaded`** on disk — same Gradle project (`settings.gradle.kts`, `:app`, `:core`).
 
 **`[AMENDED 2026-03-30]:`** Expo / React Native references in this file and other docs are historical V1 notes unless explicitly marked as active V2 work.
+
+## [AMENDED 2026-06-18] Consolidated Current State (authoritative handoff)
+
+**Read `DOCS/SUMMARY.md` → Live Product Snapshot first.** This block mirrors it for session continuity.
+
+### Active Status
+
+- **Release:** **v1.10.2** (`versionCode` **15**).
+- **Game shell:** **5 tabs** — Hub · Skills · Bank · Combat · **Resonance** (`ResonanceScreen` clicker; not idle `SkillDetailScreen`).
+- **Skills:** **49** in `SkillId`; **28** idle-trainable via `SkillDataRegistry`; unwired → `SkillComingSoonDialog`.
+- **Combat:** Encounter v1 (Barn Rat / Sunny Meadow) — `CombatEngine` + `CombatScreen`.
+- **Room:** `GameDatabase` **v6** (gear head + dual rings, companion, resonance, combat columns).
+- **Toolchain:** Gradle 9.6 nightly, **AGP 9.2.0**, Kotlin 2.3.20, JVM **21**.
+- **Repo layout:** Planning docs live under **`DOCS/`** — `claudes_checklist_by_ryan.md`, `master_settings_suggestions_doc.md`, `reference-images/`. **`core/bin/`** is build output (gitignored; do not commit).
+
+### Active Next Actions
+
+0. **Research handoff:** `DOCS/agent_prompt_report_for_research.md`
+1. **Summoning smoke:** Barn Rat drops → Summoning pouch list scroll + first train
+2. **Combat baseline:** Attack/Strength melee training loop (beyond encounter v1)
+3. **XP/hr display:** `SkillDetailScreen` live efficiency
+4. **Equipment loop verify:** gems → Jewelcrafting → equip in `EquipmentScreen`
+5. **Bank §6 backlog:** category grouping + craftable badges (`DOCS/claudes_checklist_by_ryan.md`)
+
+### Supersession Note
+
+`[AMENDED 2026-06-18]:` When older sections below conflict (4-tab shell, 41 skills, DB v2, AGP 9.1), **this block + SUMMARY Live Product Snapshot win**.
+
+---
 
 ## [AMENDED 2026-03-31] Consolidated Current State (active section)
 
@@ -360,6 +390,12 @@ Also fixed reviewer findings:
 ---
 
 ## Next Action (for the next agent)
+
+**`[AMENDED 2026-06-18]:`** **Authoritative list:** see **Consolidated Current State (2026-06-18)** at top of this file + `DOCS/SUMMARY.md` Live Product Snapshot. Immediate picks:
+1. Summoning smoke (Barn Rat materials → pouch train)
+2. Combat melee baseline (Attack/Strength beyond encounter v1)
+3. Bank §6a–c category grouping + craftable badges (`DOCS/claudes_checklist_by_ryan.md`)
+4. Equipment craft loop verify (gems → Jewelcrafting → equip)
 
 **`[AMENDED 2026-04-01]:`** **v1.5.0 standing** — 12 skills live, equipment + companions integrated, docs aligned. Next priorities:
 1. **Manual smoke — new skills:** Train Farming/Thieving (verify XP + bank item gain), train Woodworking/Tailoring (verify log/flax consumed from bank), equip a tool and confirm XP boost, summon companion and confirm passive applies during tick.

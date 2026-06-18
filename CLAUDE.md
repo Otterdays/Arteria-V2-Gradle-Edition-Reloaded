@@ -86,12 +86,16 @@ MainActivity (ComponentActivity)
               ├── account_select   → AccountSelectionScreen
               ├── account_create   → AccountCreationScreen
               └── game/{profileId} → GameScreen
-                    ├── SkillsScreen        (tab 0)
-                    ├── BankScreen          (tab 1)
-                    ├── CombatScreen        (tab 2)
+                    ├── HubScreen           (tab 0)
+                    ├── SkillsScreen        (tab 1)
+                    ├── BankScreen          (tab 2)
+                    ├── CombatScreen        (tab 3)
+                    ├── ResonanceScreen     (tab 4)
                     ├── TopAppBar           (account name + ⚙ icon)
                     └── SettingsScreen      (full-screen overlay, BackHandler dismissible)
 ```
+
+**`[AMENDED 2026-06-18]:`** Supersedes older 3-tab / 4-tab trees in this file.
 
 **Route constants** (`NavRoutes.kt`):
 - `account_select`, `account_create`, `game/{profileId}`
@@ -118,6 +122,8 @@ MainActivity (ComponentActivity)
 ### Skill system
 
 **41 skills across 5 pillars** (defined in `SkillId.kt`):
+
+**`[AMENDED 2026-06-18]:`** Roster is now **49 skills** (added `MARTIAL_ARTS`, `TRAPPING`, `SIPHONING`, `JEWELCRAFTING`, `TINKERING`, `ENCHANTING`, `DIVINATION`, `BARDING`, etc.). **28** have idle actions in `SkillDataRegistry`; **Resonance** uses the dedicated clicker tab. Count in code: `SkillId.entries.size`.
 
 - **Gathering (7):** Mining, Logging, Fishing, Harvesting, Scavenging, Farming, Thieving
 - **Crafting (11):** Smithing, Cooking, Runecrafting, Herblore, Forging, Firemaking, Woodworking,
@@ -264,7 +270,7 @@ Never set `fontFamily` in component code — it's wired in `ArteriaTheme.kt`.
 - `DockingLoreFooter` at bottom
 
 **Game Screen (`GameScreen.kt`):**
-- 3-tab bottom nav: Skills · Bank · Combat
+- 5-tab bottom nav: Hub · Skills · Bank · Combat · Resonance
 - `TopAppBar` (transparent, Cinzel account name, gear icon → `showSettings = true`)
 - Settings rendered as conditional full-screen composable with `BackHandler`
 - Unimplemented skill tap → `SkillComingSoonDialog`; implemented → `SkillDetailScreen` (`AnimatedContent` push)
@@ -358,7 +364,7 @@ Before considering any task complete:
 | File | Purpose |
 |------|---------|
 | `ui/ArteriaApp.kt` | NavHost root; wires DBs, VMs, route transitions |
-| `ui/game/GameScreen.kt` | 3-tab hub + TopAppBar + settings overlay |
+| `ui/game/GameScreen.kt` | 5-tab hub + TopAppBar + settings/chronicle/equipment overlays |
 | `ui/game/GameViewModel.kt` | Tick loop, offline processing, level-up events |
 | `ui/account/AccountViewModel.kt` | Profile CRUD + selection state |
 | `ui/account/AccountSelectionScreen.kt` | Docking station account chooser |
@@ -367,7 +373,7 @@ Before considering any task complete:
 | `navigation/NavRoutes.kt` | Route constants + `gamePath()` helper |
 | `ui/theme/ArteriaTheme.kt` | Material 3 theme, `ArteriaPalette`, Cinzel typography |
 | `core/src/main/kotlin/com/arteria/game/core/model/GameModels.kt` | Domain data classes (SkillState, GameState, TickResult…) **`[AMENDED 2026-04-01]:`** Gradle `:core` |
-| `core/src/main/kotlin/com/arteria/game/core/skill/SkillId.kt` | All 41 skills + 5 pillars enum (`SkillPillar` includes `COSMIC`) |
+| `core/src/main/kotlin/com/arteria/game/core/skill/SkillId.kt` | All **49** skills + 5 pillars enum (`SkillPillar` includes `COSMIC`) **`[AMENDED 2026-06-18]:`** |
 | `core/src/main/kotlin/com/arteria/game/core/engine/TickEngine.kt` | Offline tick simulation |
 | `core/src/main/kotlin/com/arteria/game/core/data/SkillDataRegistry.kt` | Skill actions/items; `isSkillImplemented`, `actionsForSkill` |
 | `core/src/main/kotlin/com/arteria/game/core/data/HerbloreData.kt` | Potions from `HarvestingData` inputs (`inputItems`) |

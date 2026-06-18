@@ -1,5 +1,7 @@
 # Arteria V2 — Settings System (Master Design & Checklist)
 
+**`[AMENDED 2026-06-18]:`** Canonical path: **`DOCS/master_settings_suggestions_doc.md`** (moved from repo root).
+
 **Document type:** Master design + implementation checklist  
 **Scope:** Native Android (Compose) settings surface; parity with Arteria V1 (`DOCS/ARTERIA-V1-DOCS/DOCU/`) and `DOCS/ROADMAP.md` Phase 7 QoL.  
 **Status:** In progress — checkboxes track delivery (updated 2026-04-01).  

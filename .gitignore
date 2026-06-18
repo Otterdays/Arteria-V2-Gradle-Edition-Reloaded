@@ -1,6 +1,10 @@
 # Gradle
 .gradle/
 build/
+core/bin/
+
+# Kotlin compiler daemon logs (local IDE noise)
+.kotlin/
 
 # Local SDK path (never commit)
 local.properties

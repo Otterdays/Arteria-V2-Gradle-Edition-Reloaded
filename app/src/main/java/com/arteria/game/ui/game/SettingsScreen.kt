@@ -63,7 +63,7 @@ import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.launch
 
-// [TRACE: master_settings_suggestions_doc.md — settings backlog]
+// [TRACE: DOCS/master_settings_suggestions_doc.md — settings backlog]
 
 private sealed class SettingsSubScreen {
     data object None : SettingsSubScreen()

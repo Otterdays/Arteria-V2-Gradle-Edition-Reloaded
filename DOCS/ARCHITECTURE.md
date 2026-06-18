@@ -4,6 +4,7 @@
 
 | Date | Agent | Model / Tooling | Contribution |
 |------|-------|-----------------|--------------|
+| 2026-06-18 | Cursor Agent | Composer | **Doc audit sync:** Verification snapshot amended — **5-tab** shell (Resonance), **`GameDatabase` v6**, **AGP 9.2.0**, **28** registry trainables + Resonance clicker; At-a-Glance toolchain row updated. |
 | 2026-04-29 | Cursor Agent | GPT-5.2 | **Chronicle unlock UX:** `AchievementUnlockBanner` + `AchievementDecor` (shared Chronicle/banner tints); `GameScreen` Channel queue for burst unlocks; verification snapshot line; Hub vs Chronicle copy clarified in `SUMMARY.md`. |
 | 2026-04-01 | Cursor Agent | Composer | **`DOCS/SKILLS_EXPANSION_NATIVE.md`:** V1→V2 skill expansion playbook; verification snapshot amended (`:core` JVM path, Hub 4-tab, link to new doc). |
 | 2026-04-01 | Cursor Agent | Composer | Settings backlog: DataStore `UserPreferencesRepository`, `MainActivity` `ArteriaRoot` (theme/system + reduce motion locals), light `ArteriaTheme` + space brush; `GameViewModel` + `UserPreferencesProvider`, offline cap/report prefs; `GameRepository` reset/delete; profile `deleteById`; OSS/Credits overlays; danger zone; verification snapshot amended. |
@@ -22,8 +23,9 @@
 
 # Arteria V2 Gradle Edition Reloaded — Architecture
 
-> Last updated: 2026-04-01
+> Last updated: 2026-06-18
 > **`[AMENDED 2026-04-29]:`** Chronicle achievement unlock UX (`AchievementUnlockBanner`, `AchievementDecor`) — see Verification Snapshot bullet.
+> **`[AMENDED 2026-06-18]:`** **5-tab** game shell (Resonance tab), **`GameDatabase` v6**, combat encounter v1 — see Verification Snapshot.
 > Status: Active native Android implementation (Kotlin + Compose + Room) with full Docking Station animation system
 > Scope: This file documents the architecture that exists today and the planned next architecture.
 
@@ -31,7 +33,9 @@
 
 - **Verified against live code:** `ui/ArteriaApp.kt`, `navigation/NavRoutes.kt`, `ui/game/GameScreen.kt`, `ui/game/SettingsScreen.kt`.
 - **Active nav routes:** `account_select`, `account_create`, `game/{profileId}` (encoded by `NavRoutes.gamePath()`).
-- **Game shell shape:** **`[AMENDED 2026-04-01]:`** 4-tab hub (`Hub`, `Skills`, `Bank`, `Combat`) + `TopAppBar` settings entry (older “3-tab” lines in this file are superseded).
+- **Game shell shape:** **`[AMENDED 2026-06-18]:`** **5-tab** hub (`Hub`, `Skills`, `Bank`, `Combat`, **`Resonance`**) + `TopAppBar` settings entry. Resonance is a dedicated clicker tab (`ResonanceScreen`), not idle `SkillDetailScreen` training. Older “3-tab” / “4-tab” lines in this file are superseded.
+- **`[AMENDED 2026-06-18]:`** **Combat:** Encounter v1 live — `CombatEngine` + `CombatScreen` (Barn Rat / Sunny Meadow); skilling blocked while `activeCombat` is set.
+- **`[AMENDED 2026-06-18]:`** **Trainable skills:** **28** idle skills wired in `SkillDataRegistry` (`isSkillImplemented`); **49** total in `SkillId` enum. Unwired taps → `SkillComingSoonDialog`.
 - **Skill expansion playbook:** `DOCS/SKILLS_EXPANSION_NATIVE.md` — how `SkillId` roster relates to `SkillDataRegistry`, V1 `DOCU` references, and ship checklist. **`[AMENDED 2026-04-01]:`**
 - **`[AMENDED 2026-03-31]:`** **Skills tab:** taps on skills with no actions in `SkillDataRegistry` show `SkillComingSoonDialog` (Compose `Dialog`, back-dismissible); implemented skills still push `SkillDetailScreen` via `GameScreen` `AnimatedContent`. Same overlay family as `OfflineReportDialog` (offline gains).
 - **`[AMENDED 2026-04-01]:`** **Skill content:** `HerbloreData` brews potions using `HarvestingData` item ids in `SkillAction.inputItems` (consumed in `TickEngine` from bank); `ScavengingData` is pure gathering like `LoggingData`.
@@ -39,6 +43,7 @@
 - **`[AMENDED 2026-04-01]:`** **Settings parity slice:** profile display name edit (Room `profiles.displayName`), last-played line, `BuildConfig` version string, informational tick/save cadence (`GameViewModel` constants), **Test sound** (`ToneGenerator`); rename + session refresh flow: `ArteriaApp` holds `AccountSessionInfo`, `GameScreen` passes `onRenameDisplayName` / `onRefreshAccountSession`.
 - **`[AMENDED 2026-04-01]:`** **Settings expansion:** `user_preferences` DataStore (`ThemePreference`, motion, haptics, sound, offline report, soundscapes stub, DEBUG offline-cap bypass); `LocalUserPreferencesRepository`, `LocalArteriaDarkSpace`, `LocalReduceMotion`; `GameRepository.resetProgressForProfile` / `deleteAllGameDataForProfile`; `ProfileDao.deleteById`; nested **Open source notices** (`ARTERIA_OSS_NOTICES`) + **Credits** screens; danger dialogs (reset progress, delete profile).
 - **Doc canon reference:** `DOCS/SUMMARY.md` section `Doc Canon (single source rules)`.
+- **`[AMENDED 2026-06-18]:`** `GameDatabase` is **version 6** (`MIGRATION_1_2` … `MIGRATION_5_6`); `game_meta` carries offline audit, equipment (incl. head + dual rings), companion, resonance counters, and active combat columns. See `DOCS/SBOM.md` Android Targets table. **Supersedes** older “version 2” lines below unless comparing migration history.
 - **`[AMENDED 2026-03-31]:`** `GameDatabase` is **version 2** (`MIGRATION_1_2`); `game_meta` carries `lastOfflineTickAppliedAt` for offline catch-up audit. See `DOCS/SBOM.md` Android Targets table.
 - **`[AMENDED 2026-04-29]:`** **Chronicle / achievements feedback:** `GameViewModel.newlyUnlockedAchievements` emits `AchievementProgress` when a registry trophy flips to unlocked (inline `tryEmit` in `checkAchievements` preserves **`AchievementRegistry.all` order** within a single evaluation; `MutableSharedFlow` buffer **64** to avoid drops in large bursts); `GameScreen` funnels events through a `Channel` so simultaneous unlocks **queue** (no drops). UI: `ui/components/AchievementUnlockBanner.kt` (top-of-shell toast, rarity-accent border, optional tap → Chronicle overlay) + `ui/theme/AchievementDecor.kt` (category + rarity tints consumed by `ChronicleScreen` and the banner — **ArteriaPalette only**). **Level-up** lines remain **Material `Snackbar`** with card-style `ArteriaPalette` colors. Hub “recent” strip = **skill level-ups**, not Chronicle trophies.
 
@@ -54,8 +59,8 @@
 | UI stack | Jetpack Compose + Navigation Compose |
 | Persistence | Room (`arteria_profiles.db`, `arteria_game.db`) |
 | Modules | `:app` (Android UI + Room), `:core` (JVM Kotlin engine + skill data) **`[AMENDED 2026-04-01]:`** |
-| Toolchain | Gradle 9.6 nightly, AGP 9.1, JDK 21 |
-| Current gameplay state | Account/profile flow live + in-app game hub (bottom nav: Hub/Skills/Bank/Combat; settings via `TopAppBar` overlay) **`[AMENDED 2026-04-01]:`** |
+| Toolchain | Gradle 9.6 nightly, AGP **9.2.0**, JDK 21 **`[AMENDED 2026-06-18]:`** |
+| Current gameplay state | Account/profile flow live + in-app game hub (bottom nav: Hub/Skills/Bank/Combat/**Resonance**; settings via `TopAppBar` overlay) **`[AMENDED 2026-06-18]:`** |
 
 ---
 

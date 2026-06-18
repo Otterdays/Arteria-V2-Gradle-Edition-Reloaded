@@ -29,7 +29,7 @@
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.6.0--snapshot-02303A?style=for-the-badge&logo=gradle&logoColor=white)](https://gradle.org/)
-[![AGP](https://img.shields.io/badge/AGP-9.1.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/build/releases/gradle-plugin)
+[![AGP](https://img.shields.io/badge/AGP-9.2.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/build/releases/gradle-plugin)
 [![Compose BOM](https://img.shields.io/badge/Compose_BOM-2026.03.01-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose/bom)
 [![KSP](https://img.shields.io/badge/KSP-2.3.6-7F52FF?style=for-the-badge)](https://github.com/google/ksp)
 [![Room](https://img.shields.io/badge/Room-2.8.4-0EA5E9?style=for-the-badge&logo=sqlite&logoColor=white)](https://developer.android.com/training/data-storage/room)
@@ -63,7 +63,8 @@
 
 - **Idle Mechanics** — Offline progression, skill ticks, and resource generation
 - **Skills UX** — Implemented skills open training (`SkillDetailScreen`); skills without registry actions show a **Coming Soon** dialog (`SkillComingSoonDialog`). **Herblore** uses herbs from **Harvesting** (bank `inputItems`); **Scavenging** adds salvage gathering tiers.
-- **Game hub** — Four bottom tabs: **Hub** (dashboard, offline summary hooks, skill star map entry), **Skills**, **Bank**, **Combat** (placeholder).
+- **Game hub** — Five bottom tabs: **Hub** (command center), **Skills**, **Bank**, **Combat** (encounter v1 — Barn Rat), **Resonance** (clicker / momentum). Settings + Chronicle via `TopAppBar` overlays.
+- **Combat** — `CombatEngine` encounter loop with flee, loot to bank, XP split; more enemies/areas backlog in `DOCS/claudes_checklist_by_ryan.md` §8.
 - **Settings & prefs** — DataStore-backed `UserPreferences` (theme, motion, haptics, sound, offline report); About uses `BuildConfig`; OSS **Credits / Licenses** screens.
 - **Account & Profile Persistence** — Room-based save/load with session management
 - **🎬 Docking Station UI** — Beautiful character selection with **animated glitch effects**, timeline visualizations, and skill badge showcases

@@ -1,6 +1,8 @@
 listen up buddy, this doc is going to have stuff i put here to help synthesis into workable tasks for the most advanced AI Agents to work on, like claude opus, or "Opie" as i call him.
 ===========================DO NOT DELETE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^========================================================================
 
+**`[AMENDED 2026-06-18]:`** Canonical path: **`DOCS/claudes_checklist_by_ryan.md`** (moved from repo root). Live product counts: see **`DOCS/SUMMARY.md`** → Live Product Snapshot.
+
 ---
 
 ## ✅ DONE — Sections 1–5 (30/30)
@@ -19,10 +21,12 @@ All 30 items shipped. Details in SCRATCHPAD.md Agent Credits.
 
 ## 6. Bank Screen Upgrade
 
+**`[AMENDED 2026-06-18]:`** **6d** search + 4-mode sort **shipped** in `BankScreen.kt`. Withdraw presets also exist from prior QoL pass.
+
 - [ ] **6a.** Group items by category (Ores, Bars, Logs, Fish, Herbs, Potions, Salvage) with collapsible section headers
 - [ ] **6b.** Item cards show quantity, item name, and a subtle icon placeholder — styled to match `ArteriaPalette` card system
 - [ ] **6c.** "Craftable now" badge — highlight items that are inputs to an affordable recipe the player can start immediately
-- [ ] **6d.** Search / filter bar — filter by item name or category
+- [x] **6d.** Search / filter bar — filter by item name or category **`[DONE 2026-04-01]:`** `BankScreen` search + sort menu
 - [ ] **6e.** Tap an item → mini detail sheet: what it's used for, which skill produces it, current quantity
 
 ---
@@ -39,11 +43,13 @@ All 30 items shipped. Details in SCRATCHPAD.md Agent Credits.
 
 ## 8. Combat Screen — First Pass
 
-- [ ] **8a.** Basic combat loop UI — Attack / Strength / Defence / Hitpoints live stat bars
-- [ ] **8b.** Enemy card — name, HP bar, combat level, loot preview
+**`[AMENDED 2026-06-18]:`** Encounter **v1 slice shipped** (v1.7.0+): Barn Rat / Sunny Meadow, HP bars, flee, loot to bank, combat log, skilling blocked while engaged. Items below = polish / expansion beyond v1.
+
+- [x] **8a.** Basic combat loop UI — enemy HP, player HP, engage/flee **`[PARTIAL 2026-04-29]:`** `CombatScreen` + `CombatEngine`; full Attack/Str/Def/HP stat bars still open
+- [x] **8b.** Enemy card — name, HP bar, combat stats snapshot **`[PARTIAL 2026-04-29]:`** Barn Rat only
 - [ ] **8c.** Auto-attack toggle with active animation (sword pulse on each hit cycle)
-- [ ] **8d.** Combat XP split display — shows XP awarded to each combat skill per kill
-- [ ] **8e.** Loot drop feed — scrolling mini-cards of drops that go to bank automatically
+- [x] **8d.** Combat XP split display — shows XP awarded to each combat skill per kill **`[PARTIAL 2026-04-29]:`** engine splits XP; UI surfacing still thin
+- [x] **8e.** Loot drop feed — scrolling mini-cards of drops that go to bank automatically **`[PARTIAL 2026-04-29]:`** loot lands in bank; dedicated feed UI open
 
 ---
 
